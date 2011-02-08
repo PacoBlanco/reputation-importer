@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import json.Ejecutor;
-import json.Json;
 
 import cross.reputation.model.Community;
 import cross.reputation.model.CrossReputation;
@@ -24,7 +22,7 @@ public class ReputationImporter {
 	
 	static public void main(String[] args) throws Exception {		
 		//Config extraction mode
-		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_SERVER,urlServer);
+		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND,urlServer);
 		
 		//Set All Model
 		ConfigureModel.buildCrossReputationGlobalModel();
@@ -48,7 +46,7 @@ public class ReputationImporter {
 								entity.getUniqueIdentificator()+") has null url in:"+community.getName());
 						continue;
 					}						
-					reputation = Json.ExtractReputation(urlDomain);				
+					reputation = Scrapper.ExtractReputation(urlDomain);				
 					if(reputation != null) {
 						Metric metric = (Metric)community.getMetrics().toArray()[0];
 						//System.out.println("Me:"+metric+" Sc:"+metric.getScale()+" rep:"+reputation);
