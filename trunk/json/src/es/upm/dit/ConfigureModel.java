@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import json.Json;
 
 import cross.reputation.model.Dimension;
 import cross.reputation.model.Entity;
@@ -235,7 +234,7 @@ public class ConfigureModel {
 					Community community = (Community) object;
 					String userName = usuario.get(community).getName();
 					//System.out.println(userName+":"+community);
-					accounts = Json.getMoreAccounts(userName,community.getDomainName());
+					accounts = Scrapper.getMoreAccounts(userName,community.getDomainName());
 					if(accounts != null) {
 						SetAccountsInEntity(entity, userName, accounts);
 					}
