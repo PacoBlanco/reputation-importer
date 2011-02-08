@@ -572,9 +572,11 @@ public class Json extends Thread{
 				apellidoUsuario += usuario.charAt(j);
 			}			
 		}
-		System.out.println("Script iniciado sobre:"+NombreUsuario+" "+apellidoUsuario);   	
+		System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario);   	
 		ApellidoUsuario_Espacio = " " + apellidoUsuario;
-    	InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
+    	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
+		UserAccounts("Gavin Sharp", "ohloh.net");
+		
     }
     
     
@@ -595,6 +597,18 @@ public class Json extends Thread{
 		        reputation = array_user.getString(0);
 		        System.out.println("  Reputacion: " + reputation);
 	        }
+	        //Ohloh-----------------------------------------------------------------------------------------------------
+	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/ReputacionOhloh")){
+		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/ReputacionOhloh");
+		        reputation = array_user.getString(0);
+		        System.out.println("  Reputacion: " + reputation);
+	        }
+	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking")){
+		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Ranking");
+		        reputation = array_user.getString(0);
+		        System.out.println("  Ranking: " + reputation);
+	        }
+	        //----------------------------------------------------------------------------------------------------------
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/MiembroDesde")){
 		        JSONArray array_miembro = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/MiembroDesde");
 		        String Miembro = array_miembro.getString(0);
@@ -729,40 +743,68 @@ public class Json extends Thread{
     //Para obtener la url del usuario que queramos	
     private static List<String> UserAccounts (String usuario, String initialSite) 
     throws MalformedURLException, IOException{
-		initialSite = initialSite.toLowerCase();
-		String web_inicio = "http://www.google.com/search?q=site:"+initialSite+"/users+%22";
-		String web_fin = "%22";
-		//System.out.println("URL:"+web_inicio+usuario+web_fin);
-    	Web file   = new Web(web_inicio+usuario+web_fin);
-    	String MIME    = file.getMIMEType( );
-    	Object content = file.getContent( );
     	String coma = "\"";
     	String url = "";
-    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-    		try{
-	    	    String html = content.toString();
-	    	    int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
-	    	    int indice_final = html.indexOf(coma, indice_inicial);
-	    	    if (indice_final != -1){
-	    	    	url = html.substring(indice_inicial, indice_final);
-		    	    //System.out.println("URL devuelta:"+url);
-		    	    if(!url.contains("%")){
-		    	    	List<String> accounts = new ArrayList<String>();
-		    	    	accounts.add(url);
-		    	    	url += "?tab=accounts";
-						String scrappy_dump = Ejecutor.executeScrappy(url, "0");
-						JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
-			            for(int j=0;j<array.size();j++){
-			            	JSONObject objeto_dump = array.getJSONObject(j);
-			            	accounts.addAll(GetAccounts(objeto_dump));
-			            }
-			            return accounts;			           
-			        } else
-		    	    	System.out.println("No se ha encontrado el usuario.");
-	    	    }
-    		}catch(StringIndexOutOfBoundsException e){
-    			System.out.println("El usuario no existe");
-    		}
+    	if (initialSite.equals("ohloh.net")){
+    		initialSite = initialSite.toLowerCase();
+    		String web = "https://www.ohloh.net/people?sort=kudo_position&q="+usuario;
+    		Web file = new Web (web);
+        	String MIME    = file.getMIMEType( );
+        	Object content = file.getContent( );
+	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
+	    		try{
+		    	    String html = content.toString();
+		    	    int indice_inicial = html.toLowerCase().indexOf("<a href='/accounts/");
+		    	    int indice_final = html.indexOf("'>", indice_inicial);
+		    	    if (indice_final != -1){
+		    	    	url = html.substring(indice_inicial+9, indice_final);
+			    	    //System.out.println("URL devuelta:"+url);
+			    	    if(!url.contains("%")){
+			    	    	List<String> accounts = new ArrayList<String>();
+			    	    	url = initialSite + url;
+			    	    	accounts.add(url);
+				            return accounts;			           
+				        } else
+			    	    	System.out.println("No se ha encontrado el usuario.");
+		    	    }
+	    		}catch(StringIndexOutOfBoundsException e){
+	    			System.out.println("El usuario no existe");
+	    		}
+	    	}
+    	}else{
+			initialSite = initialSite.toLowerCase();
+			String web_inicio = "http://www.google.com/search?q=site:"+initialSite+"/users+%22";
+			String web_fin = "%22";
+			//System.out.println("URL:"+web_inicio+usuario+web_fin);
+	    	Web file   = new Web(web_inicio+usuario+web_fin);
+	    	String MIME    = file.getMIMEType( );
+	    	Object content = file.getContent( );
+	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
+	    		try{
+		    	    String html = content.toString();
+		    	    int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
+		    	    int indice_final = html.indexOf(coma, indice_inicial);
+		    	    if (indice_final != -1){
+		    	    	url = html.substring(indice_inicial, indice_final);
+			    	    //System.out.println("URL devuelta:"+url);
+			    	    if(!url.contains("%")){
+			    	    	List<String> accounts = new ArrayList<String>();
+			    	    	accounts.add(url);
+			    	    	url += "?tab=accounts";
+							String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+							JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+				            for(int j=0;j<array.size();j++){
+				            	JSONObject objeto_dump = array.getJSONObject(j);
+				            	accounts.addAll(GetAccounts(objeto_dump));
+				            }
+				            return accounts;			           
+				        } else
+			    	    	System.out.println("No se ha encontrado el usuario.");
+		    	    }
+	    		}catch(StringIndexOutOfBoundsException e){
+	    			System.out.println("El usuario no existe");
+	    		}
+	    	}
     	}
     	return null;
 	}
