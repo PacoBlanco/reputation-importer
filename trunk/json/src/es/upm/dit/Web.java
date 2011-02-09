@@ -67,8 +67,8 @@ public final class Web {
             (java.net.HttpURLConnection)uconn;
  
         // Set up a request.
-        conn.setConnectTimeout( 10000 );    // 10 sec
-        conn.setReadTimeout( 10000 );       // 10 sec
+        conn.setConnectTimeout( 100000 );    // 100 sec
+        conn.setReadTimeout( 100000 );       // 100 sec
         conn.setInstanceFollowRedirects( true );
         conn.setRequestProperty( "User-agent", "spider" );
  
