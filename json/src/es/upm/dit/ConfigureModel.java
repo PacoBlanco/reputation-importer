@@ -73,6 +73,24 @@ public class ConfigureModel {
 		String semanticWikiCategories[] = {GlobalModel.addCategory("SecurityWebApp")};
 		Community wiki = new Community("semanticWiki","lab.gsi.dit.upm.es/semanticwiki",
 				semanticWikiCategories,GlobalModel.getMetrics().get("semanticWikiMetric"));
+		
+		Dimension ohloh = new Dimension("Ohloh");
+		GlobalModel.addScale(new NumericScale("ohlohScale",10.0,0.0,1.0));
+		GlobalModel.addMetric(new Metric("ohlohMetric", ohloh,
+				GlobalModel.getScales().get("ohlohScale")));
+		String ohlohCategories[] = {GlobalModel.addCategory("QandA")};
+		GlobalModel.addCommunity(new Community("ohloh.net","ohloh.net",
+				ohlohCategories,GlobalModel.getMetrics().get("ohlohMetric")));
+		
+		Dimension slackers = new Dimension("Slakers");
+		GlobalModel.addScale(new NumericScale("slackersScale",10.0,0.0,1.0));
+		GlobalModel.addMetric(new Metric("slackersMetric", slackers,
+				GlobalModel.getScales().get("slackersScale")));
+		String slackersCategories[] = {GlobalModel.addCategory("QandA")};
+		GlobalModel.addCommunity(new Community("sla.ckers.org","sla.ckers.org",
+				slackersCategories,GlobalModel.getMetrics().get("slackersMetric")));
+		
+		
 		GlobalModel.addCommunity(wiki);
 		
 		//Configure all metric transformers that we need
@@ -86,6 +104,10 @@ public class ConfigureModel {
 				get("questionsSecuritytubeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("security.StackexchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
+				get("ohlohMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
+				get("slackersMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		
 		//Add all entities configured to all metrics in the destination community
 		for(Entity entity : SetWikiUserEntitiesAndAccounts()) {
@@ -105,6 +127,10 @@ public class ConfigureModel {
 		GlobalModel.addFixedTrustBetweenCommunities("questions.securitytube.net",
 				"semanticWiki",0.8);
 		GlobalModel.addFixedTrustBetweenCommunities("security.stackexchange.com",
+				"semanticWiki",1.0);
+		GlobalModel.addFixedTrustBetweenCommunities("ohloh.net",
+				"semanticWiki",1.0);
+		GlobalModel.addFixedTrustBetweenCommunities("sla.ckers.org",
 				"semanticWiki",1.0);
 		
 		//Set the category matching table
@@ -218,6 +244,12 @@ public class ConfigureModel {
 		Entity ebarear = GlobalModel.addEntity(new Entity("Ebarear"));
 		ebarear.addIdentificatorInCommunities(GlobalModel.getCommunities().get("stackoverflow.com"), 
 				new EntityIdentifier("Jon Skeet",null));
+		Entity edukun = GlobalModel.addEntity(new Entity("Edukun"));
+		edukun.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
+				new EntityIdentifier("Gavin Sharp",null));
+		Entity racker = GlobalModel.addEntity(new Entity("Racker"));
+		racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("sla.ckers.org"),
+				new EntityIdentifier("rsnake",null));
 		GetMoreAccounts();
 		return GlobalModel.getEntities().values();
 	}
