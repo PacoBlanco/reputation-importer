@@ -54,7 +54,7 @@ public class Ejecutor{
     	String line;
     	try {
     		while ((line = brCleanUp.readLine ()) != null) {
-	            System.out.println ("[Stderr] " + line);
+	            //System.out.println ("[Stderr] " + line);
 	        }        
 			brCleanUp.close();
 		} catch (IOException e) {
@@ -77,7 +77,7 @@ public class Ejecutor{
     
     static public String ejecuta_opal(String texto) throws IOException{
     	String[] com = {"curl","-d", "text="+texto+"&translation=0", "http://localhost/opal.php"};
-        Process p = Ejecutor.comando(com);
+        Process p = Runtime.getRuntime().exec(com);
         return Ejecutor.leerBufer(Ejecutor.salidaComando(p));
     }
     /*

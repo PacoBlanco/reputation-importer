@@ -7,10 +7,14 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
+
 
 
 public class Scrapper extends Thread{
@@ -18,7 +22,8 @@ public class Scrapper extends Thread{
 	private static String NombreUsuario = "";
 	//private static String ApellidoUsuario = "";
 	private static String ApellidoUsuario_Espacio = "";
-	
+	private static double sumaOpal;
+	private static String reputation = null;
 	
 	public Scrapper(String str){
 		super(str);
@@ -447,11 +452,11 @@ public class Scrapper extends Thread{
 	/*
 	 * Metodo privado auxiliar que llama a la clase Ejecutor, que a su vez ejecuta
 	 * la herramienta OPAL para un texto dado.
-	 *	
-	private static void opal_parser(String texto) throws IOException{
+	 */	
+	private static double opal_parser(String texto) throws IOException{
 		String opal_xml = Ejecutor.ejecuta_opal(texto);
-		System.out.println(opal_xml);
-	}*/
+		return Double.parseDouble(opal_xml);
+	}
 	
 	/*
 	 * Metodo privado auxiliar que llama a la clase Ejecutor, para ejecutar el scrappy con 
@@ -510,7 +515,7 @@ public class Scrapper extends Thread{
 			String scrappy_dump = "";
 			String dameNombre = "";
 			String url = "";
-			if(!getName().startsWith("c")){
+			if(!getName().startsWith("c") && !getName().startsWith("s")){
 				if (getName().startsWith("0")){
 					dameNombre = getName().replaceFirst("0", "");
 					scrappy_dump = Ejecutor.executeScrappy(dameNombre, "0");
@@ -554,10 +559,41 @@ public class Scrapper extends Thread{
 	            	Usuarios(objeto_dump, "cuentas");
 	            }
 			}
+			if(getName().startsWith("s")){
+				url = getName().replaceFirst("s", "");
+				scrappy_dump = Ejecutor.executeScrappy(url, "0");
+				informacionPostsSlackers(scrappy_dump);
+			}
 	
 		} catch (IOException e) {
 			
 			e.printStackTrace();
+		}
+	}
+	
+	private static void informacionPostsSlackers (String scrappy_dump) throws IOException{
+		
+		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+		JSONObject objeto_dump = array.getJSONObject(0);
+		if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
+    		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
+    		for(int i=0;i<array_objeto_post.size();i++){
+    			JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
+	        	//System.out.println("Informacion de post:");
+	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
+	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
+	        		String postName = array_postURL.getString(0);
+			        //System.out.println("  PostName: " + postName);
+	        	}
+	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
+	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostText");
+	        		String postText = array_postURL.getString(0);
+			        //System.out.println("  PostText: " + postText);
+			        sumaOpal += opal_parser(postText);
+			        
+	        	}
+		
+    		}
 		}
 	}
 	
@@ -572,16 +608,18 @@ public class Scrapper extends Thread{
 				apellidoUsuario += usuario.charAt(j);
 			}			
 		}
-		System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario);   	
+		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario);   	
 		ApellidoUsuario_Espacio = " " + apellidoUsuario;
     	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
-		UserAccounts("Gavin Sharp", "ohloh.net");
-		
+		//System.out.println(getMoreAccounts("Gavin Sharp", "ohloh.net"));
+		getMoreAccounts("rsnake", "sla.ckers.org");
+		//getMoreAccounts("Ben Torell", "serverfault.com");
+		//opal_parser("esta opinion es malisima");
     }
     
     
     private static Double Reputation(JSONObject objeto, String cuenta) throws IOException {
-    	String reputation = null;
+    	
 		if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 			JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
 			JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
@@ -603,11 +641,11 @@ public class Scrapper extends Thread{
 		        reputation = array_user.getString(0);
 		        System.out.println("  Reputacion: " + reputation);
 	        }
-	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking")){
+	        /*if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking")){
 		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Ranking");
-		        reputation = array_user.getString(0);
-		        System.out.println("  Ranking: " + reputation);
-	        }
+		        ranking = array_user.getString(0);
+		        System.out.println("  Ranking: " + ranking);
+	        }*/
 	        //----------------------------------------------------------------------------------------------------------
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/MiembroDesde")){
 		        JSONArray array_miembro = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/MiembroDesde");
@@ -697,6 +735,79 @@ public class Scrapper extends Thread{
 				}
 			}			
 		}
+		//http://sla.ckers.org/-----------------------------------------------------------------------------------------------
+		if (cuenta.contains("sla.ckers.org")){
+			if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
+				JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
+				JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
+	        	//System.out.println("Informacion de usuario:");
+		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Nombre")){
+			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Nombre");
+			        String Nombre = array_user.getString(0);
+			        System.out.println("  Nombre: " + Nombre);
+		        }
+		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Posts")){
+			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
+			        String posts = array_user.getString(0);
+			        //System.out.println("  Posts: " + posts);
+		        }
+		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/URLPosts")){
+			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/URLPosts");
+			        String urlPosts = array_user.getString(0);
+			        //System.out.println("  URLPosts: " + urlPosts);
+			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
+					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+		            JSONObject objeto_dump = array.getJSONObject(0);
+		            ExecutorService exec = Executors.newFixedThreadPool(60);
+	            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
+	            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
+	            		for(int i=0;i<array_objeto_post.size();i++){
+			            
+			            	JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
+				        	//System.out.println("Informacion de post:");
+				        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostURL")){
+				        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostURL");
+				        		final String postURL = array_postURL.getString(0);
+						        //System.out.println("  PostURL: " + postURL);
+				        		exec.execute(new Runnable() {
+				        			public void run(){
+				        				try {
+											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+				        			}
+				        		});
+						        //new Scrapper("s"+postURL).start(); //s para que indicar de slackers
+						        //reputation = Double.toString(sumaOpal);
+				        	}
+	
+					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
+						        JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
+						        String postName = array_postName.getString(0);
+						        //System.out.println("  PostName: " + postName);
+					        }
+					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostFecha")){
+						        JSONArray array_fecha = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostFecha");
+						        String postsFecha = array_fecha.getString(0);
+						        //System.out.println("  Fecha: " + postsFecha);
+					        }
+			           }
+		        		exec.shutdown();
+		                try {
+		                     boolean b = exec.awaitTermination(200, TimeUnit.SECONDS);
+		                     if (b){
+		                    	 reputation = Double.toString(sumaOpal);
+		                     }
+		                     
+		                } catch (InterruptedException e) {
+		                     e.printStackTrace();
+		                }
+		           }
+		        }  	
+			}
+		}
+	//------------------------------------------------------------------------------------------------------------
 		try {
 			//return (reputation == null ? null : Double.parseDouble(reputation));			
 			return (reputation == null ? null : NumberFormat.getInstance(Locale.US).parse(reputation).doubleValue());
@@ -735,8 +846,7 @@ public class Scrapper extends Thread{
     
     
     static public List<String> getMoreAccounts(String name, String initialSite) throws Exception {
-    	//System.out.println("Informacion usuario iniciado sobre:"+name);   	
-		//ApellidoUsuario_Espacio = " " + apellidoUsuario;
+
     	return UserAccounts(name.replace(" ", "+"), initialSite);
     }
     
@@ -771,7 +881,37 @@ public class Scrapper extends Thread{
 	    			System.out.println("El usuario no existe");
 	    		}
 	    	}
-    	}else{
+	    	
+    	}else if (initialSite.equals("sla.ckers.org")){
+    		initialSite = initialSite.toLowerCase();
+    		String web = "http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+"+usuario;
+    		
+    		Web file = new Web (web);
+        	String MIME    = file.getMIMEType( );
+        	Object content = file.getContent( );
+	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
+	    		try{
+		    	    String html = content.toString();
+		    	    int indice_inicial = html.toLowerCase().indexOf("http://sla.ckers.org/forum/profile.php?");
+		    	    int indice_final = html.indexOf(coma, indice_inicial);
+		    	    if (indice_final != -1){
+		    	    	url = html.substring(indice_inicial, indice_final);
+			    	    //System.out.println("URL devuelta:"+url);
+			    	    if(!url.contains("%")){
+			    	    	List<String> accounts = new ArrayList<String>();
+			    	    	accounts.add(url);
+			    	    	ExtractReputation(url);
+				            return accounts;			           
+				        } else
+			    	    	System.out.println("No se ha encontrado el usuario.");
+		    	    }
+	    		}catch(StringIndexOutOfBoundsException e){
+	    			System.out.println("El usuario no existe");
+	    		}
+	    	}
+	    	
+    	}
+    	else{
 			initialSite = initialSite.toLowerCase();
 			String web_inicio = "http://www.google.com/search?q=site:"+initialSite+"/users+%22";
 			String web_fin = "%22";
