@@ -575,6 +575,7 @@ public class Scrapper extends Thread{
 		
 		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		JSONObject objeto_dump = array.getJSONObject(0);
+		double opal;
 		if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
     		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
     		for(int i=0;i<array_objeto_post.size();i++){
@@ -583,13 +584,15 @@ public class Scrapper extends Thread{
 	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
 	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
 	        		String postName = array_postURL.getString(0);
-			        //System.out.println("  PostName: " + postName);
+			        System.out.println("  PostName: " + postName);
 	        	}
 	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
 	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostText");
 	        		String postText = array_postURL.getString(0);
 			        //System.out.println("  PostText: " + postText);
-			        sumaOpal += opal_parser(postText);
+	        		opal = opal_parser(postText);
+			        sumaOpal += opal;
+			        System.out.println("Puntuación OPAL: "+ opal);
 			        
 	        	}
 		
@@ -614,7 +617,9 @@ public class Scrapper extends Thread{
 		//System.out.println(getMoreAccounts("Gavin Sharp", "ohloh.net"));
 		getMoreAccounts("rsnake", "sla.ckers.org");
 		//getMoreAccounts("Ben Torell", "serverfault.com");
-		//opal_parser("esta opinion es malisima");
+		//String scrappy_dump = Ejecutor.executeScrappy("http://sla.ckers.org/forum/read.php?12,28279,35088#msg-35088", "0");
+		//informacionPostsSlackers(scrappy_dump);
+		
     }
     
     
@@ -758,7 +763,7 @@ public class Scrapper extends Thread{
 			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
 					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		            JSONObject objeto_dump = array.getJSONObject(0);
-		            ExecutorService exec = Executors.newFixedThreadPool(60);
+		            ExecutorService exec = Executors.newFixedThreadPool(8);
 	            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
 	            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
 	            		for(int i=0;i<array_objeto_post.size();i++){
@@ -795,9 +800,10 @@ public class Scrapper extends Thread{
 			           }
 		        		exec.shutdown();
 		                try {
-		                     boolean b = exec.awaitTermination(200, TimeUnit.SECONDS);
+		                     boolean b = exec.awaitTermination(500, TimeUnit.SECONDS);
 		                     if (b){
 		                    	 reputation = Double.toString(sumaOpal);
+		                    	 System.out.println("Reputacion total: " + reputation);
 		                     }
 		                     
 		                } catch (InterruptedException e) {
