@@ -49,7 +49,7 @@ public class LogaritmicNumericTransformer extends MetricTransformer {
 		} else if(difference != null) {
 			valueTransformed = valueTransformed - difference;
 		}
-		System.out.println("  value:"+value+" valueTransf:"+valueTransformed+(adapt?" valueAdapted:"+
+		System.out.println("   value:"+value+" valueTransf:"+valueTransformed+(adapt?" valueAdapted:"+
 				destinationMetric.getScale().adaptToScale(valueTransformed):" without adaption"));
 		if(adapt) {		
 			return destinationMetric.getScale().adaptToScale(valueTransformed);

@@ -58,6 +58,7 @@ public class CommunityMetricToImport {
 		} else {
 			trust = 0.0;
 		}
+		//System.out.println(community.getDomainName()+" "+destinationCommunity.getDomainName()+":"+trust);
 		return trust;
 	}
 	

@@ -18,7 +18,7 @@ public class NumericScale extends Scale {
 	}		
 
 	public Double adaptToScale(Double value) {
-		System.out.println("    Value to adapt:"+maximum+","+minimum+","+step+"  <-  "+value);
+		//System.out.println("    Value to adapt:"+maximum+","+minimum+","+step+"  <-  "+value);
 		if(value == null)
 			return null;
 		if(minimum != null) {

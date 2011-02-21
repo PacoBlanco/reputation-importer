@@ -78,7 +78,8 @@ public class CrossReputation {
 					values = communityMetricToImport.getMetric().doAverage(values,
 						evaluation.getValues().size());
 					System.out.println("  -SR:before trans:"+values+" elems:"+
-							evaluation.getValues().size());
+							evaluation.getValues().size()+" c:"+communityMetricToImport.getCommunity().getDomainName()+" m:"+
+							communityMetricToImport.getMetric().getIdentificator());
 					values = exTransformer.tranformation(values, false);
 				}
 				break;
@@ -86,9 +87,11 @@ public class CrossReputation {
 		}
 		if(values == null)
 			return null;
-		System.out.println("  -SR:after trans:"+values+" trust:"+value+" ("+
-		exTransformer.getCorrelationBetweenMetrics()+"*"+communityMetricToImport.getTrust()
-		+") SR:"+communityMetricToImport.getMetric().addTrust(values,value));
+		System.out.println("   SR:after trans:"+values+" trust:"+value+" ("+
+				exTransformer.getCorrelationBetweenMetrics()+"*"+communityMetricToImport.getTrust()
+				+") SR:"+communityMetricToImport.getMetric().addTrust(values,value)+" c"+
+				communityMetricToImport.getDestinationCommunity().getDomainName()+" m:"+
+				communityMetricToImport.getDestinationMetric().getIdentificator());
 		return communityMetricToImport.getMetric().addTrust(values,value);		
 	}
 	
