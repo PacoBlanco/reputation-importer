@@ -103,17 +103,12 @@ public class ConfigureModel {
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("questionsSecuritytubeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
-				get("security.StackexchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+				get("security.StackexchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));				
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("ohlohMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
-				get("slackersMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
-		
-		//Add all entities configured to all metrics in the destination community
-		for(Entity entity : SetWikiUserEntitiesAndAccounts()) {
-			wiki.addEntityToAllMetrics(entity);
-		}
-		
+				get("slackersMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));				
+
 		//for(Community community : GlobalModel.getCommunities().values())
 		//	printCommunity(community);
 		
@@ -261,12 +256,16 @@ public class ConfigureModel {
 				Map<Community,EntityIdentifier> usuario = entity.getIdentificatorInCommunities();
 				//In this form of iteration, we dont search accounts in the new accounts found or
 				//  accounts updated that have already been iterated
-				//for(Community community : usuario.keySet())
 				for(Object object : usuario.keySet().toArray()) {
 					Community community = (Community) object;
 					String userName = usuario.get(community).getName();
 					//System.out.println(userName+":"+community);
-					accounts = Scrapper.getMoreAccounts(userName,community.getDomainName());
+					String url = usuario.get(community).getUrl();
+					if(url != null) {
+						accounts = Scrapper.UserAccountsByURL(url);
+					} else {
+						accounts = Scrapper.UserAccounts(userName,community.getDomainName());
+					}
 					if(accounts != null) {
 						SetAccountsInEntity(entity, userName, accounts);
 					}
