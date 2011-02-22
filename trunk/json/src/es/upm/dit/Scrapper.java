@@ -25,6 +25,13 @@ public class Scrapper extends Thread{
 	private static double sumaOpal;
 	private static String reputation = null;
 	
+	private static String accountsDefinition[][] = {
+		{"sla.ckers.org","http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+",
+			"http://sla.ckers.org/forum/profile.php?"},
+		{"elhacker.net","http://www.google.com/search?q=site:elhacker.net",
+				"http://foro.elhacker.net/profiles/"}
+		};
+	
 	public Scrapper(String str){
 		super(str);
 	}
@@ -621,7 +628,7 @@ public class Scrapper extends Thread{
 		//String scrappy_dump = Ejecutor.executeScrappy(url, "0");
 		//System.out.println(scrappy_dump);
 		//informacionPostsSlackers(scrappy_dump);
-		getMoreAccounts("anelkaos", "elhacker.net");
+		UserAccounts("anelkaos", "elhacker.net");
     }
     
     
@@ -852,15 +859,23 @@ public class Scrapper extends Thread{
 		return null;
     }
     
-    
-    static public List<String> getMoreAccounts(String name, String initialSite) throws Exception {
-
-    	return UserAccounts(name.replace(" ", "+"), initialSite);
+    static public List<String> UserAccountsByURL(String url) throws IOException {
+    	List<String> accounts = new ArrayList<String>();
+    	accounts.add(url);
+    	url += "?tab=accounts";
+		String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+        for(int j=0;j<array.size();j++){
+        	JSONObject objeto_dump = array.getJSONObject(j);
+        	accounts.addAll(GetAccounts(objeto_dump));
+        }
+        return accounts;
     }
     
     //Para obtener la url del usuario que queramos	
-    private static List<String> UserAccounts (String usuario, String initialSite) 
+    static public List<String> UserAccounts (String usuario, String initialSite) 
     throws MalformedURLException, IOException{
+    	usuario = usuario.replace(" ", "+");
     	String coma = "\"";
     	String url = "";
     	if (initialSite.equals("ohloh.net")){
@@ -963,16 +978,7 @@ public class Scrapper extends Thread{
 		    	    	url = html.substring(indice_inicial, indice_final);
 			    	    //System.out.println("URL devuelta:"+url);
 			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	accounts.add(url);
-			    	    	url += "?tab=accounts";
-							String scrappy_dump = Ejecutor.executeScrappy(url, "0");
-							JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
-				            for(int j=0;j<array.size();j++){
-				            	JSONObject objeto_dump = array.getJSONObject(j);
-				            	accounts.addAll(GetAccounts(objeto_dump));
-				            }
-				            return accounts;			           
+			    	    	UserAccountsByURL(url);			           
 				        } else
 			    	    	System.out.println("No se ha encontrado el usuario.");
 		    	    }
