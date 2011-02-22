@@ -615,16 +615,18 @@ public class Scrapper extends Thread{
 		ApellidoUsuario_Espacio = " " + apellidoUsuario;
     	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
 		//System.out.println(getMoreAccounts("Gavin Sharp", "ohloh.net"));
-		getMoreAccounts("rsnake", "sla.ckers.org");
+		//getMoreAccounts("rsnake", "sla.ckers.org");
 		//getMoreAccounts("Ben Torell", "serverfault.com");
-		//String scrappy_dump = Ejecutor.executeScrappy("http://sla.ckers.org/forum/read.php?12,28279,35088#msg-35088", "0");
+		//String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
+		//String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+		//System.out.println(scrappy_dump);
 		//informacionPostsSlackers(scrappy_dump);
-		
+		getMoreAccounts("anelkaos", "elhacker.net");
     }
     
     
     private static Double Reputation(JSONObject objeto, String cuenta) throws IOException {
-    	
+    	String coma = "\"";
 		if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 			JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
 			JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
@@ -741,7 +743,7 @@ public class Scrapper extends Thread{
 			}			
 		}
 		//http://sla.ckers.org/-----------------------------------------------------------------------------------------------
-		if (cuenta.contains("sla.ckers.org")){
+		if (cuenta.contains("sla.ckers.org") || cuenta.contains("elhacker.net")){
 			if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 				JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
 				JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
@@ -749,17 +751,17 @@ public class Scrapper extends Thread{
 		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Nombre")){
 			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Nombre");
 			        String Nombre = array_user.getString(0);
-			        System.out.println("  Nombre: " + Nombre);
+			        //System.out.println("  Nombre: " + Nombre);
 		        }
 		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Posts")){
 			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
 			        String posts = array_user.getString(0);
-			        //System.out.println("  Posts: " + posts);
+			        System.out.println("  Posts: " + posts);
 		        }
 		        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/URLPosts")){
 			        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/URLPosts");
 			        String urlPosts = array_user.getString(0);
-			        //System.out.println("  URLPosts: " + urlPosts);
+			        System.out.println("  URLPosts: " + urlPosts);
 			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
 					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		            JSONObject objeto_dump = array.getJSONObject(0);
@@ -773,7 +775,7 @@ public class Scrapper extends Thread{
 				        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostURL")){
 				        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostURL");
 				        		final String postURL = array_postURL.getString(0);
-						        //System.out.println("  PostURL: " + postURL);
+						        System.out.println("  PostURL: " + postURL);
 				        		exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
@@ -831,7 +833,7 @@ public class Scrapper extends Thread{
 			if(url.contains("http://")){
 				direccionWeb = url.substring(7);				
 			}
-			if(url.indexOf("/") != -1) {
+			if((url.indexOf("/") != -1) && (!url.contains("elhacker"))) {
 				direccionWeb += url.substring(0,url.indexOf("/"));				
 			}
 			for(int j=0; j<array.size(); j++){
@@ -916,6 +918,33 @@ public class Scrapper extends Thread{
 	    		}
 	    	}
 	    	
+    	}
+    	else if (initialSite.equals("elhacker.net")){
+    		initialSite = initialSite.toLowerCase();
+    		String web = "http://www.google.com/search?q=site:elhacker.net+"+usuario;
+    		Web file = new Web (web);
+        	String MIME    = file.getMIMEType( );
+        	Object content = file.getContent( );
+	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
+	    		try{
+		    	    String html = content.toString();
+		    	    int indice_inicial = html.toLowerCase().indexOf("http://foro.elhacker.net/profiles/");
+		    	    int indice_final = html.indexOf(coma, indice_inicial);
+		    	    if (indice_final != -1){
+		    	    	url = html.substring(indice_inicial, indice_final);
+			    	    //System.out.println("URL devuelta:"+url);
+			    	    if(!url.contains("%")){
+			    	    	List<String> accounts = new ArrayList<String>();
+			    	    	accounts.add(url);
+			    	    	ExtractReputation(url);
+				            return accounts;			           
+				        } else
+			    	    	System.out.println("No se ha encontrado el usuario.");
+		    	    }
+	    		}catch(StringIndexOutOfBoundsException e){
+	    			System.out.println("El usuario no existe");
+	    		}
+	    	}
     	}
     	else{
 			initialSite = initialSite.toLowerCase();
