@@ -1,0 +1,116 @@
+dc: http://purl.org/dc/elements/1.1/
+owl: http://www.w3.org/2002/07/owl#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+sioc: http://rdfs.org/sioc/ns#
+sc: http://lab.gsi.dit.upm.es/scraping.rdf#
+loc: http://www.daml.org/experiment/ontology/location-ont#
+
+_:elhackeruser:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://foro.elhacker.net/profiles/*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Usuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".bordercolor"
+          sc:index: "-1"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Nombre
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".windowbg td"
+              sc:index: "1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Posts
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".windowbg td"
+              sc:index: "3"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: " "
+                  sc:index:  "0"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:URLPosts
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".windowbg2 a"
+              sc:attribute: "href"
+              sc:index: "0"
+_:elhackerposts:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://foro.elhacker.net/profiles/*;sa,showPosts"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Posts
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".titlebg2"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostName
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".middletext a"
+              sc:index: "2"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostURL
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".middletext a"
+              sc:attribute: "href"
+              sc:index: "2"
+_:elhackerpostpage:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://foro.elhacker.net/*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Posts
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".windowbg"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostText
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".post"
