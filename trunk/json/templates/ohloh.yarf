@@ -1,0 +1,105 @@
+dc: http://purl.org/dc/elements/1.1/
+owl: http://www.w3.org/2002/07/owl#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+sioc: http://rdfs.org/sioc/ns#
+sc: http://lab.gsi.dit.upm.es/scraping.rdf#
+loc: http://www.daml.org/experiment/ontology/location-ont#
+
+_:ohlohuser:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://www.ohloh.net/accounts/*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Usuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: "#page"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Nombre
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".inset_middle a"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:MiembroDesde
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".nomargin.date .date"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PaginaWeb
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".nomargin .small.soft a"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:ReputacionOhloh
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".row .col.span_8 .inset_top.mezzo .kudo_mantle .laurel img"
+              sc:attribute: "alt"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: " "
+                  sc:index:  "1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Ranking
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".row .col.span_8 .inset_top.mezzo .kudo_mantle .position"
+_:ohlohcontributor:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://www.ohloh.net/p/*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Usuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: "#page"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Nombre
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".inside h2"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Reputacion
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".row .gpanel .laurel_block .laurel img"
+              sc:attribute: "alt"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: " "
+                  sc:index:  "1"

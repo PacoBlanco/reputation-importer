@@ -1,0 +1,135 @@
+dc: http://purl.org/dc/elements/1.1/
+owl: http://www.w3.org/2002/07/owl#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+sioc: http://rdfs.org/sioc/ns#
+sc: http://lab.gsi.dit.upm.es/scraping.rdf#
+loc: http://www.daml.org/experiment/ontology/location-ont#
+
+_:slackeruser:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://sla.ckers.org/forum/profile.php*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Usuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".PDDiv"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Nombre
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumStdBlockHeader.PhorumNarrowBlock.PhorumHeaderText"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: "\u00a0:\u00a0"
+                  sc:index:  "1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Posts
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumStdBlock.PhorumNarrowBlock"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: "Posts:\u00a0\n          "
+                  sc:index:  "1"
+                  sc:selector:
+                    *:
+                      rdf:type: sc:SliceSelector
+                      rdf:value: "\n"
+                      sc:index:  "0"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:URLPosts
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumNavLink"
+              sc:attribute: "href"
+              sc:index: "-1"
+_:slackerpost:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://sla.ckers.org/forum/search.php?*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Posts
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".PhorumRowBlock"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostName
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumLargeFont a"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostURL
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumLargeFont a"
+              sc:attribute: "href"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostFecha
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumColumnFloatLarge"
+_:slackerpostpage:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://sla.ckers.org/forum/read.php?*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Posts
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".PhorumReadMessageBlock"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostName
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumReadBodySubject"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PostText
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".PhorumReadBodyText"
