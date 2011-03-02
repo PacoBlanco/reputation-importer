@@ -1,0 +1,466 @@
+dc: http://purl.org/dc/elements/1.1/
+owl: http://www.w3.org/2002/07/owl#
+rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+sioc: http://rdfs.org/sioc/ns#
+sc: http://lab.gsi.dit.upm.es/scraping.rdf#
+loc: http://www.daml.org/experiment/ontology/location-ont#
+
+_:superuserindice:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriSelector
+      rdf:value: "http://superuser.com/"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type: sioc:Post
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".summary h3"
+      sc:identifier:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: "a"
+          sc:attribute: "href"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Titulo
+          sc:selector:
+            *:
+              rdf:type:  sc:CssSelector
+              rdf:value: "a"
+_:superuserquestion:
+  rdf:type: sc:Fragment
+  sc:type: sioc:Post
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://superuser.com/questions/*"
+  sc:identifier:
+    *:
+      rdf:type: sc:BaseUriSelector
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Pregunta
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: "#content"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:TituloPregunta
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: "#question-header h1 a"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Creador
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".postcell .post-signature.owner .user-details a"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Creador_SinPerfil
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".postcell div.user-details"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:ReputacionInternaCreador
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".postcell .user-details .reputation-score"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Fecha
+          sc:selector:
+            *:
+              rdf:type:  sc:CssSelector
+              rdf:value: ".postcell .user-action-time span"
+              sc:attribute: "title"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:TextoPregunta
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".postcell .post-text p"
+        *:
+          sc:type:     rdf:Resource
+          sc:relation: dc:Comentarios
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".comments"
+          sc:subfragment:
+            *:
+              sc:type:     rdf:Resource
+              sc:relation: dc:InformacionComentarios
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".comment"
+              sc:subfragment:
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:TextoComentarios
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".comment-text div"
+                      sc:selector:
+                        *:
+                          rdf:type: sc:SliceSelector
+                          rdf:value: "\u2013\u00a0"
+                          sc:index:  "0"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ReputacionInternaComentarios
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".comment-text div a.comment-user"
+                      sc:attribute: "title"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:Fecha
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-date span"
+                      sc:attribute: "title"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ComentadoPor
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-text a.comment-user"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ComentadoPor
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-text span.comment-user"
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Respuestas
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".answer"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:TextoRespuesta
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".post-text p"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:RespondidoPor
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".fw .user-details a"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:RespondidoPor_SinPerfil
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".fw div.user-details"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Fecha
+          sc:selector:
+            *:
+              rdf:type:  sc:CssSelector
+              rdf:value: ".user-action-time span"
+              sc:index: "-1"
+              sc:attribute: "title"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:ReputacionInternaResponden
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".fw .user-details .reputation-score"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:FlagPositivo
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vote .vote-accepted-on"
+        *:
+          sc:type:     rdf:Resource
+          sc:relation: dc:Comentarios
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".comments"
+          sc:subfragment:
+            *:
+              sc:type:     rdf:Resource
+              sc:relation: dc:InformacionComentarios
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".comment"
+              sc:subfragment:
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:TextoComentarios
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".comment-text div"
+                      sc:selector:
+                        *:
+                          rdf:type: sc:SliceSelector
+                          rdf:value: "\u2013\u00a0"
+                          sc:index:  "0"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ReputacionInternaComentarios
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".comment-text div a.comment-user"
+                      sc:attribute: "title"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:Fecha
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-date span"
+                      sc:attribute: "title"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ComentadoPor
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-text a.comment-user"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:ComentadoPor
+                  sc:selector:
+                    *:
+                      rdf:type:  sc:CssSelector
+                      rdf:value: ".comment-text span.comment-user"
+_:superuseruser:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://superuser.com/users/*"
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:Usuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".container"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Nombre
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".subheader h1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:VistoUltimaVez
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .user-details .cool span"
+              sc:attribute: "title"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:MiembroDesde
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .user-details span.cool"
+              sc:index: "0"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:PaginaWeb
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .user-details .no-overflow a"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Localizacion
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .user-details .label.adr"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Reputacion
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .summaryinfo .summarycount"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Edad
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .user-details tr"
+              sc:index: "-1"
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:Descripcion
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".vcard .note"
+        *:
+          sc:type:     rdf:Resource
+          sc:relation: dc:PreguntasUsuario
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: "#questions-table"
+          sc:subfragment:
+            *:
+              sc:type:     rdf:Literal
+              sc:relation: dc:NumeroPreguntas
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".summary-title .summarycount.ar"
+            *:
+              sc:type:     rdf:Resource
+              sc:relation: dc:InformacionPreguntas
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".question-summary.narrow"
+              sc:subfragment:
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:URL
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".summary h3 a"
+                      sc:attribute: "href"
+                *:
+                  sc:type:     rdf:Literal
+                  sc:relation: dc:TituloPregunta
+                  sc:selector:
+                    *:
+                      rdf:type: sc:CssSelector
+                      rdf:value: ".summary h3 a"
+        *:
+          sc:type: sc:Index
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: "a"
+              sc:keyword:
+                "newest"
+          sc:identifier:
+            *:
+              rdf:type: sc:XPathSelector
+              rdf:value: "./."
+              sc:attribute: "href"
+_:superusernewest:
+  rdf:type: sc:Fragment
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://superuser.com/users/stats/answer*"
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:RespuestasUsuario
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: "body"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:NumeroRespuestas
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".summary-title .summarycount.ar"
+        *:
+          sc:type:     rdf:Resource
+          sc:relation: dc:InformacionRespuestas
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: ".answer-summary"
+          sc:subfragment:
+            *:
+              sc:type:     rdf:Literal
+              sc:relation: dc:URL
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".answer-link a"
+                  sc:attribute: "href"
+            *:
+              sc:type:     rdf:Literal
+              sc:relation: dc:TituloRespuesta
+              sc:selector:
+                *:
+                  rdf:type: sc:CssSelector
+                  rdf:value: ".answer-link a"
+_:superusercuentas:
+  rdf:type: sc:Fragment
+  sc:type: sioc:Post
+  sc:selector:
+    *:
+      rdf:type: sc:UriPatternSelector
+      rdf:value: "http://superuser.com/users/*?tab=accounts"
+  sc:subfragment:
+    *:
+      sc:type:     rdf:Resource
+      sc:relation: dc:CuentasRelacionadas
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".container .module"
+      sc:subfragment:
+        *:
+          sc:type:     rdf:Literal
+          sc:relation: dc:URLCuentas
+          sc:selector:
+            *:
+              rdf:type: sc:CssSelector
+              rdf:value: "a"
+              sc:attribute: "href"
