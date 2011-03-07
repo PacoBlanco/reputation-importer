@@ -24,12 +24,27 @@ public class Scrapper extends Thread{
 	private static String ApellidoUsuario_Espacio = "";
 	private static double sumaOpal;
 	private static String reputation = null;
+	private static String usuario = "";
 	
 	private static String accountsDefinition[][] = {
 		{"sla.ckers.org","http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+",
-			"http://sla.ckers.org/forum/profile.php?"},
-		{"elhacker.net","http://www.google.com/search?q=site:elhacker.net",
-				"http://foro.elhacker.net/profiles/"}
+			"http://sla.ckers.org/forum/profile.php?", "\""},
+		{"elhacker.net","http://www.google.com/search?q=site:elhacker.net+",
+				"http://foro.elhacker.net/profiles/", "\""},
+		{"ohloh.net", "https://www.ohloh.net/people?sort=kudo_position&q=",
+					"<a href='/accounts/", "'>",},
+		{"stackoverflow.com", "http://www.google.com/search?q=site:",
+					"\""},
+		{"serverfault.com", "http://www.google.com/search?q=site:",
+					"\""},
+		{"webapps.stackexchange.com", "http://www.google.com/search?q=site:",
+					"\""},
+		{"questions.securitytube.net", "http://www.google.com/search?q=site:",
+					"\""},
+		{"security.stackexchange.com", "http://www.google.com/search?q=site:",
+					"\""}
+					
+					
 		};
 	
 	public Scrapper(String str){
@@ -569,7 +584,7 @@ public class Scrapper extends Thread{
 			if(getName().startsWith("s")){
 				url = getName().replaceFirst("s", "");
 				scrappy_dump = Ejecutor.executeScrappy(url, "0");
-				informacionPostsSlackers(scrappy_dump);
+				//informacionPostsSlackers(scrappy_dump);
 			}
 	
 		} catch (IOException e) {
@@ -583,57 +598,54 @@ public class Scrapper extends Thread{
 		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		JSONObject objeto_dump = array.getJSONObject(0);
 		double opal;
+		int k = 0;
 		if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
     		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
-    		for(int i=0;i<array_objeto_post.size();i++){
-    			JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
-	        	//System.out.println("Informacion de post:");
-	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
-	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
-	        		String postName = array_postURL.getString(0);
-			        System.out.println("  PostName: " + postName);
+    		for(int j=0;j<array_objeto_post.size();j++){
+    			JSONObject objeto_array_post = array_objeto_post.getJSONObject(j);
+	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/UserName") && 
+	        			objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
+	        		JSONArray array_userName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/UserName");
+	        		String userName = array_userName.getString(0);
+	        		if (userName.toLowerCase().equals(usuario)){ //Si encuentra una respuesta del usuario, guarda su posicion
+	        			k = j;
+		        		break;
+	        		}
 	        	}
-	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
-	        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostText");
-	        		String postText = array_postURL.getString(0);
-			        //System.out.println("  PostText: " + postText);
+    		}
+    		for(int i=k+1;i<array_objeto_post.size();i++){ //Empieza a sacar la puntuacion de las respuestas siguientes a la del usuario
+    			JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
+	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/UserName") && 
+	        			objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
+	        		JSONArray array_postText = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostText");
+	        		String postText = array_postText.getString(0);
 	        		opal = opal_parser(postText);
 			        sumaOpal += opal;
 			        System.out.println("Puntuación OPAL: "+ opal);
-			        
 	        	}
-		
+    			
     		}
 		}
 	}
 	
     public static void main(String[] args) throws Exception {
-    	String usuario = "Ben Torell"; //wayne koorts"; //Tiberiu Ana"; //"Ben Torell";
-    	String apellidoUsuario = "";
-		if (usuario.contains(" ")){
-			for(int i=0;i<usuario.indexOf(" ");i++){
-				NombreUsuario += usuario.charAt(i);
-			}
-			for(int j=usuario.indexOf(" ")+1;j<usuario.length();j++){
-				apellidoUsuario += usuario.charAt(j);
-			}			
-		}
-		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario);   	
-		ApellidoUsuario_Espacio = " " + apellidoUsuario;
+    	usuario = "rsnake";
+		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario); 
     	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
-		//System.out.println(getMoreAccounts("Gavin Sharp", "ohloh.net"));
-		//getMoreAccounts("rsnake", "sla.ckers.org");
-		//getMoreAccounts("Ben Torell", "serverfault.com");
+		//UserAccounts("Gavin Sharp", "ohloh.net");
+		UserAccounts(usuario, "sla.ckers.org");
+		//UserAccounts("Ben Torell", "serverfault.com");
 		//String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
 		//String scrappy_dump = Ejecutor.executeScrappy(url, "0");
 		//System.out.println(scrappy_dump);
 		//informacionPostsSlackers(scrappy_dump);
-		UserAccounts("anelkaos", "elhacker.net");
+		//UserAccounts(usuario, "elhacker.net");
     }
     
     
     private static Double Reputation(JSONObject objeto, String cuenta) throws IOException {
     	String coma = "\"";
+    	double puntuation = 0;
 		if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 			JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
 			JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
@@ -650,16 +662,19 @@ public class Scrapper extends Thread{
 		        System.out.println("  Reputacion: " + reputation);
 	        }
 	        //Ohloh-----------------------------------------------------------------------------------------------------
+	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking")){
+		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Ranking");
+		        String ranking = array_user.getString(0).replace("\n","").replace(" ", "").replace(".", "");
+				double posicion = Double.parseDouble(ranking.substring(0,ranking.indexOf("of")));
+				double usuariosTotales = Double.parseDouble(ranking.substring(ranking.indexOf("of")+2,ranking.length()));
+				puntuation = (Math.log10(usuariosTotales/posicion))/(Math.log10(Math.pow(usuariosTotales, 0.1)));
+		        System.out.println("  Ranking: " + ranking);
+	        }
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/ReputacionOhloh")){
 		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/ReputacionOhloh");
-		        reputation = array_user.getString(0);
+		        reputation = (Double.parseDouble(array_user.getString(0))*puntuation) + "";
 		        System.out.println("  Reputacion: " + reputation);
 	        }
-	        /*if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking")){
-		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Ranking");
-		        ranking = array_user.getString(0);
-		        System.out.println("  Ranking: " + ranking);
-	        }*/
 	        //----------------------------------------------------------------------------------------------------------
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/MiembroDesde")){
 		        JSONArray array_miembro = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/MiembroDesde");
@@ -749,7 +764,7 @@ public class Scrapper extends Thread{
 				}
 			}			
 		}
-		//http://sla.ckers.org/-----------------------------------------------------------------------------------------------
+		//sla.ckers.org && elhacker.net----------------------------------------------------------------------------
 		if (cuenta.contains("sla.ckers.org") || cuenta.contains("elhacker.net")){
 			if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 				JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
@@ -786,7 +801,8 @@ public class Scrapper extends Thread{
 				        		exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
-											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
+											//informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
+											informacionPostsSlackers(Ejecutor.executeScrappy(postURL+";start,15", "0"));
 										} catch (IOException e) {
 											e.printStackTrace();
 										}
@@ -869,6 +885,7 @@ public class Scrapper extends Thread{
         	JSONObject objeto_dump = array.getJSONObject(j);
         	accounts.addAll(GetAccounts(objeto_dump));
         }
+        System.out.println(accounts);
         return accounts;
     }
     
@@ -876,116 +893,63 @@ public class Scrapper extends Thread{
     static public List<String> UserAccounts (String usuario, String initialSite) 
     throws MalformedURLException, IOException{
     	usuario = usuario.replace(" ", "+");
-    	String coma = "\"";
     	String url = "";
-    	if (initialSite.equals("ohloh.net")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "https://www.ohloh.net/people?sort=kudo_position&q="+usuario;
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("<a href='/accounts/");
-		    	    int indice_final = html.indexOf("'>", indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial+9, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
+    	String web = "";
+    	for(int i=0;i<accountsDefinition.length;i++){
+    		String acc = accountsDefinition[i][0];
+			if (initialSite.equals(accountsDefinition[i][0])){
+				if (initialSite.equals(accountsDefinition[0][0]) || initialSite.equals(accountsDefinition[1][0]) 
+						|| initialSite.equals(accountsDefinition[2][0])){
+					web = accountsDefinition[i][1] + usuario;
+				}else{
+					web = accountsDefinition[i][1] + initialSite + "/users+" + usuario;
+				}
+	    		Web file = new Web (web);
+	        	String MIME    = file.getMIMEType( );
+	        	Object content = file.getContent( );
+		    	if ( MIME.equals( "text/html" ) && content instanceof String ){
+		    		try{
+		    			if (initialSite.equals(accountsDefinition[0][0]) || initialSite.equals(accountsDefinition[1][0]) 
+								|| initialSite.equals(accountsDefinition[2][0])){
+				    	    String html = content.toString();
+				    	    int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][2]);
+				    	    int indice_final = html.indexOf(accountsDefinition[i][3], indice_inicial);
+		
+					    	//System.out.println("URL devuelta:"+url);
+				    	    if((indice_final != -1) && !url.contains("%") && accountsDefinition[i][0].equals("ohloh.net")){
+				    	    	url = html.substring(indice_inicial+9, indice_final);
+				    	    	url = initialSite + url;
+				    	    }else if (!url.contains("%") && (indice_final != -1)) {
+				    	    	url = html.substring(indice_inicial, indice_final);
+				    	    }
 			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	url = initialSite + url;
-			    	    	accounts.add(url);
-				            return accounts;			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-	    	
-    	}else if (initialSite.equals("sla.ckers.org")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+"+usuario;
-    		
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("http://sla.ckers.org/forum/profile.php?");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	accounts.add(url);
 			    	    	ExtractReputation(url);
-				            return accounts;			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-	    	
-    	}
-    	else if (initialSite.equals("elhacker.net")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "http://www.google.com/search?q=site:elhacker.net+"+usuario;
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("http://foro.elhacker.net/profiles/");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
 			    	    	accounts.add(url);
-			    	    	ExtractReputation(url);
-				            return accounts;			           
+			    	    	System.out.println(accounts);
+				            return accounts;	
+		    			} else if (initialSite.equals(accountsDefinition[3][0]) || initialSite.equals(accountsDefinition[4][0]) 
+								|| initialSite.equals(accountsDefinition[5][0]) || initialSite.equals(accountsDefinition[6][0])
+								|| initialSite.equals(accountsDefinition[7][0])){
+		    				
+		    				 String html = content.toString();
+					    	    int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
+					    	    int indice_final = html.indexOf("\"", indice_inicial);
+					    	    if (indice_final != -1){
+					    	    	url = html.substring(indice_inicial, indice_final);
+						    	    //System.out.println("URL devuelta:"+url);
+						    	    if(!url.contains("%")){
+						    	    	UserAccountsByURL(url);			           
+							        } else
+						    	    	System.out.println("No se ha encontrado el usuario.");
+					    	    }
 				        } else
 			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-    	}
-    	else{
-			initialSite = initialSite.toLowerCase();
-			String web_inicio = "http://www.google.com/search?q=site:"+initialSite+"/users+%22";
-			String web_fin = "%22";
-			//System.out.println("URL:"+web_inicio+usuario+web_fin);
-	    	Web file   = new Web(web_inicio+usuario+web_fin);
-	    	String MIME    = file.getMIMEType( );
-	    	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	UserAccountsByURL(url);			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
+		    	    
+		    		}catch(StringIndexOutOfBoundsException e){
+		    			System.out.println("El usuario no existe");
+		    		}
+		    	}
+			}
     	}
     	return null;
 	}

@@ -28,7 +28,13 @@ public class ReputationImporter {
 		ConfigureModel.buildCrossReputationGlobalModel();
 		
 		//Set the destination community to import the other community reputations
-		Community destinationCommunity = GlobalModel.getCommunities().get("semanticWiki");		
+		Community destinationCommunity = GlobalModel.getCommunities().get("semanticWiki");	
+		
+		//Add all entities configured to all metrics in the destination community
+		for(Entity entity : ConfigureModel.SetWikiUserEntitiesAndAccounts()) {
+			destinationCommunity.addEntityToAllMetrics(entity);
+		}
+		
 		//Set that all rest communities and theirs metrics are valid to the importation
 		List<CommunityMetricToImport> metricsToImport = ConfigureModel.
 			buildMetricsFromAllCommunitiesToAllMetrics(destinationCommunity);
