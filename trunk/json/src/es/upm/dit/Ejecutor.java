@@ -85,9 +85,13 @@ public class Ejecutor{
      */
     static public String executeScrappy (String texto, String tipo) throws IOException{
     	if(SCRAPPY_EXECUTOR_TYPE == SCRAPPY_EXECUTOR_LINE_COMMAND) {
-	    	String[] com = {"-f","ejson","-g",texto, "-l", tipo};
+    		/*if (texto.contains(";")){
+		    	//texto = texto.replace(";","\\;");
+    			texto = "\"" + texto + "\"";
+    		}*/
+    		String[] com = {"-f","ejson","-g", texto, "-l", tipo};
 	    	Process p = Ejecutor.comando(com);
-	    	return Ejecutor.leerBufer(Ejecutor.salidaComando(p));
+	    	return leerBufer(salidaComando(p));
     	} else {
     		System.out.println("\nExecute URL:"+URL_SERVER+URLEncoder.encode(texto));
     		Web file   = new Web(URL_SERVER+URLEncoder.encode(texto),"UTF-8");
