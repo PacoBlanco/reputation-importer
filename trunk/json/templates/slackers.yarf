@@ -121,11 +121,11 @@ _:slackerpostpage:
       sc:subfragment:
         *:
           sc:type:     rdf:Literal
-          sc:relation: dc:PostName
+          sc:relation: dc:UserName
           sc:selector:
             *:
               rdf:type: sc:CssSelector
-              rdf:value: ".PhorumReadBodySubject"
+              rdf:value: ".PhorumReadBodyHead a"
         *:
           sc:type:     rdf:Literal
           sc:relation: dc:PostText
