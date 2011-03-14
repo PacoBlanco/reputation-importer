@@ -92,7 +92,16 @@ public class GlobalModel {
 	//}
 	static public List<Evaluation> getEvaluations() {
 		return evaluations;
-	}		
+	}
+	
+	static public Community getCommunity(String communityName) {
+		for(String community : communities.keySet()) {
+			if(community.equalsIgnoreCase(communityName)) {
+				return communities.get(community);
+			}
+		}
+		return null;
+	}
 	
 	static public void addFixedTrustBetweenCommunities(String sourceComName,
 			String destinationComName, Double fixedValue) {
@@ -162,12 +171,13 @@ public class GlobalModel {
 		categories.add(category);
 		return category;
 	}
-	static public void addMetric(Metric metric) {
+	static public Metric addMetric(Metric metric) {
 		if(metric == null) {
 			System.out.println("Error: metric is null");
-			return;
+			return null;
 		}
 		metrics.put(metric.getIdentificator(),metric);
+		return metric;
 	}
 	static public Entity addEntity(Entity entity) {
 		if(entity == null) {
@@ -223,10 +233,12 @@ public class GlobalModel {
 		for(Evaluation evaluation : evaluations) {
 			if(evaluation != null) {
 				System.out.println("Evaluation:"+evaluation);
-				System.out.println("  Com:"+(evaluation.getCommunity()==null?
-						null:evaluation.getCommunity().getName()));
+				System.out.println("  sourMetr:"+(evaluation.getMetric()==null?
+						null:evaluation.getMetric().getIdentificator()));
 				System.out.println("  Ent:"+(evaluation.getDestinationEntity()==null?
 						null:evaluation.getDestinationEntity().getUniqueIdentificator()));
+				System.out.println("  DesCom:"+(evaluation.getCommunity()==null?
+						null:evaluation.getCommunity().getName()));
 				List<Object> values = evaluation.getValues();
 				if(values == null)
 					System.out.println("  Val:"+values);

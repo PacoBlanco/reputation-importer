@@ -1,5 +1,8 @@
 package cross.reputation.model;
 
+import java.util.List;
+import java.util.Map;
+
 public class NumericScale extends Scale {
 	private Double minimum;
 	private Double maximum;
@@ -53,11 +56,29 @@ public class NumericScale extends Scale {
 			return (Object)((Double)value + (Double)valueToSum);
 		return null;
 	}
+	//No necessary to adapt to the maximum, minimum and step	
+	public Object mulValues(Object value, Object valueToSum, Double weight) {
+		if(value == null)
+			return valueToSum;
+		if(valueToSum == null)
+			return value;
+		if(value instanceof Double && valueToSum instanceof Double)
+			return (Object)((Double)value * (Double)valueToSum * weight);
+		return null;
+	}
+	//No necessary to adapt to the maximum, minimum and step	
+	public Object aggregateValues(Map<CommunityMetricToImport,Object> values) {
+		Object totalValue = null;
+		for(Object value : values.values()) {
+			totalValue = sumValues(totalValue, value);
+		}
+		return doAverage(totalValue,values.size());		
+	}
 	//No necessary to adapt to the maximum, minimum and step
 	public Object doAverage(Object value, int elements) {
 		if(value == null)
 			return null;
-		if(elements <= 0)
+		if(elements <= 1)
 			return value;
 		if(value instanceof Double)
 			return (Object)((Double)value/elements);

@@ -2,10 +2,10 @@ package cross.reputation.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Metric {
 	private String identificator;
-	private List<MetricTransformer> transformers = new ArrayList<MetricTransformer>();
 	private Dimension dimension;
 	private Scale scale;
 	
@@ -21,12 +21,6 @@ public class Metric {
 	public void setIdentificator(String identificator) {
 		this.identificator = identificator;
 	}		
-	public List<MetricTransformer> getMetricTransformers() {
-		return transformers;
-	}
-	public void setTransformers(List<MetricTransformer> transformers) {
-		this.transformers = transformers;
-	}
 	public Dimension getDimension() {
 		return dimension;
 	}
@@ -39,9 +33,6 @@ public class Metric {
 	public void setScale(Scale scale) {
 		this.scale = scale;
 	}
-	public void addMetricTransformer(MetricTransformer metricTransformer)  {
-		transformers.add(metricTransformer);
-	}
 	public Object sumValues(Object value, Object valueToSum) {
 		return getScale().sumValues(value, valueToSum);
 	}
@@ -50,5 +41,8 @@ public class Metric {
 	}
 	public Object addTrust(Object value, Double trust) {
 		return getScale().addTrust(value, trust);
+	}
+	public Object aggregateValues(Map<CommunityMetricToImport,Object> values) {
+		return getScale().aggregateValues(values);
 	}
 }
