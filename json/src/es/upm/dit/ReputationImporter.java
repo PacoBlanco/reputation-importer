@@ -22,13 +22,14 @@ public class ReputationImporter {
 	
 	static public void main(String[] args) throws Exception {		
 		//Config extraction mode
+		//Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_SERVER,urlServer);
 		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND,urlServer);
 		
 		//Set All Model
 		ConfigureModel.buildCrossReputationGlobalModel();
 		
 		//Set the destination community to import the other community reputations
-		Community destinationCommunity = GlobalModel.getCommunities().get("semanticWiki");	
+		Community destinationCommunity = GlobalModel.getCommunities().get("semanticWiki");
 		
 		//Add all entities configured to all metrics in the destination community
 		for(Entity entity : ConfigureModel.SetWikiUserEntitiesAndAccounts()) {
@@ -44,26 +45,51 @@ public class ReputationImporter {
 			//TODO: solo entidades que esten en metricsFromCommunity!!!
 			Map<Community,EntityIdentifier> communityEntity = entity.getIdentificatorInCommunities();
 			for(Community community : communityEntity.keySet()) {
-				Double reputation = null;
-				if(community.getMetrics().size() == 1) {
-					String urlDomain = communityEntity.get(community).getUrl();
-					if(urlDomain == null) {
-						System.out.println("Info:"+communityEntity.get(community).getName()+"("+
-								entity.getUniqueIdentificator()+") has null url in:"+community.getName());
-						continue;
-					}						
-					reputation = Scrapper.ExtractReputation(urlDomain);				
-					if(reputation != null) {
-						Metric metric = (Metric)community.getMetrics().toArray()[0];
-						//System.out.println("Me:"+metric+" Sc:"+metric.getScale()+" rep:"+reputation);
-						reputation = (Double) metric.getScale().adaptToScale((Object)reputation);
-						GlobalModel.addEvaluation(new Evaluation(community, entity,
-								metric,reputation));						
-					}					
+				String urlDomain = communityEntity.get(community).getUrl();
+				if(urlDomain == null) {
+					System.out.println("Info:"+communityEntity.get(community).getName()+"("+
+							entity.getUniqueIdentificator()+") has null url in:"+community.getName());
+					continue;
+				}						
+				Map<Metric,Object> reputationMap = Scrapper.ExtractReputation(urlDomain);				
+				if(reputationMap == null || reputationMap.isEmpty()) {
+					continue;
 				}
-				//TODO:Method to extract reputation that associated the metric with the value
-				System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "+community.getName()
-						+ " url:"+communityEntity.get(community).getUrl()+" rep:"+reputation);
+				if(reputationMap.size() == 1 && community.getMetrics().size() == 1) {
+					Metric metric = (Metric)community.getMetrics().toArray()[0];
+					for(Object value : reputationMap.values()) {
+						GlobalModel.addEvaluation(new Evaluation(community, entity,
+								metric,value));
+						System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "
+						+community.getName()+ " url:"+communityEntity.get(community).getUrl()
+						+" met:"+metric.getIdentificator()+" rep:"+value);
+					}
+				} else {
+					for(Metric metric : reputationMap.keySet()) {
+						Metric sourceMetric = null;
+						for(Metric comMetric : community.getMetrics()) {
+							if(metric == null || !metric.getIdentificator().equalsIgnoreCase(
+									comMetric.getIdentificator())) {
+								continue;										
+							}
+							sourceMetric = comMetric;
+							break;
+						}
+						if(sourceMetric == null) {							
+							System.out.println("INFO: metric parsed("+(metric==null?null:metric.getIdentificator())
+								+") does not correspond to any metric of the community("+community.getName()+
+								"):"+community.getMetrics()+". Its score is ignored");
+							continue;
+						}
+						GlobalModel.addEvaluation(new Evaluation(community,
+								entity,sourceMetric,reputationMap.get(metric)));
+						System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com:"
+						+community.getName()+ " url:"+communityEntity.get(community).getUrl()
+						+" met:"+sourceMetric.getIdentificator()+" rep:"+reputationMap.get(metric));
+						break;
+					}							
+				}
+				//TODO:Method to extract reputation that associated the metric with the value				
 			}
 		}		
 		
