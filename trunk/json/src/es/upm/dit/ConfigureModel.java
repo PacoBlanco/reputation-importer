@@ -26,65 +26,103 @@ public class ConfigureModel {
 	static void buildCrossReputationGlobalModel() {
 		//Set the dimensions of each scale, the scale of each metric, the metrics
 		//of each community, the categories of each community and the communities
-		Dimension SystemAdminQandA = new Dimension("SystemAdminQandA");
+		Dimension reputationInQandA = new Dimension("ReputationInQandA");
+		Dimension projectsReputation = new Dimension("ReputationInProject");
+		Dimension rankReputation = new Dimension("rankReputation");		
+		
+		
+		String qandACategory = GlobalModel.addCategory("QandA");
+		String securityWebAppCategory = GlobalModel.addCategory("SecurityWebApp");
+		String projectConnCategory = GlobalModel.addCategory("ProjectConnection");
+		
+		
 		GlobalModel.addScale(new NumericScale("stackOverflowScale",30000.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("stackOverflowMetric", SystemAdminQandA,
+		GlobalModel.addMetric(new Metric("stackOverflowMetric", reputationInQandA,
 				GlobalModel.getScales().get("stackOverflowScale")));
-		String stackOverflowCategories[] = {GlobalModel.addCategory("QandA")};
+		String stackOverflowCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("stackoverflow.com","stackoverflow.com",
 				stackOverflowCategories,GlobalModel.getMetrics().get("stackOverflowMetric")));		
 		
-		Dimension ProgramingQandA = new Dimension("ProgramingQandA");
 		GlobalModel.addScale(new NumericScale("serverFaultScale",20000.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("serverFaultMetric", ProgramingQandA,
+		GlobalModel.addMetric(new Metric("serverFaultMetric", reputationInQandA,
 				GlobalModel.getScales().get("serverFaultScale")));
-		String serverFaultCategories[] = {GlobalModel.addCategory("QandA")};
+		String serverFaultCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("serverfault.com","serverfault.com",
 				serverFaultCategories,GlobalModel.getMetrics().get("serverFaultMetric")));
 				
-		Dimension WebAppsQandA = new Dimension("WebAppsQandA");
 		GlobalModel.addScale(new NumericScale("webAppsStackExchangeScale",20000.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("webAppsStackExchangeMetric", WebAppsQandA,
+		GlobalModel.addMetric(new Metric("webAppsStackExchangeMetric", reputationInQandA,
 				GlobalModel.getScales().get("webAppsStackExchangeScale")));
-		String webAppsStackExchangeCategories[] = {GlobalModel.addCategory("QandA")};
+		String webAppsStackExchangeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("webapps.stackexchange.com","webapps.stackexchange.com",
 				webAppsStackExchangeCategories,GlobalModel.getMetrics().get("webAppsStackExchangeMetric")));
 				
-		Dimension solveSecurityProblemsQandA = new Dimension("solveSecurityProblemsQandA");
 		GlobalModel.addScale(new NumericScale("questionsSecuritytubeScale",20000.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("questionsSecuritytubeMetric", solveSecurityProblemsQandA,
+		GlobalModel.addMetric(new Metric("questionsSecuritytubeMetric", reputationInQandA,
 				GlobalModel.getScales().get("questionsSecuritytubeScale")));
-		String questionsSecuritytubeCategories[] = {GlobalModel.addCategory("QandA")};
+		String questionsSecuritytubeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("questions.securitytube.net","questions.securitytube.net",
 				questionsSecuritytubeCategories,GlobalModel.getMetrics().get("questionsSecuritytubeMetric")));
 				
-		Dimension ITSecurityQandA = new Dimension("ITSecurityQandA");
 		GlobalModel.addScale(new NumericScale("security.StackexchangeScale",2000.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("security.StackexchangeMetric", ITSecurityQandA,
+		GlobalModel.addMetric(new Metric("security.StackexchangeMetric", reputationInQandA,
 				GlobalModel.getScales().get("security.StackexchangeScale")));
-		String securityStackexchangeCategories[] = {GlobalModel.addCategory("QandA")};
+		String securityStackexchangeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("security.stackexchange.com","security.stackexchange.com",
 				securityStackexchangeCategories,GlobalModel.getMetrics().get("security.StackexchangeMetric")));
 		
-		Dimension securityWebApps = new Dimension("SecurityWebApps");
 		GlobalModel.addScale(new NumericScale("semanticWikiScale",10.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("semanticWikiMetric", securityWebApps,
-				GlobalModel.getScales().get("semanticWikiScale")));
-		String semanticWikiCategories[] = {GlobalModel.addCategory("SecurityWebApp")};
+		GlobalModel.addMetric(new Metric("semanticWikiMetric", reputationInQandA,
+				GlobalModel.getScales().get("semanticWikiScale")){
+			public Object aggregateValues(Map<CommunityMetricToImport,Object> values) {
+				Object total = null;
+				int sum = 0;
+				for(CommunityMetricToImport comMetToImp: values.keySet()) {
+					if(comMetToImp.getCommunity() ==
+							GlobalModel.getCommunities().get("ohloh.net")) {
+						if(total != null) {
+							total = getScale().mulValues(total,values.get(comMetToImp),0.1/0.9);
+						} else {
+							total = values.get(comMetToImp);
+						}
+						if(sum == 0) {
+							sum = 1;
+						}
+						//System.out.println("new total in mul:"+total);
+					}										
+				}
+				for(CommunityMetricToImport comMetToImp: values.keySet()) {
+					if(comMetToImp.getCommunity() ==
+						GlobalModel.getCommunities().get("ohloh.net")) {
+						continue;
+					}
+					//System.out.println("total:"+total+" next value to sum:"+values.get(comMetToImp));					
+					total = getScale().sumValues(total, values.get(comMetToImp));
+					sum++;
+				}				
+				//return doAverage(total,sum);
+				return total;
+			}
+		});		
+		String semanticWikiCategories[] = {securityWebAppCategory};
 		Community wiki = new Community("semanticWiki","lab.gsi.dit.upm.es/semanticwiki",
 				semanticWikiCategories,GlobalModel.getMetrics().get("semanticWikiMetric"));
 		
-		Dimension ohloh = new Dimension("Ohloh");
-		GlobalModel.addScale(new NumericScale("ohlohScale",10.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("ohlohMetric", ohloh,
-				GlobalModel.getScales().get("ohlohScale")));
-		String ohlohCategories[] = {GlobalModel.addCategory("QandA")};
+		String ohlohCategories[] = {projectConnCategory};		
+		Set<Metric> ohlohMetrics = new HashSet<Metric>();
+		GlobalModel.addScale(new NumericScale("ohlohKudoScale",10.0,0.0,1.0));
+		Metric ohlohKudoMetric = GlobalModel.addMetric(new Metric("ohlohKudoMetric",
+				projectsReputation,GlobalModel.getScales().get("ohlohKudoScale")));
+		ohlohMetrics.add(ohlohKudoMetric);	
+		GlobalModel.addScale(new NumericScale("ohlohRankScale",450000.0,0.0,1.0));
+		Metric ohlohRankMetric = GlobalModel.addMetric(new Metric("ohlohRankMetric", rankReputation,
+				GlobalModel.getScales().get("ohlohRankScale")));
+		ohlohMetrics.add(ohlohRankMetric);		
 		GlobalModel.addCommunity(new Community("ohloh.net","ohloh.net",
-				ohlohCategories,GlobalModel.getMetrics().get("ohlohMetric")));
+				ohlohCategories,ohlohMetrics));
 		
-		Dimension slackers = new Dimension("Slakers");
 		GlobalModel.addScale(new NumericScale("slackersScale",10.0,0.0,1.0));
-		GlobalModel.addMetric(new Metric("slackersMetric", slackers,
+		GlobalModel.addMetric(new Metric("slackersMetric", reputationInQandA,
 				GlobalModel.getScales().get("slackersScale")));
 		String slackersCategories[] = {GlobalModel.addCategory("QandA")};
 		GlobalModel.addCommunity(new Community("sla.ckers.org","sla.ckers.org",
@@ -105,10 +143,11 @@ public class ConfigureModel {
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("security.StackexchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));				
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
-				get("ohlohMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+				get("slackersMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		GlobalModel.addMetricTransformer(new LinealNumericTransformer(GlobalModel.getMetrics().
+				get("ohlohKudoMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),0.9));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
-				get("slackersMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));				
-
+				get("ohlohRankMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));		
 		//for(Community community : GlobalModel.getCommunities().values())
 		//	printCommunity(community);
 		
@@ -123,14 +162,14 @@ public class ConfigureModel {
 				"semanticWiki",0.8);
 		GlobalModel.addFixedTrustBetweenCommunities("security.stackexchange.com",
 				"semanticWiki",1.0);
-		GlobalModel.addFixedTrustBetweenCommunities("ohloh.net",
-				"semanticWiki",1.0);
+		//GlobalModel.addFixedTrustBetweenCommunities("ohloh.net",
+		//		"semanticWiki",1.0);
 		GlobalModel.addFixedTrustBetweenCommunities("sla.ckers.org",
 				"semanticWiki",1.0);
 		
 		//Set the category matching table
 		GlobalModel.addCategoryMatching("SecurityWebApp","QandA",0.9);
-		
+		GlobalModel.addCategoryMatching("SecurityWebApp","ProjectConnection",0.9);
 	}
 	
 	static public List<CommunityMetricToImport> 
@@ -142,12 +181,12 @@ public class ConfigureModel {
 				continue;
 			}
 			Community sourceCommunity = GlobalModel.getCommunities().get(communityId);
-			for(Metric metric : sourceCommunity.getMetrics()) {
+			for(Metric sourceMetric : sourceCommunity.getMetrics()) {
 				communityMetricsToImport.addAll(buildCommunityMetricToImportToAllMetrics(
-						sourceCommunity, community, metric));
+						sourceCommunity, community, sourceMetric));
 			}
 		}
-		//printMetricsFromCommunity(metricsFromCommunities);
+		//printMetricsFromCommunity(communityMetricsToImport);
 		return communityMetricsToImport;
 	}
 	
@@ -165,6 +204,9 @@ public class ConfigureModel {
 				metricsToImport.add(new CommunityMetricToImport(sourceCommunity,destinationCommunity,
 						sourceMetric, destinationMetric, categMatching, fixedValue));
 			}
+		} else {
+			System.out.println("INFO: no category matching neither fixed value between:"+
+					sourceCommunity.getName()+" and "+destinationCommunity.getName());
 		}
 		return metricsToImport;
 	}
@@ -173,10 +215,14 @@ public class ConfigureModel {
 		for(CommunityMetricToImport metriCom : metricsFromCommunities) {
 			if(metriCom != null) {
 				System.out.println("MetriCom:"+metriCom);
-				System.out.println("  Com:"+(metriCom.getCommunity() == null?
+				System.out.println("  SourCom:"+(metriCom.getCommunity() == null?
 						null:metriCom.getCommunity().getName()));
-				System.out.println("  Met:"+(metriCom.getMetric() == null?
+				System.out.println("  SourMet:"+(metriCom.getMetric() == null?
 						null:metriCom.getMetric().getIdentificator()));
+				System.out.println("  DesCom:"+(metriCom.getDestinationCommunity() == null?
+						null:metriCom.getDestinationCommunity().getName()));
+				System.out.println("  DesMet:"+(metriCom.getDestinationMetric() == null?
+						null:metriCom.getDestinationMetric().getIdentificator()));
 				System.out.println("  Tru:"+metriCom.getTrust());
 			} else
 				System.out.println("MetriCom:"+metriCom);
@@ -224,6 +270,10 @@ public class ConfigureModel {
 		Entity pblanco = GlobalModel.addEntity(new Entity("PBlanco"));
 		pblanco.addIdentificatorInCommunities(GlobalModel.getCommunities().get("serverfault.com"),
 				new EntityIdentifier("wayne koorts",null));
+		pblanco.addIdentificatorInCommunities(GlobalModel.getCommunities().get("security.stackexchange.com"),
+				new EntityIdentifier("kk-sjp-kk","http://security.stackexchange.com/users/1337/sjp"));
+		pblanco.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
+				new EntityIdentifier("Arjan van de Ven",null));
 		Entity jAMaldonado = GlobalModel.addEntity(new Entity("Jamaldonado"));
 		jAMaldonado.addIdentificatorInCommunities(GlobalModel.getCommunities().get("questions.securitytube.net"),
 				new EntityIdentifier("Andre G",null));
@@ -242,25 +292,29 @@ public class ConfigureModel {
 		Entity edukun = GlobalModel.addEntity(new Entity("Edukun"));
 		edukun.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
 				new EntityIdentifier("Gavin Sharp",null));
+		edukun.addIdentificatorInCommunities(GlobalModel.getCommunities().get("security.stackexchange.com"),
+				new EntityIdentifier("Sairam Kunala",null));
 		Entity racker = GlobalModel.addEntity(new Entity("Racker"));
-		racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("sla.ckers.org"),
-				new EntityIdentifier("rsnake",null));
+		racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
+				new EntityIdentifier("janosch","http://www.ohloh.net/p/linux-omap/contributors/34615288934090"));
+		//racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("sla.ckers.org"),
+		//		new EntityIdentifier("rsnake",null));
 		GetMoreAccounts();
 		return GlobalModel.getEntities().values();
 	}
 	
 	static public void GetMoreAccounts() {
 		List<String> accounts;
-		try {
-			for(Entity entity : GlobalModel.getEntities().values()) {
-				Map<Community,EntityIdentifier> usuario = entity.getIdentificatorInCommunities();
-				//In this form of iteration, we dont search accounts in the new accounts found or
-				//  accounts updated that have already been iterated
-				for(Object object : usuario.keySet().toArray()) {
-					Community community = (Community) object;
-					String userName = usuario.get(community).getName();
-					//System.out.println(userName+":"+community);
-					String url = usuario.get(community).getUrl();
+		for(Entity entity : GlobalModel.getEntities().values()) {
+			Map<Community,EntityIdentifier> usuario = entity.getIdentificatorInCommunities();
+			//In this form of iteration, we dont search accounts in the new accounts found or
+			//  accounts updated that have already been iterated
+			for(Object object : usuario.keySet().toArray()) {
+				Community community = (Community) object;
+				String userName = usuario.get(community).getName();
+				//System.out.println(userName+":"+community);
+				String url = usuario.get(community).getUrl();
+				try {
 					if(url != null) {
 						accounts = Scrapper.UserAccountsByURL(url);
 					} else {
@@ -269,12 +323,14 @@ public class ConfigureModel {
 					if(accounts != null) {
 						SetAccountsInEntity(entity, userName, accounts);
 					}
+				} catch (Exception e) {
+					System.out.println("Error to get more accounts for entity:"+
+						entity.getUniqueIdentificator()+" with comunnity: "+community.getName()
+						+(url==null?" and user:"+userName:" and url:"+url));
+					e.printStackTrace();
 				}
 			}
-		} catch (Exception e) {
-			System.out.println("Error to get more accounts:");
-			e.printStackTrace();
-		}
+		}		
 	}
 	
 	static private void SetAccountsInEntity(Entity entity, String userName, List<String> accounts) {

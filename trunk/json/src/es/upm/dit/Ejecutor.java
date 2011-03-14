@@ -33,7 +33,11 @@ public class Ejecutor{
     		//comand = "/var/lib/gems/1.8/gems/scrappy-0.1.9/bin/scrappy"
     		commandList.add(0,"scrappy");
     	}
-    	
+    	String execute = "Execute: ";
+    	for(int i = 0; i < commandList.size(); i++) {
+    		execute += commandList.get(i)+" ";
+    	}
+    	System.out.println(execute);
     	Process p = Runtime.getRuntime().exec(commandList.toArray(new String[commandList.size()]));
 		try {
 			p.waitFor();				
@@ -54,7 +58,7 @@ public class Ejecutor{
     	String line;
     	try {
     		while ((line = brCleanUp.readLine ()) != null) {
-	            //System.out.println ("[Stderr] " + line);
+	            System.out.println ("[Stderr] " + line);
 	        }        
 			brCleanUp.close();
 		} catch (IOException e) {
@@ -85,11 +89,7 @@ public class Ejecutor{
      */
     static public String executeScrappy (String texto, String tipo) throws IOException{
     	if(SCRAPPY_EXECUTOR_TYPE == SCRAPPY_EXECUTOR_LINE_COMMAND) {
-    		/*if (texto.contains(";")){
-		    	//texto = texto.replace(";","\\;");
-    			texto = "\"" + texto + "\"";
-    		}*/
-    		String[] com = {"-f","ejson","-g", texto, "-l", tipo};
+	    	String[] com = {"-f","ejson","-g",texto, "-l", tipo};
 	    	Process p = Ejecutor.comando(com);
 	    	return leerBufer(salidaComando(p));
     	} else {
