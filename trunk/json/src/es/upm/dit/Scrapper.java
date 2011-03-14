@@ -42,10 +42,7 @@ public class Scrapper extends Thread{
 		{"questions.securitytube.net", "http://www.google.com/search?q=site:",
 					"\""},
 		{"security.stackexchange.com", "http://www.google.com/search?q=site:",
-					"\""}
-					
-					
-		};
+					"\""}};
 	
 	public Scrapper(String str){
 		super(str);
@@ -629,17 +626,17 @@ public class Scrapper extends Thread{
 	}
 	
     public static void main(String[] args) throws Exception {
-    	usuario = "rsnake";
+    	usuario = "anelkaos";
 		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario); 
     	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
 		//UserAccounts("Gavin Sharp", "ohloh.net");
-		UserAccounts(usuario, "sla.ckers.org");
+		//UserAccounts(usuario, "sla.ckers.org");
 		//UserAccounts("Ben Torell", "serverfault.com");
 		//String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
 		//String scrappy_dump = Ejecutor.executeScrappy(url, "0");
 		//System.out.println(scrappy_dump);
 		//informacionPostsSlackers(scrappy_dump);
-		//UserAccounts(usuario, "elhacker.net");
+		UserAccounts(usuario, "elhacker.net");
     }
     
     
@@ -787,7 +784,7 @@ public class Scrapper extends Thread{
 			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
 					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		            JSONObject objeto_dump = array.getJSONObject(0);
-		            ExecutorService exec = Executors.newFixedThreadPool(8);
+		            ExecutorService exec = Executors.newFixedThreadPool(3);
 	            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
 	            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
 	            		for(int i=0;i<array_objeto_post.size();i++){
@@ -801,7 +798,7 @@ public class Scrapper extends Thread{
 				        		exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
-											//informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
+											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
 											informacionPostsSlackers(Ejecutor.executeScrappy(postURL+";start,15", "0"));
 										} catch (IOException e) {
 											e.printStackTrace();
