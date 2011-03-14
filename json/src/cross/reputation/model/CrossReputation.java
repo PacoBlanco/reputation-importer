@@ -14,9 +14,24 @@ public class CrossReputation {
 	private Set<Entity> entities;
 	private List<Evaluation> evaluations = new ArrayList<Evaluation>();
 	private List<CommunityMetricToImport> metricsToImport;
+	private boolean verifyEntities = false;
 	
 	public CrossReputation(Community community, List<CommunityMetricToImport> 
+			metricsFromCommunities, boolean allEntities, boolean verifyMetrics,
+			boolean verifyEntities) {
+		this.verifyEntities = verifyEntities;
+		initialize(community,metricsFromCommunities,allEntities, 
+				verifyMetrics);
+	}
+		
+	public CrossReputation(Community community, List<CommunityMetricToImport> 
 			metricsFromCommunities, boolean allEntities, boolean verifyMetrics) {
+		initialize(community,metricsFromCommunities,allEntities, 
+				verifyMetrics);
+	}
+	
+	private void initialize(Community community, List<CommunityMetricToImport> 
+			metricsFromCommunities, boolean allEntities, boolean verifyMetrics){
 		this.community = community;
 		if(allEntities) {
 			entities = community.getEntities().keySet();
@@ -48,21 +63,26 @@ public class CrossReputation {
 	
 	public Object calculateSingleReputation(CommunityMetricToImport communityMetricToImport,
 			Metric destinationMetric, Entity entity) {
-		if(communityMetricToImport.getDestinationMetric() != destinationMetric)
+		if(communityMetricToImport.getDestinationMetric() != destinationMetric) {
 			return null;
-		Double value = null;
+		}
+		Double trustByMetricsAndCommunities = null;
 		MetricTransformer exTransformer = null;
 		for(MetricTransformer transformer : GlobalModel.getMetricTransformers()){
 			if(transformer.getSourceMetric() == communityMetricToImport.getMetric() &&
 					transformer.getDestinationMetric() == destinationMetric) {
 				exTransformer = transformer;
-				value = transformer.getCorrelationBetweenMetrics();
+				trustByMetricsAndCommunities = transformer.getCorrelationBetweenMetrics();
 				break;
 			}				
 		}
-		if(value == null || communityMetricToImport.getTrust() == null)
+		if(trustByMetricsAndCommunities == null || communityMetricToImport.getTrust() == null) {
+			System.out.println("INFO: there is not trust set between " +
+				communityMetricToImport.getCommunity().getName()+" and " +
+				communityMetricToImport.getDestinationCommunity().getName());
 			return null;
-		value *= communityMetricToImport.getTrust();
+		}		
+		trustByMetricsAndCommunities *= communityMetricToImport.getTrust();
 		Object values = null;
 		for(Evaluation evaluation : evaluations) {
 			if(evaluation.getCommunity() == communityMetricToImport.getCommunity() &&
@@ -87,12 +107,12 @@ public class CrossReputation {
 		}
 		if(values == null)
 			return null;
-		System.out.println("   SR:after trans:"+values+" trust:"+value+" ("+
+		System.out.println("   SR:after trans:"+values+" trust:"+trustByMetricsAndCommunities+" ("+
 				exTransformer.getCorrelationBetweenMetrics()+"*"+communityMetricToImport.getTrust()
-				+") SR:"+communityMetricToImport.getMetric().addTrust(values,value)+" c"+
+				+") SR:"+communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities)+" c"+
 				communityMetricToImport.getDestinationCommunity().getDomainName()+" m:"+
 				communityMetricToImport.getDestinationMetric().getIdentificator());
-		return communityMetricToImport.getMetric().addTrust(values,value);		
+		return communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities);		
 	}
 	
 	/**
@@ -200,16 +220,44 @@ public class CrossReputation {
 	
 	public Object calculateCrossReputationByMetricsAndEntity(List<CommunityMetricToImport> 
 			metricsToImport, Metric destinationMetric, Entity entity) {
-		Object values = null;		
-		for(CommunityMetricToImport metricToImport : metricsToImport) {
-			values = destinationMetric.sumValues(values,calculateSingleReputation(
-					metricToImport,destinationMetric,entity));
+		Map<CommunityMetricToImport, Object> values = new HashMap<CommunityMetricToImport, Object>();
+		List<CommunityMetricToImport> metricsToImportByEntity;
+		if(verifyEntities) {
+			metricsToImportByEntity = new ArrayList<CommunityMetricToImport>();
+			Entity destinationEntity = null;
+			for(Entity entiti : community.getEntities().keySet()) {
+				if(entiti.getUniqueIdentificator().equalsIgnoreCase(
+						entity.getUniqueIdentificator())) {
+					destinationEntity = entiti;
+				}
+			}
+			if(destinationEntity == null) {
+				return null;
+			}
+			for(Metric metric : community.getEntities().get(destinationEntity)) {
+				for(CommunityMetricToImport metricToImport : metricsToImport) {
+					if(metric.getIdentificator().equalsIgnoreCase(
+							metricToImport.getMetric().getIdentificator())) {
+						metricsToImportByEntity.add(metricToImport);
+					}
+				}
+			}
+		} else {
+			metricsToImportByEntity = metricsToImport;
 		}
+		for(CommunityMetricToImport metricToImport : metricsToImportByEntity) {
+			Object value = calculateSingleReputation(metricToImport,
+					destinationMetric,entity);
+			if(value != null) {
+				values.put(metricToImport,value);
+			}
+		}
+		Object value = destinationMetric.aggregateValues(values);
 		System.out.println("-Eva:"+entity.getUniqueIdentificator()+","+destinationMetric.
-				getIdentificator()+","+values);
+				getIdentificator()+","+value);
 		updateEvaluation(entity,destinationMetric,
-				destinationMetric.getScale().adaptToScale(values));
-		return values;
+				destinationMetric.getScale().adaptToScale(value));
+		return value;
 	}	
 	
 	public Map<Metric,List<CommunityMetricToImport>> sortMetricsByDestinationMetric(
@@ -228,6 +276,11 @@ public class CrossReputation {
 				metricsByDestination.add(metricToImport);
 			}
 		}
+		//for(Metric metric : metricsSortByDestination.keySet()) {
+		//	System.out.println("Sorted Metric:"+metric.getIdentificator());
+		//	ConfigureModel.printMetricsFromCommunity(metricsSortByDestination.get(metric));
+		//	System.out.println("----------------------------------");
+		//}
 		return metricsSortByDestination;
 	}
 	

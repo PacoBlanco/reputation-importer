@@ -1,6 +1,7 @@
 package cross.reputation.model;
 
 import java.util.List;
+import java.util.Map;
 
 public class CategoricScale extends Scale {
 	private List<String> categories;
@@ -37,5 +38,15 @@ public class CategoricScale extends Scale {
 		if(value == null)
 			return valueToSum;
 		return value;
+	}
+	@Override
+	public Object mulValues(Object value, Object valueToSum, Double weight) {
+		if(value == null)
+			return valueToSum;
+		return value;
+	}
+	@Override
+	public Object aggregateValues(Map<CommunityMetricToImport,Object> values) {
+		return null;
 	}
 }

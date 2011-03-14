@@ -1,5 +1,8 @@
 package cross.reputation.model;
 
+import java.util.List;
+import java.util.Map;
+
 abstract public class Scale {
 	String name;
 
@@ -16,6 +19,9 @@ abstract public class Scale {
 	
 	abstract public Object adaptToScale(Object value);		
 	abstract public Object sumValues(Object value, Object valueToSum);
+	abstract public Object mulValues(Object value, Object valueToSum, Double weight);
 	abstract public Object doAverage(Object value, int elements);
 	abstract public Object addTrust(Object value, Double trust);
+	abstract public Object aggregateValues(Map<CommunityMetricToImport,Object> values);
+	
 }
