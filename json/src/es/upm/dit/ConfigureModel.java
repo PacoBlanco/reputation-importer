@@ -23,7 +23,7 @@ import cross.reputation.model.NumericScale;
 
 public class ConfigureModel {
 	
-	static void buildCrossReputationGlobalModel() {
+	static public void buildCrossReputationGlobalModel() {
 		//Set the dimensions of each scale, the scale of each metric, the metrics
 		//of each community, the categories of each community and the communities
 		Dimension reputationInQandA = new Dimension("ReputationInQandA");
@@ -264,7 +264,7 @@ public class ConfigureModel {
 	}
 	
 	static public Collection<Entity> SetWikiUserEntitiesAndAccounts() {
-		Entity administrator = GlobalModel.addEntity(new Entity("Administrator"));
+		/*Entity administrator = GlobalModel.addEntity(new Entity("Administrator"));
 		administrator.addIdentificatorInCommunities(GlobalModel.getCommunities().get("serverfault.com"),
 				new EntityIdentifier("Ben Torell",null));
 		Entity pblanco = GlobalModel.addEntity(new Entity("PBlanco"));
@@ -293,12 +293,12 @@ public class ConfigureModel {
 		edukun.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
 				new EntityIdentifier("Gavin Sharp",null));
 		edukun.addIdentificatorInCommunities(GlobalModel.getCommunities().get("security.stackexchange.com"),
-				new EntityIdentifier("Sairam Kunala",null));
+				new EntityIdentifier("Sairam Kunala",null));*/
 		Entity racker = GlobalModel.addEntity(new Entity("Racker"));
-		racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
-				new EntityIdentifier("janosch","http://www.ohloh.net/p/linux-omap/contributors/34615288934090"));
-		//racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("sla.ckers.org"),
-		//		new EntityIdentifier("rsnake",null));
+		//racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("ohloh.net"),
+		//		new EntityIdentifier("janosch","http://www.ohloh.net/p/linux-omap/contributors/34615288934090"));
+		racker.addIdentificatorInCommunities(GlobalModel.getCommunities().get("sla.ckers.org"),
+				new EntityIdentifier("rsnake",null));
 		GetMoreAccounts();
 		return GlobalModel.getEntities().values();
 	}

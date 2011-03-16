@@ -18,12 +18,13 @@ import cross.reputation.model.CommunityMetricToImport;
 
 
 public class ReputationImporter {
-	static private String urlServer = "http://localhost:3434/ejson/";
+	static private String urlServer = "http://localhost:3434/ejson/";	
 	
 	static public void main(String[] args) throws Exception {		
 		//Config extraction mode
 		//Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_SERVER,urlServer);
 		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND,urlServer);
+		Ejecutor.ConfigureOpalServer("http://localhost/opal/opal.php");
 		
 		//Set All Model
 		ConfigureModel.buildCrossReputationGlobalModel();
@@ -85,8 +86,7 @@ public class ReputationImporter {
 								entity,sourceMetric,reputationMap.get(metric)));
 						System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com:"
 						+community.getName()+ " url:"+communityEntity.get(community).getUrl()
-						+" met:"+sourceMetric.getIdentificator()+" rep:"+reputationMap.get(metric));
-						break;
+						+" met:"+sourceMetric.getIdentificator()+" rep:"+reputationMap.get(metric));						
 					}							
 				}
 				//TODO:Method to extract reputation that associated the metric with the value				

@@ -16,6 +16,8 @@ public class Ejecutor{
 	static final public int SCRAPPY_EXECUTOR_SERVER = 1;	
     static public int SCRAPPY_EXECUTOR_TYPE = SCRAPPY_EXECUTOR_LINE_COMMAND;
     static public String URL_SERVER = "http://localhost:3434/ejson/";
+    static public String OPAL_SERVER = "http://localhost/opal.php";
+    static public boolean stderrExit = false;
 		
     //Esta funcion devuelve un proceso que es la ejecucion del comando
     //que se le pasa como argumento con el nombre c
@@ -47,25 +49,22 @@ public class Ejecutor{
 		return p;
     }
     
-    static private BufferedReader getCommandOutput(InputStream is) {
-    	return new BufferedReader(new InputStreamReader(is));
-	}
-    
     //Un lector de la salida que provoca el comando
     static private BufferedReader salidaComando(Process p){
-    	BufferedReader brCleanUp = 
-            new BufferedReader (new InputStreamReader (p.getErrorStream()));
-    	String line;
-    	try {
-    		while ((line = brCleanUp.readLine ()) != null) {
-	            System.out.println ("[Stderr] " + line);
-	        }        
-			brCleanUp.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		//System.out.println("Llega hasta aqui");
-        return new BufferedReader(new InputStreamReader(p.getInputStream()));
+    	if(stderrExit) {
+	    	BufferedReader brCleanUp = 
+	            new BufferedReader (new InputStreamReader (p.getErrorStream()));
+	    	String line;
+	    	try {
+	    		while ((line = brCleanUp.readLine ()) != null) {
+		            System.out.println ("[Stderr] " + line);
+		        }        
+				brCleanUp.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+		return new BufferedReader(new InputStreamReader(p.getInputStream()));
     }
     
     //Tranforma los Buffers en texto legible
@@ -79,8 +78,14 @@ public class Ejecutor{
         return aux;
     }
     
-    static public String ejecuta_opal(String texto) throws IOException{
-    	String[] com = {"curl","-d", "text="+texto+"&translation=0", "http://localhost/opal.php"};
+    static public String ejecuta_opal(String text) throws IOException{
+    	text = URLEncoder.encode(text,"UTF-8");
+    	String[] com = {"curl","-d", "text="+text+"&translation=0", OPAL_SERVER};
+    	System.out.print("Execute:");
+    	for(int i = 0; i < com.length; i++) {
+    		System.out.print("\""+com[i]+"\" ");
+    	}
+    	System.out.println();
         Process p = Runtime.getRuntime().exec(com);
         return Ejecutor.leerBufer(Ejecutor.salidaComando(p));
     }
@@ -93,8 +98,8 @@ public class Ejecutor{
 	    	Process p = Ejecutor.comando(com);
 	    	return leerBufer(salidaComando(p));
     	} else {
-    		System.out.println("\nExecute URL:"+URL_SERVER+URLEncoder.encode(texto));
-    		Web file   = new Web(URL_SERVER+URLEncoder.encode(texto),"UTF-8");
+    		System.out.println("\nExecute URL:"+URL_SERVER+URLEncoder.encode(texto,"UTF-8"));
+    		Web file = new Web(URL_SERVER+URLEncoder.encode(texto),"UTF-8");
     		return file.getContent().toString();
     	}
     }
@@ -110,6 +115,10 @@ public class Ejecutor{
     	if(mode == SCRAPPY_EXECUTOR_SERVER && urlServer != null) {
     		URL_SERVER = urlServer;
     	}
+    }
+    
+    static public void ConfigureOpalServer(String opalServer) {
+    	OPAL_SERVER = opalServer;
     }
     
 	public static int getSCRAPPY_EXECUTOR_TYPE() {
