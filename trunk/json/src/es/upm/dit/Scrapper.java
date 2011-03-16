@@ -25,11 +25,9 @@ import net.sf.json.JSONSerializer;
 public class Scrapper extends Thread{
 	
 	private static String NombreUsuario = "";
-	//private static String ApellidoUsuario = "";
 	private static String ApellidoUsuario_Espacio = "";
-	private static double sumaOpal;
-	private static String reputation = null;
-	private static String usuario = "";
+	//private static double sumaOpal = 0;
+	//private static String usuario = "";
 	
 	private static String accountsDefinition[][] = {
 		{"sla.ckers.org","http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+",
@@ -477,19 +475,11 @@ public class Scrapper extends Thread{
 	 * Metodo privado auxiliar que llama a la clase Ejecutor, que a su vez ejecuta
 	 * la herramienta OPAL para un texto dado.
 	 */	
-	private static double opal_parser(String texto) throws IOException{
+	private static String opal_parser(String texto) throws IOException{
 		String opal_xml = Ejecutor.ejecuta_opal(texto);
-		return Double.parseDouble(opal_xml);
+		//System.out.println("Opal exit:"+opal_xml);
+		return opal_xml;
 	}
-	
-	/*
-	 * Metodo privado auxiliar que llama a la clase Ejecutor, para ejecutar el scrappy con 
-	 * la url que le digamos, guardando el resultado en 
-	 * un fichero en el escritorio, de nombre scrappy_dump.txt
-	 *	
-	private static String ejecutar_scrappy (String url, String tipo) throws IOException{
-		return Ejecutor.ejecuta_scrappy(url, tipo);
-	}*/
 	
 	/*
 	 * Metodo privado auxiliar para buscar un usuario y parsear la informacion. 
@@ -595,43 +585,54 @@ public class Scrapper extends Thread{
 		}
 	}
 	
-	private static void informacionPostsSlackers (String scrappy_dump) throws IOException{
-		
+	public static double informacionPostsSlackers (String userName, String scrappy_dump) throws IOException{		
 		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		JSONObject objeto_dump = array.getJSONObject(0);
-		double opal;
+		double opal = 0;
 		int k = 0;
 		if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
-    		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
+    		JSONArray array_objeto_post = objeto_dump.getJSONArray(
+    				"http://purl.org/dc/elements/1.1/Posts");
     		for(int j=0;j<array_objeto_post.size();j++){
     			JSONObject objeto_array_post = array_objeto_post.getJSONObject(j);
 	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/UserName") && 
 	        			objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
-	        		JSONArray array_userName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/UserName");
-	        		String userName = array_userName.getString(0);
-	        		if (userName.toLowerCase().equals(usuario)){ //Si encuentra una respuesta del usuario, guarda su posicion
+	        		JSONArray array_userName = objeto_array_post.getJSONArray(
+	        				"http://purl.org/dc/elements/1.1/UserName");
+	        		String writerName = array_userName.getString(0);
+	        		//Si encuentra una respuesta del usuario, guarda su posicion:
+	        		if (writerName.toLowerCase().equals(userName)){ 
 	        			k = j;
 		        		break;
 	        		}
 	        	}
     		}
-    		for(int i=k+1;i<array_objeto_post.size();i++){ //Empieza a sacar la puntuacion de las respuestas siguientes a la del usuario
+    		//Empieza a sacar la puntuacion de las respuestas siguientes a la del usuario:
+    		for(int i=k+1;i<array_objeto_post.size();i++){ 
     			JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
 	        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/UserName") && 
 	        			objeto_array_post.has("http://purl.org/dc/elements/1.1/PostText")){
-	        		JSONArray array_postText = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostText");
+	        		JSONArray array_postText = objeto_array_post.getJSONArray(
+	        				"http://purl.org/dc/elements/1.1/PostText");
 	        		String postText = array_postText.getString(0);
-	        		opal = opal_parser(postText);
-			        sumaOpal += opal;
-			        System.out.println("Puntuación OPAL: "+ opal);
+	        		String opal_xml = null;
+	        		try {
+		        		opal_xml = opal_parser(postText);
+		        		opal += Double.parseDouble(opal_xml);
+				        System.out.println("OPAL Score: "+ opal);
+	        		} catch (NumberFormatException e) {
+	        			System.out.println("ERROR: OPAL doest not return a numeric" +
+	        					" value for text of size:"+opal_xml);
+	        		}
 	        	}
     			
     		}
 		}
+		return opal;
 	}
 	
     public static void main(String[] args) throws Exception {
-    	usuario = "anelkaos";
+    	String usuario = "anelkaos";
 		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario); 
     	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
 		//UserAccounts("Gavin Sharp", "ohloh.net");
@@ -648,6 +649,7 @@ public class Scrapper extends Thread{
     private static Map<Metric,Object> Reputation(JSONObject objeto, String cuenta) throws IOException {
     	Map<Metric,String> reputation = new HashMap<Metric,String>();
     	Map<Metric,Object> reputations = null;
+    	String userName = null;
 		if (objeto.has("http://purl.org/dc/elements/1.1/Usuario")){
 			JSONArray array_usuarios = objeto.getJSONArray("http://purl.org/dc/elements/1.1/Usuario");
 			JSONObject objeto_usuarios = array_usuarios.getJSONObject(0);
@@ -655,8 +657,8 @@ public class Scrapper extends Thread{
 	        //Vamos sacando la información relevante, que son objetos, con un array, dentro de objeto_respuestas
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Nombre")){
 		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Nombre");
-		        String Nombre = array_user.getString(0);
-		        System.out.println("  Nombre: " + Nombre);
+		        userName = array_user.getString(0);
+		        System.out.println("  Nombre: " + userName);
 	        }
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/Reputacion")){
 		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/Reputacion");		        
@@ -802,31 +804,37 @@ public class Scrapper extends Thread{
 			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
 					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 		            JSONObject objeto_dump = array.getJSONObject(0);
-		            ExecutorService exec = Executors.newFixedThreadPool(3);
+		            OpalExecutorService opalExec = new OpalExecutorService(1, userName, 500);
+		            //ExecutorService exec;
 	            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
 	            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
-	            		for(int i=0;i<array_objeto_post.size();i++){
-			            
+	            		System.out.println("  Calculate reputation over "+array_objeto_post.size()+" posts");
+	            		for(int i=0;i<array_objeto_post.size();i++){			            
 			            	JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
 				        	//System.out.println("Informacion de post:");
 				        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostURL")){
-				        		JSONArray array_postURL = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostURL");
+				        		JSONArray array_postURL = objeto_array_post.getJSONArray(
+				        				"http://purl.org/dc/elements/1.1/PostURL");
 				        		final String postURL = array_postURL.getString(0);
-						        System.out.println("  PostURL: " + postURL);
-				        		exec.execute(new Runnable() {
+						        System.out.println("    PostURL: " + postURL);
+						        opalExec.execute(postURL);						        
+						        /*
+						        final String finalUserName = userName;
+						        exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
-											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
-											informacionPostsSlackers(Ejecutor.executeScrappy(postURL+";start,15", "0"));
+											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL, "0"));
+											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL+";start,15", "0"));
 										} catch (IOException e) {
 											e.printStackTrace();
 										}
 				        			}
 				        		});
+				        		*/						        
 						        //new Scrapper("s"+postURL).start(); //s para que indicar de slackers
 						        //reputation = Double.toString(sumaOpal);
 				        	}
-	
+				        	
 					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
 					        	//JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
 					        	//String postName = array_postName.getString(0);
@@ -837,20 +845,14 @@ public class Scrapper extends Thread{
 					        	//String postsFecha = array_fecha.getString(0);
 						        //System.out.println("  Fecha: " + postsFecha);
 					        }
-			           }
-		        		exec.shutdown();
-		                try {
-		                     boolean b = exec.awaitTermination(500, TimeUnit.SECONDS);
-		                     if (b){
-		                    	 reputations = new HashMap<Metric,Object>();
-		                    	 reputations.put(GlobalModel.getMetrics().get("slackersMetric"),sumaOpal);
-		                    	 System.out.println("Reputacion total: " + sumaOpal);
-		                     }
-		                     
-		                } catch (InterruptedException e) {
-		                     e.printStackTrace();
-		                }
-		           }
+			            }
+	            		Double opalSum = opalExec.shutdown();
+				        if(opalSum != null) {
+					        reputations = new HashMap<Metric,Object>();
+			            	reputations.put(GlobalModel.getMetrics().get("slackersMetric"),opalSum);
+			            	System.out.println("  Slackers reputation by OPAL: " + opalSum);
+				        }
+		            }
 		        }  	
 			}
 		}
@@ -885,7 +887,8 @@ public class Scrapper extends Thread{
 			}
 			for(int j=0; j<array.size(); j++){
             	JSONObject objeto_dump = array.getJSONObject(j);
-            	System.out.println("-----------------------------------------------------------------------------------------------");
+            	System.out.println("-------------------------------------------------" +
+            			"----------------------------------------------");
             	Map<Metric,Object> singleReputation = Reputation(objeto_dump,direccionWeb);
             	if(singleReputation != null) {
             		reputations.putAll(singleReputation);
@@ -974,116 +977,7 @@ public class Scrapper extends Thread{
 		    		}
 		    	}
 			}
-    	}
-    	/*if (initialSite.equals("ohloh.net")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "https://www.ohloh.net/people?sort=kudo_position&q="+usuario;
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("<a href='/accounts/");
-		    	    int indice_final = html.indexOf("'>", indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial+9, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	url = initialSite + url;
-			    	    	accounts.add(url);
-				            return accounts;			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-	    	
-    	} else if (initialSite.equals("sla.ckers.org")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "http://www.google.com/search?q=site:sla.ckers.org/forum/profile.php+"+usuario;
-    		
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("http://sla.ckers.org/forum/profile.php?");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	accounts.add(url);
-			    	    	//ExtractReputation(url);
-				            return accounts;			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-	    	
-    	} else if (initialSite.equals("elhacker.net")){
-    		initialSite = initialSite.toLowerCase();
-    		String web = "http://www.google.com/search?q=site:elhacker.net+"+usuario;
-    		Web file = new Web (web);
-        	String MIME    = file.getMIMEType( );
-        	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf("http://foro.elhacker.net/profiles/");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	accounts.add(url);
-			    	    	//ExtractReputation(url);
-				            return accounts;			           
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-    	} else{
-			initialSite = initialSite.toLowerCase();
-			String web_inicio = "http://www.google.com/search?q=site:"+initialSite+"/users+%22";
-			String web_fin = "%22";
-			//System.out.println("URL:"+web_inicio+usuario+web_fin);
-	    	Web file   = new Web(web_inicio+usuario+web_fin);
-	    	String MIME    = file.getMIMEType( );
-	    	Object content = file.getContent( );
-	    	if ( MIME.equals( "text/html" ) && content instanceof String ){
-	    		try{
-		    	    String html = content.toString();
-		    	    int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
-		    	    int indice_final = html.indexOf(coma, indice_inicial);
-		    	    if (indice_final != -1){
-		    	    	url = html.substring(indice_inicial, indice_final);
-			    	    //System.out.println("URL devuelta:"+url);
-			    	    if(!url.contains("%")){
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	accounts = UserAccountsByURL(url);
-			    	    	return accounts;
-				        } else
-			    	    	System.out.println("No se ha encontrado el usuario.");
-		    	    }
-	    		}catch(StringIndexOutOfBoundsException e){
-	    			System.out.println("El usuario no existe");
-	    		}
-	    	}
-    	}*/
+    	}    	
     	return null;
 	}
     
