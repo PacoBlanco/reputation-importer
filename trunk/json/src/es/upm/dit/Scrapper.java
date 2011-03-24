@@ -961,13 +961,12 @@ public class Scrapper extends Thread{
 				    	    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
 				    	    			"found or the result of the search is not understable");
 				    	    	break;
-				    	    }
-					    	
+				    	    }					    	
 					    	url = html.substring(indice_inicial+9, indice_final);
 				    	    url = initialSite + url;
 				    	    List<String> accounts = new ArrayList<String>();
 						    accounts.add(url);
-			    	    	System.out.println(accounts);
+			    	    	System.out.println("Accounts found:"+accounts);
 				            return accounts;			    	    		
 		    			} else if (initialSite.equals(accountsDefinition[3][0]) || initialSite.equals(accountsDefinition[4][0]) 
 								|| initialSite.equals(accountsDefinition[5][0]) || initialSite.equals(accountsDefinition[6][0])

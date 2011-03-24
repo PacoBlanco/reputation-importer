@@ -349,7 +349,7 @@ public class ReputationWiki {
 								break;
 							}
 							if(sourceMetric == null) {							
-								System.out.println("INFO: metric parsed("+(metric==null?null:metric.getIdentificator())
+								System.out.println("ERROR: metric parsed("+(metric==null?null:metric.getIdentificator())
 									+") does not correspond to any metric of the community("+community.getName()+
 									"):"+community.getMetrics()+". Its score is ignored");
 								continue;
@@ -363,7 +363,7 @@ public class ReputationWiki {
 						}							
 					}
 				} catch (IOException e) {
-					System.out.println("Error: extract reputation on user:" +
+					System.out.println("INFO: extract reputation on user:" +
 						entity.getUniqueIdentificator()+" over("+community.getName()+","+
 						communityEntity.get(community).getName()+") and url:"+
 						communityEntity.get(community).getUrl()+"gives a exception." +
