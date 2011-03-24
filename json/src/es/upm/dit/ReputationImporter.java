@@ -77,7 +77,7 @@ public class ReputationImporter {
 							break;
 						}
 						if(sourceMetric == null) {							
-							System.out.println("INFO: metric parsed("+(metric==null?null:metric.getIdentificator())
+							System.out.println("ERROR: metric parsed("+(metric==null?null:metric.getIdentificator())
 								+") does not correspond to any metric of the community("+community.getName()+
 								"):"+community.getMetrics()+". Its score is ignored");
 							continue;
