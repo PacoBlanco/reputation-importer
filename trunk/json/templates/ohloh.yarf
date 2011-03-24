@@ -65,6 +65,11 @@ _:ohlohuser:
             *:
               rdf:type: sc:CssSelector
               rdf:value: ".row .col.span_8 .inset_top.mezzo .kudo_mantle .position"
+              sc:selector:
+                *:
+                  rdf:type: sc:SliceSelector
+                  rdf:value: "Ranked"
+                  sc:index:  "1"
 _:ohlohcontributor:
   rdf:type: sc:Fragment
   sc:selector:

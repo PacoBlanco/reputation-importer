@@ -35,7 +35,7 @@ public class Scrapper extends Thread{
 		{"elhacker.net","http://www.google.com/search?q=site:elhacker.net+",
 				"http://foro.elhacker.net/profiles/", "\""},
 		{"ohloh.net", "https://www.ohloh.net/people?sort=kudo_position&q=",
-					"<a href='/accounts/", "'>",},
+					"<div class=\'name\'>","<a href=", "'>",},
 		{"stackoverflow.com", "http://www.google.com/search?q=site:",
 					"\""},
 		{"serverfault.com", "http://www.google.com/search?q=site:",
@@ -833,8 +833,7 @@ public class Scrapper extends Thread{
 				        		*/						        
 						        //new Scrapper("s"+postURL).start(); //s para que indicar de slackers
 						        //reputation = Double.toString(sumaOpal);
-				        	}
-				        	
+				        	}				        	
 					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
 					        	//JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
 					        	//String postName = array_postName.getString(0);
@@ -919,63 +918,86 @@ public class Scrapper extends Thread{
     
     //Para obtener la url del usuario que queramos	
     static public List<String> UserAccounts (String usuario, String initialSite) 
-    throws MalformedURLException, IOException{
+    		throws MalformedURLException, IOException{
     	usuario = usuario.replace(" ", "+");
     	String url = "";
     	String web = "";
     	for(int i=0;i<accountsDefinition.length;i++){
     		if (initialSite.equals(accountsDefinition[i][0])){
-				if (initialSite.equals(accountsDefinition[0][0]) || initialSite.equals(accountsDefinition[1][0]) 
-						|| initialSite.equals(accountsDefinition[2][0])){
+				if (i == 0 || i == 1 || i == 2) {						
 					web = accountsDefinition[i][1] + usuario;
 				}else{
 					web = accountsDefinition[i][1] + initialSite + "/users+" + usuario;
 				}
+				System.out.println("Execute query:"+web);
 	    		Web file = new Web (web);
 	        	String MIME    = file.getMIMEType( );
 	        	Object content = file.getContent( );
 		    	if ( MIME.equals( "text/html" ) && content instanceof String ){
 		    		try{
 		    			String html = content.toString();
-		    			if (initialSite.equals(accountsDefinition[0][0]) || initialSite.equals(accountsDefinition[1][0]) 
-								|| initialSite.equals(accountsDefinition[2][0])){
-				    	    int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][2]);
-				    	    int indice_final = html.indexOf(accountsDefinition[i][3], indice_inicial);
-		
-					    	//System.out.println("URL devuelta:"+url);
-				    	    if((indice_final != -1) && !url.contains("%") && accountsDefinition[i][0].equals("ohloh.net")){
-				    	    	url = html.substring(indice_inicial+9, indice_final);
-				    	    	url = initialSite + url;
-				    	    }else if (!url.contains("%") && (indice_final != -1)) {
-				    	    	url = html.substring(indice_inicial, indice_final);
+		    			if (i == 0 || i == 1){
+		    				int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][2]);
+		    				int indice_final = html.indexOf(accountsDefinition[i][3], indice_inicial);
+				    	    if(indice_final == -1 || indice_inicial == -1) {
+				    	    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
+				    	    			"found or the result of the search is not understable");
+				    	    	break;
 				    	    }
-			    	    	List<String> accounts = new ArrayList<String>();
-			    	    	//ExtractReputation(url);
-			    	    	accounts.add(url);
+				    	    url = html.substring(indice_inicial, indice_final);
+				    	    List<String> accounts = new ArrayList<String>();
+						    accounts.add(url);
 			    	    	System.out.println(accounts);
-				            return accounts;	
+				            return accounts;
+		    			} else if(i == 2) { //ohloh.net
+		    				//System.out.println("HTML\n"+html);
+				    	    int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][2]);
+				    	    int indice_final = 0;
+				    	    if(indice_inicial != -1) {
+		    					indice_inicial = html.indexOf(accountsDefinition[i][3], indice_inicial);
+		    					indice_final = html.indexOf(accountsDefinition[i][4], indice_inicial);
+		    				}
+				    	    if(indice_final == -1 || indice_inicial == -1) {
+				    	    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
+				    	    			"found or the result of the search is not understable");
+				    	    	break;
+				    	    }
+					    	
+					    	url = html.substring(indice_inicial+9, indice_final);
+				    	    url = initialSite + url;
+				    	    List<String> accounts = new ArrayList<String>();
+						    accounts.add(url);
+			    	    	System.out.println(accounts);
+				            return accounts;			    	    		
 		    			} else if (initialSite.equals(accountsDefinition[3][0]) || initialSite.equals(accountsDefinition[4][0]) 
 								|| initialSite.equals(accountsDefinition[5][0]) || initialSite.equals(accountsDefinition[6][0])
 								|| initialSite.equals(accountsDefinition[7][0])){
 		    				int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
 		    				int indice_final = html.indexOf("\"", indice_inicial);
-					    	if (indice_final != -1){
-					    		url = html.substring(indice_inicial, indice_final);
-						        //System.out.println("URL devuelta:"+url);
-						        if(!url.contains("%")){
-						        	List<String> accounts = new ArrayList<String>();
-						        	accounts = UserAccountsByURL(url);
-						        	return accounts;
-							    } else
-						        	System.out.println("No se ha encontrado el usuario.");
+					    	if (indice_final != -1 && indice_inicial != -1){
+					    		System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
+		    	    			"found or the result of the search is not understable");
+					    		break;
 					    	}
+					    	url = html.substring(indice_inicial, indice_final);
+						    //System.out.println("URL devuelta:"+url);
+						    if(url.contains("%")){
+						       	List<String> accounts = new ArrayList<String>();
+						       	accounts = UserAccountsByURL(url);
+						       	return accounts;
+						    } else {
+						    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
+		    	    				"found or the result of the search is not understable");
+						    }						    
 				        } else {
-			    	    	System.out.println("No se ha encontrado el usuario.");
-				        }
+			    	    	System.out.println("The initialSite: "+initialSite+" does not" +
+			    	    			"corresponed to any site configured");			    	    	
+				        }		    			
 		    		}catch(StringIndexOutOfBoundsException e){
 		    			System.out.println("El usuario no existe");
 		    		}
 		    	}
+		    	break;
 			}
     	}    	
     	return null;

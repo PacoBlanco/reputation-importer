@@ -339,17 +339,27 @@ public class ReputationWiki {
 						}
 					} else {
 						for(Metric metric : reputationMap.keySet()) {
+							Metric sourceMetric = null;							
 							for(Metric comMetric : community.getMetrics()) {
-								if(!metric.getIdentificator().equalsIgnoreCase(
+								if(metric == null || !metric.getIdentificator().equalsIgnoreCase(
 										comMetric.getIdentificator())) {
-									continue;										
+									continue;									
 								}
-								GlobalModel.addEvaluation(new Evaluation(community,
-										entity,comMetric,reputationMap.get(metric)));
-								System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "
-								+community.getName()+ " url:"+communityEntity.get(community).getUrl()
-								+" met:"+comMetric.getIdentificator()+" rep:"+reputationMap.get(metric));
+								sourceMetric = comMetric;
+								break;
 							}
+							if(sourceMetric == null) {							
+								System.out.println("INFO: metric parsed("+(metric==null?null:metric.getIdentificator())
+									+") does not correspond to any metric of the community("+community.getName()+
+									"):"+community.getMetrics()+". Its score is ignored");
+								continue;
+							}	
+							GlobalModel.addEvaluation(new Evaluation(community,
+									entity,sourceMetric,reputationMap.get(metric)));
+							System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "
+							+community.getName()+ " url:"+communityEntity.get(community).getUrl()
+							+" met:"+sourceMetric.getIdentificator()+" rep:"+reputationMap.get(metric));
+							
 						}							
 					}
 				} catch (IOException e) {
@@ -375,7 +385,7 @@ public class ReputationWiki {
 		} else if(url.contains("stackoverflow")) {
 			return "stackoverflow.com";
 		} else if(url.contains("ohloh")) {
-			return "ohloh";
+			return "ohloh.net";
 		} else if(url.contains("webapps.stackexchange")) {
 			return "webapps.stackexchange.com";
 		}
