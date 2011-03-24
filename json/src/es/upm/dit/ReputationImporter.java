@@ -22,8 +22,8 @@ public class ReputationImporter {
 	
 	static public void main(String[] args) throws Exception {		
 		//Config extraction mode
-		//Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_SERVER,urlServer);
-		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND,urlServer);
+		Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_SERVER,urlServer);
+		//Ejecutor.ConfigureExtractorMode(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND,urlServer);
 		Ejecutor.ConfigureOpalServer("http://localhost/opal/opal.php");
 		
 		//Set All Model
