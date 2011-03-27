@@ -912,7 +912,7 @@ public class Scrapper extends Thread{
         	JSONObject objeto_dump = array.getJSONObject(j);
         	accounts.addAll(GetAccounts(objeto_dump));
         }
-        System.out.println(accounts);
+        System.out.println("Accounts found:"+accounts);
         return accounts;
     }
     
@@ -968,19 +968,17 @@ public class Scrapper extends Thread{
 						    accounts.add(url);
 			    	    	System.out.println("Accounts found:"+accounts);
 				            return accounts;			    	    		
-		    			} else if (initialSite.equals(accountsDefinition[3][0]) || initialSite.equals(accountsDefinition[4][0]) 
-								|| initialSite.equals(accountsDefinition[5][0]) || initialSite.equals(accountsDefinition[6][0])
-								|| initialSite.equals(accountsDefinition[7][0])){
+		    			} else if (i == 3 || i == 4 || i == 5 || i == 6 || i == 7){
 		    				int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
 		    				int indice_final = html.indexOf("\"", indice_inicial);
-					    	if (indice_final != -1 && indice_inicial != -1){
+					    	if (indice_final == -1 || indice_inicial == -1){
 					    		System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
 		    	    			"found or the result of the search is not understable");
 					    		break;
 					    	}
 					    	url = html.substring(indice_inicial, indice_final);
 						    //System.out.println("URL devuelta:"+url);
-						    if(url.contains("%")){
+						    if(!url.contains("%")){
 						       	List<String> accounts = new ArrayList<String>();
 						       	accounts = UserAccountsByURL(url);
 						       	return accounts;
