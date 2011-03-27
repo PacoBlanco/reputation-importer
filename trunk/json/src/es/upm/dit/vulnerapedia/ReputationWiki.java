@@ -319,8 +319,9 @@ public class ReputationWiki {
 			for(Community community : communityEntity.keySet()) {
 				String urlDomain = communityEntity.get(community).getUrl();
 				if(urlDomain == null) {
-					System.out.println("Info:"+communityEntity.get(community).getName()+"("+
-							entity.getUniqueIdentificator()+") has null url in:"+community.getName());
+					System.out.println("Info:"+entity.getUniqueIdentificator()+
+							":"+communityEntity.get(community).getName()+
+							" has null url in:"+community.getName());
 					continue;
 				}
 				try {
