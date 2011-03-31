@@ -638,11 +638,11 @@ public class Scrapper extends Thread{
 		//UserAccounts("Gavin Sharp", "ohloh.net");
 		//UserAccounts(usuario, "sla.ckers.org");
 		//UserAccounts("Ben Torell", "serverfault.com");
-		//String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
-		//String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+		String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
+		String scrappy_dump = Ejecutor.executeScrappy(url, "0");
 		//System.out.println(scrappy_dump);
 		//informacionPostsSlackers(scrappy_dump);
-		UserAccounts(usuario, "elhacker.net");
+		//UserAccounts(usuario, "elhacker.net");
     }
     
     
@@ -683,6 +683,11 @@ public class Scrapper extends Thread{
 							ranking.substring(0,ranking.indexOf("of"))+" of "+
 							ranking.substring(ranking.indexOf("of")+2,ranking.length()));
 		        }
+	        }else if (!objeto_usuarios.has("http://purl.org/dc/elements/1.1/Ranking") && 
+	        		objeto_usuarios.has("http://purl.org/dc/elements/1.1/ReputacionOhloh")){
+	        	double reputationWithoutRank = 200000;
+				reputations = new HashMap<Metric,Object>();
+				reputations.put(GlobalModel.getMetrics().get("ohlohRankMetric"), reputationWithoutRank);
 	        }
 	        if(objeto_usuarios.has("http://purl.org/dc/elements/1.1/ReputacionOhloh")){
 		        JSONArray array_user = objeto_usuarios.getJSONArray("http://purl.org/dc/elements/1.1/ReputacionOhloh");
@@ -823,8 +828,13 @@ public class Scrapper extends Thread{
 						        exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
+<<<<<<< .mine
+											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
+											//informacionPostsSlackers(Ejecutor.executeScrappy(postURL+";start,15", "0"));
+=======
 											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL, "0"));
 											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL+";start,15", "0"));
+>>>>>>> .r29
 										} catch (IOException e) {
 											e.printStackTrace();
 										}
