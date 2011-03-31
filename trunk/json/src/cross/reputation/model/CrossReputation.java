@@ -109,7 +109,7 @@ public class CrossReputation {
 			return null;
 		System.out.println("   SR:after trans:"+values+" trust:"+trustByMetricsAndCommunities+" ("+
 				exTransformer.getCorrelationBetweenMetrics()+"*"+communityMetricToImport.getTrust()
-				+") SR:"+communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities)+" c"+
+				+") SR:"+communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities)+" c:"+
 				communityMetricToImport.getDestinationCommunity().getDomainName()+" m:"+
 				communityMetricToImport.getDestinationMetric().getIdentificator());
 		return communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities);		

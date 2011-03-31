@@ -22,10 +22,20 @@ public class OpalExecutorService {
 		exec.execute(new Runnable() {
 			public void run(){
 				try {
-					opalSum += Scrapper.informacionPostsSlackers(userName,
+					if(postURL.contains("elhacker")){
+						opalSum += Scrapper.informacionPostsSlackers(userName,
+								Ejecutor.executeScrappy(postURL, "0"));
+						opalSum += Scrapper.informacionPostsSlackers(userName,
+								Ejecutor.executeScrappy(postURL+";start,15", "0"));
+						opalSum += Scrapper.informacionPostsSlackers(userName,
+								Ejecutor.executeScrappy(postURL+";start,30", "0"));
+						opalSum += Scrapper.informacionPostsSlackers(userName,
+								Ejecutor.executeScrappy(postURL+";start,45", "0"));
+					}
+					else{
+						opalSum += Scrapper.informacionPostsSlackers(userName,
 							Ejecutor.executeScrappy(postURL, "0"));
-					opalSum += Scrapper.informacionPostsSlackers(userName,
-							Ejecutor.executeScrappy(postURL+";start,15", "0"));
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

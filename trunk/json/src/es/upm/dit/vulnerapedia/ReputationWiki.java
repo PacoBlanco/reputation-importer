@@ -325,7 +325,7 @@ public class ReputationWiki {
 					continue;
 				}
 				try {
-					Map<Metric,Object> reputationMap = Scrapper.ExtractReputation(urlDomain);				
+					Map<Metric,Object> reputationMap = Scrapper.ExtractReputation(urlDomain);	
 					if(reputationMap == null || reputationMap.isEmpty()) {
 						continue;
 					}
@@ -389,7 +389,8 @@ public class ReputationWiki {
 			return "ohloh.net";
 		} else if(url.contains("webapps.stackexchange")) {
 			return "webapps.stackexchange.com";
-		}
+		} else if(url.contains("sla.ckers"))
+			return "sla.ckers.org";
 		return null;
 	}
 }
