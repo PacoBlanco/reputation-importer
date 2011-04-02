@@ -97,7 +97,7 @@ _:ohlohcontributor:
               rdf:value: ".inside h2"
         *:
           sc:type:     rdf:Literal
-          sc:relation: dc:Reputacion
+          sc:relation: dc:ReputacionOhloh
           sc:selector:
             *:
               rdf:type: sc:CssSelector
