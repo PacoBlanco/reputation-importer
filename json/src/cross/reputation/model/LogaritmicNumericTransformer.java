@@ -1,18 +1,18 @@
 package cross.reputation.model;
 
-public class LogaritmicNumericTransformer extends MetricTransformer {
+public class LogaritmicNumericTransformer extends NumericTransformer {
 	Double base = 10.0;
 	Double difference;
 	Double scale;
 	
 	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) {
+			Double correlationBetweenMetrics) throws Exception  {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		calculateTransformers();
 	}
 	
 	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics, Double base) {
+			Double correlationBetweenMetrics, Double base) throws Exception  {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		this.base = base;
 		calculateTransformers();
@@ -39,11 +39,11 @@ public class LogaritmicNumericTransformer extends MetricTransformer {
 	}
 	
 	@Override
-	public Object tranformation(Object value, boolean adapt) {
+	public Object tranformation(Object value, boolean adapt) throws Exception {
 		if (!(value instanceof Double)) {
 			return null;
 		}
-		Double valueTransformed = (Double)value;
+		Double valueTransformed = putInRange((Double)value, false);
 		if(scale != null) {
 			valueTransformed = scale * Math.log(valueTransformed + difference);			
 		} else if(difference != null) {

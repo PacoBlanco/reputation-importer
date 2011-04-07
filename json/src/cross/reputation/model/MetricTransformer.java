@@ -12,7 +12,7 @@ abstract public class MetricTransformer {
 		this.correlationBetweenMetrics = correlationBetweenMetrics;
 	}
 	
-	abstract public Object tranformation(Object value, boolean adapt);
+	abstract public Object tranformation(Object value, boolean adapt) throws Exception;
 	
 	public Metric getSourceMetric() {
 		return sourceMetric;

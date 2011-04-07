@@ -100,7 +100,12 @@ public class CrossReputation {
 					System.out.println("  -SR:before trans:"+values+" elems:"+
 							evaluation.getValues().size()+" c:"+communityMetricToImport.getCommunity().getDomainName()+" m:"+
 							communityMetricToImport.getMetric().getIdentificator());
-					values = exTransformer.tranformation(values, false);
+					try {
+						values = exTransformer.tranformation(values, false);
+					} catch(Exception e) {
+						System.out.println("Error:value "+values+" launchs a exception in transformation("+
+								e.getMessage()+")");
+					}
 				}
 				break;
 			}

@@ -10,8 +10,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cross.reputation.model.Community;
 import cross.reputation.model.CommunityMetricToImport;
@@ -227,7 +229,7 @@ public class ReputationWiki {
 					name+"::Web Reputation:="+value.intValue()+"| ]]");
 				continue;
 			}				
-			String accounts = "";
+			Set<Community> communities = new HashSet<Community>();
 			for(Evaluation evaluation : GlobalModel.getEvaluations()) {
 				//System.out.println("comun in eval:"+evaluation.getCommunity()+"=?="+
 				//		destinationCommunity+", name in eval:"+evaluation.getCommunity().getName()+
@@ -236,11 +238,15 @@ public class ReputationWiki {
 						evaluation.getCommunity() == destinationCommunity) {
 					continue;
 				}
-				//Sin tener en cuenta las metricas!!
+				//Without taking into account the metric names!!
+				communities.add(evaluation.getCommunity());
+			}
+			String accounts = "";
+			for(Community community : communities) {
 				if(!accounts.isEmpty()) {
 					accounts += ", ";
 				}
-				accounts += evaluation.getCommunity().getName();
+				accounts += community.getName();
 			}
 			if(value != null) {				
 				table += WikiFormat.AddColumnTable("align=\"center\" | "+accounts);
@@ -248,7 +254,7 @@ public class ReputationWiki {
 					value.intValue()+".png|frameless|alt="+value.intValue()+"]][["+
 					name+"::Web Reputation:="+value.intValue()+"| ]]");
 			} else {
-				if(accounts.isEmpty()) {
+				if(communities.isEmpty()) {
 					table += WikiFormat.AddColumnTable("align=\"center\" | "+
 						"User profile with all incorrect url user profile or" +
 						" usernames in accounts");
@@ -367,7 +373,7 @@ public class ReputationWiki {
 					System.out.println("INFO: extract reputation on user:" +
 						entity.getUniqueIdentificator()+" over("+community.getName()+","+
 						communityEntity.get(community).getName()+") and url:"+
-						communityEntity.get(community).getUrl()+"gives a exception." +
+						communityEntity.get(community).getUrl()+" gives a exception." +
 						" His evaluation on this community is discarted.");
 				}
 				//TODO:Method to extract reputation that associated the metric with the value				
