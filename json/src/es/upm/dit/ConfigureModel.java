@@ -11,6 +11,7 @@ import java.util.Set;
 import cross.reputation.model.Dimension;
 import cross.reputation.model.Entity;
 import cross.reputation.model.EntityIdentifier;
+import cross.reputation.model.ExponentialNumericTransformer;
 import cross.reputation.model.GlobalModel;
 import cross.reputation.model.Community;
 import cross.reputation.model.LogaritmicNumericTransformer;
@@ -139,9 +140,9 @@ public class ConfigureModel {
 		//		get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new SqrtNumericTransformer(GlobalModel.getMetrics().
 				get("stackOverflowMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
-		GlobalModel.addMetricTransformer(new SqrtNumericTransformer(GlobalModel.getMetrics().
-				get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),
-				1.0,0.0,625.0,true));
+		//Cube root = exponent of 0.333:
+		GlobalModel.addMetricTransformer(new ExponentialNumericTransformer(GlobalModel.getMetrics().
+				get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0,0.333));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("webAppsStackExchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
