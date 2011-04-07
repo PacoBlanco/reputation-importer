@@ -1,21 +1,21 @@
 package cross.reputation.model;
 
-public class LinealNumericTransformer extends MetricTransformer {
+public class LinealNumericTransformer extends NumericTransformer {
 	private Double scale;
 	private Double difference;
 	
 	public LinealNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) {
+			Double correlationBetweenMetrics) throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		calculateTransformers();
 	}
 
 	@Override
-	public Object tranformation(Object value, boolean adapt) {
+	public Object tranformation(Object value, boolean adapt) throws Exception {
 		if (!(value instanceof Double)) {
 			return null;
 		}
-		Double valueTransformed = (Double)value;
+		Double valueTransformed = putInRange((Double)value, false);;
 		if(scale != null) {
 			valueTransformed = valueTransformed/scale - difference;			
 		} else if(difference != null) {

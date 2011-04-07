@@ -20,10 +20,11 @@ import cross.reputation.model.MetricTransformer;
 import cross.reputation.model.LinealNumericTransformer;
 import cross.reputation.model.Scale;
 import cross.reputation.model.NumericScale;
+import cross.reputation.model.SqrtNumericTransformer;
 
 public class ConfigureModel {
 	
-	static public void buildCrossReputationGlobalModel() {
+	static public void buildCrossReputationGlobalModel() throws Exception {
 		//Set the dimensions of each scale, the scale of each metric, the metrics
 		//of each community, the categories of each community and the communities
 		Dimension reputationInQandA = new Dimension("ReputationInQandA");
@@ -36,7 +37,7 @@ public class ConfigureModel {
 		String projectConnCategory = GlobalModel.addCategory("ProjectConnection");
 		
 		
-		GlobalModel.addScale(new NumericScale("stackOverflowScale",30000.0,0.0,1.0));
+		GlobalModel.addScale(new NumericScale("stackOverflowScale",200000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("stackOverflowMetric", reputationInQandA,
 				GlobalModel.getScales().get("stackOverflowScale")));
 		String stackOverflowCategories[] = {qandACategory};
@@ -132,10 +133,15 @@ public class ConfigureModel {
 		GlobalModel.addCommunity(wiki);
 		
 		//Configure all metric transformers that we need
-		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
+		//GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
+		//		get("stackOverflowMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		//GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
+		//		get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		GlobalModel.addMetricTransformer(new SqrtNumericTransformer(GlobalModel.getMetrics().
 				get("stackOverflowMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
-		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
-				get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
+		GlobalModel.addMetricTransformer(new SqrtNumericTransformer(GlobalModel.getMetrics().
+				get("serverFaultMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),
+				1.0,0.0,625.0,true));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().
 				get("webAppsStackExchangeMetric"),GlobalModel.getMetrics().get("semanticWikiMetric"),1.0));
 		GlobalModel.addMetricTransformer(new LogaritmicNumericTransformer(GlobalModel.getMetrics().

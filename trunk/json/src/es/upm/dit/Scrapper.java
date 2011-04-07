@@ -828,13 +828,8 @@ public class Scrapper extends Thread{
 						        exec.execute(new Runnable() {
 				        			public void run(){
 				        				try {
-<<<<<<< .mine
-											informacionPostsSlackers(Ejecutor.executeScrappy(postURL, "0"));
-											//informacionPostsSlackers(Ejecutor.executeScrappy(postURL+";start,15", "0"));
-=======
 											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL, "0"));
 											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL+";start,15", "0"));
->>>>>>> .r29
 										} catch (IOException e) {
 											e.printStackTrace();
 										}
