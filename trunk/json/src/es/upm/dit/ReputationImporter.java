@@ -18,7 +18,9 @@ import cross.reputation.model.CommunityMetricToImport;
 
 
 public class ReputationImporter {
-	static private String urlServer = "http://localhost:3434/ejson/";	
+	static private Property prop = new Property();
+	
+	static private String urlServer = prop.getURL_SERVER();	
 	
 	static public void main(String[] args) throws Exception {		
 		//Config extraction mode

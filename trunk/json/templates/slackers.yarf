@@ -72,6 +72,19 @@ _:slackerpost:
       rdf:type: sc:BaseUriSelector
   sc:subfragment:
     *:
+      sc:type:     rdf:Literal
+      sc:relation: dc:TotalPages
+      sc:selector:
+        *:
+          rdf:type: sc:CssSelector
+          rdf:value: ".PDDiv .PhorumNavBlock"
+          sc:index: "1"
+          sc:selector:
+            *:
+              rdf:type: sc:SliceSelector
+              rdf:value: " of"
+              sc:index:  "1"
+    *:
       sc:type:     rdf:Resource
       sc:relation: dc:Posts
       sc:selector:
