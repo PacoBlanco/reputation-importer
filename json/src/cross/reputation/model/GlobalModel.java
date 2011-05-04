@@ -184,7 +184,8 @@ public class GlobalModel {
 			System.out.println("Error: entity is null");
 			return null;
 		}
-		entities.put(entity.getUniqueIdentificator(),entity);
+		if(!entities.containsValue(entity))
+			entities.put(entity.getUniqueIdentificator(),entity);
 		return entity;
 	}
 	static public void addMetricTransformer(MetricTransformer metricTransformer) {

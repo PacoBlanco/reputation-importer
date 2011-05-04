@@ -7,10 +7,11 @@ import java.util.concurrent.TimeUnit;
 
 
 public class OpalExecutorService {
+	private Property prop = new Property();
 	ExecutorService exec;
 	String userName;
 	double opalSum = 0;
-	int timeThreshold = 500;
+	int timeThreshold = prop.getTimeThreshold();
 	
 	OpalExecutorService(int threads, String userName, int timeThreshold) {
 		exec = Executors.newFixedThreadPool(threads);
@@ -21,21 +22,9 @@ public class OpalExecutorService {
 	public void execute(final String postURL) {
 		exec.execute(new Runnable() {
 			public void run(){
-				try {
-					if(postURL.contains("elhacker")){
-						opalSum += Scrapper.informacionPostsSlackers(userName,
-								Ejecutor.executeScrappy(postURL, "0"));
-						opalSum += Scrapper.informacionPostsSlackers(userName,
-								Ejecutor.executeScrappy(postURL+";start,15", "0"));
-						opalSum += Scrapper.informacionPostsSlackers(userName,
-								Ejecutor.executeScrappy(postURL+";start,30", "0"));
-						opalSum += Scrapper.informacionPostsSlackers(userName,
-								Ejecutor.executeScrappy(postURL+";start,45", "0"));
-					}
-					else{
-						opalSum += Scrapper.informacionPostsSlackers(userName,
-							Ejecutor.executeScrappy(postURL, "0"));
-					}
+				try {	
+					opalSum += Scrapper.informacionPostsSlackers(userName,Ejecutor.executeScrappy(postURL, "0"));
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

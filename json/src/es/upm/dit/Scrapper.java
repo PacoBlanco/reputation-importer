@@ -618,7 +618,11 @@ public class Scrapper extends Thread{
 	        		String opal_xml = null;
 	        		try {
 		        		opal_xml = opal_parser(postText);
-		        		opal += Double.parseDouble(opal_xml);
+		        		double opalDouble = Double.parseDouble(opal_xml);
+		        		if((opalDouble > 1) || (opalDouble < -1)){
+		        			opalDouble = 0;
+		        		}
+		        		opal += opalDouble;
 				        System.out.println("OPAL Score: "+ opal);
 	        		} catch (NumberFormatException e) {
 	        			System.out.println("ERROR: OPAL doest not return a numeric" +
@@ -807,56 +811,64 @@ public class Scrapper extends Thread{
 			        String urlPosts = array_user.getString(0);
 			        System.out.println("  URLPosts: " + urlPosts);
 			        String scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
-					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+					JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump); 
 		            JSONObject objeto_dump = array.getJSONObject(0);
-		            OpalExecutorService opalExec = new OpalExecutorService(1, userName, 500);
-		            //ExecutorService exec;
-	            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
-	            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
-	            		System.out.println("  Calculate reputation over "+array_objeto_post.size()+" posts");
-	            		for(int i=0;i<array_objeto_post.size();i++){			            
-			            	JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
-				        	//System.out.println("Informacion de post:");
-				        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostURL")){
-				        		JSONArray array_postURL = objeto_array_post.getJSONArray(
-				        				"http://purl.org/dc/elements/1.1/PostURL");
-				        		final String postURL = array_postURL.getString(0);
-						        System.out.println("    PostURL: " + postURL);
-						        opalExec.execute(postURL);						        
-						        /*
-						        final String finalUserName = userName;
-						        exec.execute(new Runnable() {
-				        			public void run(){
-				        				try {
-											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL, "0"));
-											informacionPostsSlackers(finalUserName, Ejecutor.executeScrappy(postURL+";start,15", "0"));
-										} catch (IOException e) {
-											e.printStackTrace();
-										}
-				        			}
-				        		});
-				        		*/						        
-						        //new Scrapper("s"+postURL).start(); //s para que indicar de slackers
-						        //reputation = Double.toString(sumaOpal);
-				        	}				        	
-					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
-					        	//JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
-					        	//String postName = array_postName.getString(0);
-						        //System.out.println("  PostName: " + postName);
-					        }
-					        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostFecha")){
-					        	//JSONArray array_fecha = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostFecha");
-					        	//String postsFecha = array_fecha.getString(0);
-						        //System.out.println("  Fecha: " + postsFecha);
-					        }
+			        int totalPages = 1;
+			        if(objeto_dump.has("http://purl.org/dc/elements/1.1/TotalPages")){
+			        	JSONArray number = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/TotalPages");
+			        	totalPages = Integer.parseInt(number.getString(0));
+			        }
+			        
+			        OpalExecutorService opalExec = new OpalExecutorService(Property.getTHREAD_NUMBER(), userName, Property.getTimeThreshold());
+			        int postsCount = 0;
+			        System.out.println("  Maximum posts: " + Property.getPOSTS_NUMBER());
+		            
+		            for (int j = 1; j <= totalPages; j++){
+		            	
+            			if (postsCount == Property.getPOSTS_NUMBER())
+            				break;
+		            	
+		            	if (j > 1){
+		            		urlPosts += ",page=" + j;
+		            		scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
+		            		array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+		            		objeto_dump = array.getJSONObject(0);
+		            	}
+		            	if (objeto_dump.has("http://purl.org/dc/elements/1.1/Posts")){
+		            		JSONArray array_objeto_post = objeto_dump.getJSONArray("http://purl.org/dc/elements/1.1/Posts");
+		            		System.out.println("  Calculate reputation over "+array_objeto_post.size()+" posts");
+		            		for(int i=0;i<array_objeto_post.size();i++){	
+		            			if (postsCount == Property.getPOSTS_NUMBER())
+		            				break;
+				            	JSONObject objeto_array_post = array_objeto_post.getJSONObject(i);
+					        	//System.out.println("Informacion de post:");
+					        	if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostURL")){
+					        		JSONArray array_postURL = objeto_array_post.getJSONArray(
+					        				"http://purl.org/dc/elements/1.1/PostURL");
+					        		final String postURL = array_postURL.getString(0);
+							        System.out.println("    PostURL: " + postURL);
+							        opalExec.execute(postURL);					
+							        postsCount++;
+					        	}				        	
+						        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
+						        	//JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");
+						        	//String postName = array_postName.getString(0);
+							        //System.out.println("  PostName: " + postName);
+						        }
+						        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostFecha")){
+						        	//JSONArray array_fecha = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostFecha");
+						        	//String postsFecha = array_fecha.getString(0);
+							        //System.out.println("  Fecha: " + postsFecha);
+						        }
+				            }
 			            }
-	            		Double opalSum = opalExec.shutdown();
-				        if(opalSum != null) {
-					        reputations = new HashMap<Metric,Object>();
-			            	reputations.put(GlobalModel.getMetrics().get("slackersMetric"),opalSum);
-			            	System.out.println("  Slackers reputation by OPAL: " + opalSum);
-				        }
 		            }
+            		Double opalSum = opalExec.shutdown();
+			        if(opalSum != null) {
+				        reputations = new HashMap<Metric,Object>();
+		            	reputations.put(GlobalModel.getMetrics().get("slackersMetric"),opalSum);
+		            	System.out.println("  Slackers reputation by OPAL: " + opalSum);
+			        }
 		        }  	
 			}
 		}

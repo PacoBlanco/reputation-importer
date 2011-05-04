@@ -10,13 +10,15 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import es.upm.dit.Property;
 
 public class Ejecutor{
+	
 	static final public int SCRAPPY_EXECUTOR_LINE_COMMAND = 0;
 	static final public int SCRAPPY_EXECUTOR_SERVER = 1;	
-    static public int SCRAPPY_EXECUTOR_TYPE = SCRAPPY_EXECUTOR_LINE_COMMAND;
-    static public String URL_SERVER = "http://localhost:3434/ejson/";
-    static public String OPAL_SERVER = "http://localhost/opal.php";
+    static public int SCRAPPY_EXECUTOR_TYPE = Property.getSCRAPPY_EXECUTOR_TYPE();
+    static public String URL_SERVER = Property.getURL_SERVER();
+    static public String OPAL_SERVER = Property.getOPAL_SERVER();
     static public boolean stderrExit = false;
 		
     //Esta funcion devuelve un proceso que es la ejecucion del comando
