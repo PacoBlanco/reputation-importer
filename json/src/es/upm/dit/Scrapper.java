@@ -633,22 +633,7 @@ public class Scrapper extends Thread{
     		}
 		}
 		return opal;
-	}
-	
-    public static void main(String[] args) throws Exception {
-    	String usuario = "anelkaos";
-		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario); 
-    	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
-		//UserAccounts("Gavin Sharp", "ohloh.net");
-		//UserAccounts(usuario, "sla.ckers.org");
-		//UserAccounts("Ben Torell", "serverfault.com");
-		String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
-		String scrappy_dump = Ejecutor.executeScrappy(url, "0");
-		//System.out.println(scrappy_dump);
-		//informacionPostsSlackers(scrappy_dump);
-		//UserAccounts(usuario, "elhacker.net");
-    }
-    
+	}    
     
     private static Map<Metric,Object> Reputation(JSONObject objeto, String cuenta) throws IOException {
     	Map<Metric,String> reputation = new HashMap<Metric,String>();
@@ -823,7 +808,7 @@ public class Scrapper extends Thread{
 			        int postsCount = 0;
 			        System.out.println("  Maximum posts: " + Property.getPOSTS_NUMBER());
 		            
-		            for (int j = 1; j <= totalPages; j++){
+		            for (int j = 3; j <= totalPages -2; j++){
 		            	
             			if (postsCount == Property.getPOSTS_NUMBER())
             				break;
@@ -848,7 +833,8 @@ public class Scrapper extends Thread{
 					        		final String postURL = array_postURL.getString(0);
 							        System.out.println("    PostURL: " + postURL);
 							        opalExec.execute(postURL);					
-							        postsCount++;
+							        postsCount++; //Depurar Execute: scrappy -f ejson -g http://sla.ckers.org/forum/read.php?16,27618,27683#msg-27683 -l 0 
+							        			  //Limitar caracteres a la entrada curl (en el caso de q falle curl).
 					        	}				        	
 						        if(objeto_array_post.has("http://purl.org/dc/elements/1.1/PostName")){
 						        	//JSONArray array_postName = objeto_array_post.getJSONArray("http://purl.org/dc/elements/1.1/PostName");

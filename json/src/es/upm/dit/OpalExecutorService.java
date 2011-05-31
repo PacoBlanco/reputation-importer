@@ -1,17 +1,17 @@
 package es.upm.dit;
 
-import java.io.IOException;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 
 public class OpalExecutorService {
-	private Property prop = new Property();
-	ExecutorService exec;
-	String userName;
-	double opalSum = 0;
-	int timeThreshold = prop.getTimeThreshold();
+	
+	private ExecutorService exec;
+	private String userName;
+	private double opalSum = 0;
+	private int timeThreshold = Property.getTimeThreshold();
 	
 	OpalExecutorService(int threads, String userName, int timeThreshold) {
 		exec = Executors.newFixedThreadPool(threads);
@@ -19,7 +19,7 @@ public class OpalExecutorService {
 		this.timeThreshold = timeThreshold;
 	}
 	
-	public void execute(final String postURL) {
+	public synchronized void execute(final String postURL) {
 		exec.execute(new Runnable() {
 			public void run(){
 				try {	
