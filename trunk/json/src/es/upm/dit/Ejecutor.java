@@ -43,11 +43,12 @@ public class Ejecutor{
     	}
     	System.out.println(execute);
     	Process p = Runtime.getRuntime().exec(commandList.toArray(new String[commandList.size()]));
-		try {
-			p.waitFor();				
+		/*try {
+			p.waitFor();
+			
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}			
+		}		*/	
 		return p;
     }
     
