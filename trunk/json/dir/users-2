@@ -1,0 +1,44 @@
+[
+	{
+		"Delete page script": [
+			{
+				"not_exist": ""
+			}
+		]
+	},
+	{
+		"CreateBot": [
+			{
+				"not_exist": ""
+			}
+		]
+	},
+	{
+		"Lperez": [
+			{
+				"barbarianbob": [
+					"sla.ckers.org"
+				]
+			},
+			{
+				"BalusC": [
+					"stackoverflow.com"
+				]
+			}
+		]
+	},
+	{
+		"Owasp": [
+			{
+				"9": ""
+			}
+		]
+	},
+	{
+		"MITRE": [
+			{
+				"10": ""
+			}
+		]		
+	}
+]
