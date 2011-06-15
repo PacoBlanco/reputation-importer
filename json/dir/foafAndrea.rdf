@@ -1,0 +1,149 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+xmlns:foaf="http://xmlns.com/foaf/0.1/"
+xmlns:admin="http://webns.net/mvcb/"
+xmlns:rss="http://purl.org/rss/1.0/"
+xmlns:dc="http://purl.org/dc/elements/1.1/">
+<foaf:PersonalProfileDocument rdf:about="">
+<foaf:maker rdf:resource="#me"/>
+<foaf:primaryTopic rdf:resource="#me"/>
+<admin:generatorAgent rdf:resource="http://www.ldodds.com/foaf/foaf-a-matic"/>
+<admin:errorReportsTo rdf:resource="mailto:leigh@ldodds.com"/>
+</foaf:PersonalProfileDocument>
+<foaf:Person rdf:about="#me">
+<foaf:name>Andrea Ferracani</foaf:name>
+<foaf:title>Dott.</foaf:title>
+<foaf:givenname>Andrea</foaf:givenname>
+<foaf:family_name>Ferracani</foaf:family_name>
+<foaf:nick>nodirection</foaf:nick>
+<foaf:mbox_sha1sum>efbed9a5cabd4a468093bcc1ebb4d1bc474bf579</foaf:mbox_sha1sum>
+<foaf:weblog rdf:resource="http://www.micc.unifi.it/ferracani"/>
+<rdfs:seeAlso>
+<rss:channel rdf:about="http://www.micc.unifi.it/ferracani/blog/feed/"/>
+</rdfs:seeAlso>
+<foaf:depiction rdf:resource="http://www.micc.unifi.it/ferracani/blog/wp-content/themes/grid_focus_public2/images/avatar.png"/>
+<foaf:workplaceHomepage rdf:resource="http://www.micc.unifi.it/"/>
+<foaf:workInfoHomepage rdf:resource="I am working as researcher in the Visual Information and Media Lab at the Media Integration and Communication Center, University of Florence. My research interests focus on web applications, semantic web and collective intelligence"/>
+<foaf:schoolHomepage rdf:resource="http://www.unifi.it"/>
+<foaf:openid rdf:resource="http://www.micc.unifi.it/ferracani/"/>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Facebook" rdf:resource="http://www.facebook.com/" />
+<foaf:accountProfilePage rdf:resource="http://www.facebook.com/andreaferracani"/>
+<foaf:accountName>andreaferracani</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Flickr" rdf:resource="http://www.flickr.com/"/>
+<foaf:accountProfilePage rdf:resource="http://www.flickr.com/photos/andreaferracani"/>
+<foaf:accountName>andreaferracani</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Delicious" rdf:resource="http://www.delicious.com/"/>
+<foaf:accountProfilePage rdf:resource="http://delicious.com/andreaferracani"/>
+<foaf:accountName>andreaferracani</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Delicious" rdf:resource="http://twitter.com/"/>
+<foaf:accountProfilePage rdf:resource="http://twitter.com/nodirection76/"/>
+<foaf:accountName>nodirection76</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Friendfeed" rdf:resource="http://friendfeed.com/" />
+<foaf:accountProfilePage rdf:resource="http://friendfeed.com/nodirection/"/>
+<foaf:accountName>nodirection</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Last fm" rdf:resource="http://www.last.fm/"/>
+<foaf:accountProfilePage rdf:resource="http://www.last.fm/user/andreaferracani"/>
+<foaf:accountName>andreaferracani</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:holdsAccount>
+<foaf:OnlineAccount>
+<foaf:accountServiceHomepage dc:title="Linkedin" rdf:resource="http://www.linkedin.com/"/>
+<foaf:accountProfilePage rdf:resource="http://www.linkedin.com/in/andreaferracani/"/>
+<foaf:accountName>andreaferracani</foaf:accountName>
+</foaf:OnlineAccount>
+</foaf:holdsAccount>
+<foaf:currentProject>
+<rdf:Description rdf:about="http://www.im3i.eu/index.html">
+<dc:title>IM3I</dc:title>
+<dc:description>Immersive Multimedia Interfaces. IM3I aims to provide the creative media sector with new ways of searching, summarising and visualising large multimedia archives. IM3I will provide a service-oriented architecture that allow multiple viewpoints upon multimedia data that are available in a repository, and provide better ways to interact and share rich media. This paves the way for a multimedia information management platform which is more flexible, adaptable and customisable than current repository software. This in turn enables new opportunities for content owners to exploit their digital assets.</dc:description>
+</rdf:Description>
+</foaf:currentProject>
+<foaf:currentProject>
+<rdf:Description rdf:about="http://www.vidi-video.it/">
+<dc:title>Vidivideo</dc:title>
+<dc:description>Improving the accessibility of video. The VIDI-Video project aims to integrate and develop state of the art components from machine learning, audio event detection, video processing, interaction and visualization into a fully implemented audio-visual search engine combining large number of categories and exploiting the interclass similarities as well as using the information from different sources: metadata, keyword annotations, audio visual data, speech, and explicit knowledge. </dc:description>
+</rdf:Description>
+</foaf:currentProject>
+<foaf:interest>
+<rdf:Description rdf:about="http://www.micc.unifi.it/ferracani/blog/about-me/" dc:title="General" />
+</foaf:interest>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Thomas M. Alisi</foaf:name>
+<foaf:homepage rdf:resource="http://morpheus.micc.unifi.it/alisi"/>
+<foaf:mbox_sha1sum>f2964e1316745b02cbb959a14b4865fc3c0e0876</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Gianpaolo D'Amico</foaf:name>
+<foaf:homepage rdf:resource="http://morpheus.micc.unifi.it/damico"/>
+<foaf:mbox_sha1sum>9f8abf70ca051d13a7ba9596c3eadb510cebff37</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Nicola Martorana</foaf:name>
+<foaf:homepage rdf:resource="www.martos.it"/>
+<foaf:mbox_sha1sum>4a2a2a8c474193c43f1413d855647145836f5b78</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Nicola Torpei</foaf:name>
+<foaf:homepage rdf:resource="http://morpheus.micc.unifi.it/torpei"/>
+<foaf:mbox_sha1sum>02738f3bcca7fff26db219ed077c6cedca2f7398</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Marco Bertini</foaf:name>
+<foaf:homepage rdf:resource="http://makeclean.iobloggo.com"/>
+<foaf:mbox_sha1sum>0273c461096d969b80f51a400d3ccd3769218258</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Lea Landucci</foaf:name>
+<foaf:mbox_sha1sum>adb401dc76b55cabd5526d09b056f1d2f40f6183</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Marco Meoni</foaf:name>
+<foaf:homepage rdf:resource="http://www.marcomeoni.net/"/>
+<foaf:mbox_sha1sum>e73f7eb95ee9206bd64eafdb1f7f07e4d2038bde</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+<foaf:knows>
+<foaf:Person>
+<foaf:name>Giuseppe Serra</foaf:name>
+<foaf:homepage rdf:resource="http://www.micc.unifi.it/serra/"/>
+<foaf:mbox_sha1sum>34dcb02aafa811e3c34419b0a7cbc77e7a50f59f</foaf:mbox_sha1sum>
+</foaf:Person>
+</foaf:knows>
+</foaf:Person>
+</rdf:RDF>
