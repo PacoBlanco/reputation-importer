@@ -1,0 +1,245 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+xmlns:foaf="http://xmlns.com/foaf/0.1/"
+xmlns:admin="http://webns.net/mvcb/"
+xmlns:rss="http://purl.org/rss/1.0/"
+xmlns:dc="http://purl.org/dc/elements/1.1/"
+xmlns:ri="http://purl.org/reputationImport/0.1">
+
+<!-- Community definitions -->	
+<ri:Community rdf:about="semanticWiki">
+	<ri:identifier>semanticWiki</ri:identifier>
+	<ri:homePage>http://lab.gsi.dit.upm.es/semanticwiki</ri:homePage>
+	<ri:hasCategory>
+		<Category rdf:about="QandA">
+	</ri:hasCategory>
+	<ri:hasReputationModel>
+		<ri:ReputationModel>
+			<ri:name>semanticWikiModel</ri:name>
+			<dc:description>Reputation Model of the Community semanticWiki based in an only module of reputation importation</dc:description>
+			<ri:reputationModule>
+				<ri:ReputationImporter>
+					<ri:resultCollectionType rdf:resource="ri:Unique"/>
+					<ri:Accesibility rdf:resource="ri:Visible"/>
+					<ri:Accesibility rdf:resource="ri:Downloable"/>
+					<ri:usesMetric rdf:resource="#semanticWikiMetric"/>	
+					
+					<ri:mapsMetric rdf:about="#stackOverflowWikiMetricMapping">
+						<ri:resultMetric rdf:resource="semanticWikiMetric"/>
+						<ri:importedMetric rdf:resource="stackOverflowImportedMetric"/>
+						<ri:value>1</ri:value>
+					</ri:mapsMetric>
+					<ri:importsFrom>
+						<ri:ImportationUnit>
+							<ri:importedCommunity rdf:resource="#stackoverflow.com"/>
+							<ri:importedMetric rdf:resource="#stackOverflowImportedMetric"/>
+							<ri:collectsReputationBy rdf:resource="stackOverflowImportation"/>
+							<ri:metricTransformation>
+						</ri:ImportationUnit>
+					</ri:importsFrom>
+					
+					<ri:mapsMetric rdf:about="#KudoOhlohWikiMetricMapping">
+						<ri:resultMetric rdf:resource="semanticWikiMetric"/>
+						<ri:importedMetric rdf:resource="ohlohKudoImportedMetric"/>
+						<ri:value>1</ri:value>
+					</ri:mapsMetric>
+					<ri:importsFrom>
+						<ri:ImportationUnit>
+							<ri:importedCommunity rdf:resource="#ohloh.net"/>
+							<ri:importedMetric rdf:resource="#ohlohKudoImportedMetric"/>
+							<ri:collectsReputationBy rdf:resource="ohlohImportation"/>
+						</ri:ImportationUnit>
+					</ri:importsFrom>
+					
+					<ri:mapsMetric rdf:about="#RankOhlohWikiMetricMapping">
+						<ri:resultMetric rdf:resource="semanticWikiMetric"/>
+						<ri:importedMetric rdf:resource="ohlohRankImportedMetric"/>
+						<ri:value>1</ri:value>
+					</ri:mapsMetric>
+					<ri:importsFrom>					
+						<ri:ImportationUnit>
+							<ri:importedCommunity rdf:resource="#ohloh.net"/>
+							<ri:importedMetric rdf:resource="#ohlohRankImportedMetric"/>
+							<ri:collectsReputationBy rdf:resource="ohlohImportation"/>
+						</ri:ImportationUnit>
+					</ri:importsFrom>
+					
+				</ri:ReputationImporter>
+			</ri:reputationModule>
+		</ri:ReputationModel>
+	</ri:hasReputationModel>
+</ri:Community>
+<ri:Community rdf:about="#stackoverflow.com">
+	<ri:identifier>stackoverflow.com</ri:identifier>
+	<ri:homePage>http://stackoverflow.com</ri:homePage>
+	<ri:hasCategory>
+		<Category rdf:about="SecurityWebApp">
+	</ri:hasCategory>
+	<ri:hasReputationModel>
+		<ri:ReputationModel>
+			<ri:name>stackoverflowReputationModel</ri:name>
+			<dc:description>Reputation Model of the Community StackOverflow.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>			
+			<ri:resultCollectionType rdf:resource="ri:Unique"/>
+			<ri:Accesibility rdf:resource="ri:Visible"/>
+			<ri:resultCollectionType>Unique</ri:resultCollectionType>
+		</ri:ReputationModel>
+	</ri:hasReputationModel>
+</ri:Community>
+<ri:Community rdf:about="#ohloh.net">
+	<ri:identifier>ohloh.net</ri:identifier>
+	<ri:homePage>http://ohloh.net</ri:homePage>
+	<ri:hasCategory>
+		<Category rdf:about="ProjectConnection">
+	</ri:hasCategory>
+	<ri:hasReputationModel>
+		<ri:ReputationModel>
+			<ri:name>stackoverflowReputationModel</ri:name>
+			<dc:description>Reputation Model of the Community StackOverflow.com based in one module of KudoRank</dc:description>
+			<ri:resultCollectionType rdf:resource="ri:Unique"/>
+			<ri:Accesibility rdf:resource="ri:Visible"/>
+			<ri:resultCollectionType>Unique</ri:resultCollectionType>			
+		</ri:ReputationModel>
+	</ri:hasReputationModel>
+</ri:Community>
+
+<!-- Collecting Systems Definition -->
+<ri:CollectingSystem rdf:about="ohlohImportation">
+	<ri:name>Scrappy</ri:name>
+	<ri:uriFormat>ohloh.net/$User_Profile_Ending</ri:uriFormat>
+</ri:CollectingSystem>
+<ri:CollectingSystem rdf:about="stackOverflowImportation">
+	<ri:name>Scrappy</ri:name>
+	<ri:uriFormat>stackoverflow.com/$User_Profile_Ending</ri:uriFormat>
+</ri:CollectingSystem>
+
+<!-- Metrics Definition -->
+<ri:Metric rdf:about="#stackOverflowImportedMetric">
+	<ri:identifier>stackOverflowMetric</ri:identifier>
+	<ri:hasDimension rdf:resource="reputationInQandA">
+	<ri:hasScale>
+		<ri:NumericScale rdf:about="stackOverflowImportedScale">
+			<ri:name>stackOverflowImportedScale</ri:name>
+			<ri:minimum rdf:datatype="double">0.0</ri:minimum>
+			<ri:maximum>20000.0</ri:maximum>
+			<ri:step>1.0</ri:step>
+		</ri:NumericScale>
+	</ri:hasScale>
+</ri:Metric>
+<ri:Metric rdf:about="#ohlohRankImportedMetric">
+	<ri:identifier>ohlohRankImportedMetric</ri:identifier>
+	<ri:hasDimension rdf:resource="rankReputation">
+	<ri:hasScale>
+		<ri:NumericScale rdf:about="ohlohRankImportedScale">
+			<ri:name>ohlohRankImportedScale</ri:name>
+			<ri:minimum rdf:datatype="double">0.0</ri:minimum>
+			<ri:maximum>450000.0</ri:maximum>
+			<ri:step>1.0</ri:step>
+		</ri:NumericScale>
+	</ri:hasScale>
+</ri:Metric>
+<ri:Metric rdf:about="#ohlohKudoImportedMetric">
+	<ri:identifier>ohlohKudoImportedMetric</ri:identifier>
+	<ri:hasDimension rdf:resource="ReputationInProject">
+	<ri:hasScale>
+		<ri:NumericScale rdf:about="ohlohKudoImportedScale">
+			<ri:name>ohlohKudoImportedScale</ri:name>
+			<ri:minimum rdf:datatype="double">1.0</ri:minimum>
+			<ri:maximum>10.0</ri:maximum>
+			<ri:step>1.0</ri:step>
+		</ri:NumericScale>
+	</ri:hasScale>
+</ri:Metric>
+<ri:Metric rdf:about="#semanticWikiMetric">
+	<ri:identifier>stackOverflowMetric</ri:identifier>
+	<ri:hasDimension rdf:resource="reputationInQandA">
+	<ri:hasScale>
+		<ri:NumericScale rdf:about="semanticWikiScale">
+			<ri:name>semanticWikiScale</ri:name>
+			<ri:minimum rdf:datatype="double">0.0</ri:minimum>
+			<ri:maximum>10.0</ri:maximum>
+			<ri:step>1.0</ri:step>
+		</ri:NumericScale>
+	</ri:hasScale>
+</ri:Metric>
+
+<!-- Metric Transformers-->
+<ri:SqrtNumericTransformer>
+	<ri:sourceMetric rdf:resource="#stackOverflowImportedMetric"/>
+	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>	
+	<ri:trust>
+		<ri:TrustBetweenCommunities>
+			<ri:trustProvidedBy rdf:resource="ohlohToWiki"/>
+			<ri:trustProvidedBy rdf:resource="stackOverflowToWiki"/>
+		</ri:TrustBetweenCommunities>	
+	<ri:trust>
+</ri:SqrtNumericTransformer>
+<ri:LinealNumericTransformer>
+	<ri:sourceMetric rdf:resource="#ohlohKudoImportedMetric"/>
+	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>
+	<ri:correlationBetweenMetrics rdf:resource="QandAToProject"/>
+	<ri:trust rdf:resource="ohlohToWiki"/>
+</ri:LinealNumericTransformer>
+<ri:LogaritmicNumericTransformer>
+	<ri:sourceMetric rdf:resource="#ohlohRankImportedMetric"/>
+	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>
+	<ri:correlationBetweenMetrics rdf:resource="QandAToRank"/>
+	<ri:trust>
+		<ri:TrustBetweenCommunities>
+			<ri:trustProvidedBy rdf:resource="fixedStackOverflowToWiki"/>
+			<ri:trustProvidedBy rdf:resource="ProjectConToQandA"/>			
+		</ri:TrustBetweenCommunities>	
+	<ri:trust>
+</ri:LogaritmicNumericTransformer>
+
+<!-- Trust Between Communities -->
+<ri:TrustBetweenCommunities rdf:about="ohlohToWiki">
+	<ri:trustProvidedBy rdf:resource="fixedOhlohToWiki"/>
+	<ri:trustProvidedBy rdf:resource="ProjectConToQandA"/>
+</ri:TrustBetweenCommunities>
+
+<!-- Correlation Between Dimensions -->
+<ri:CorrelationBetweenDimension rdf:about="QandAToProject">
+	<ri:sourceDimension rdf:resource="reputationInQandA"/>
+	<ri:targetDimension rdf:resource="ReputationInProject"/>
+	<ri:correlationBetweenDimensions>1<ri:correlationBetweenDimensions>
+</ri:CorrelationBetweenDimension>
+<ri:CorrelationBetweenDimension rdf:about="QandAToRank">
+	<ri:sourceDimension rdf:resource="reputationInQandA"/>
+	<ri:targetDimension rdf:resource="rankReputation"/>
+	<ri:correlationBetweenDimensions>1<ri:correlationBetweenDimensions>
+</ri:CorrelationBetweenDimension>
+
+<!-- Fixed Communities Trust Definitions -->
+<ri:FixedCommunitiesTrust rdf:about="fixedStackOverflowToWiki">
+	<ri:communityScorer rdf:resource="semanticWiki"/>
+	<ri:communityScored rdf:resource="stackOverflow.com"/>
+	<ri:value>0.7</ri:value>
+</ri:FixedCommunitiesTrust rdf:about="fixedOhlohToWiki">
+<ri:FixedCommunitiesTrust >
+	<ri:communityScorer rdf:resource="semanticWiki"/>
+	<ri:communityScored rdf:resource="ohloh.com"/>
+	<ri:value>1.0</ri:value>
+</ri:FixedCommunitiesTrust>
+
+<!-- Category Matching Definitions -->
+<ri:CategoryMatching rdf:about="SecurityToQandA">
+	<ri:originatingCategory rdf:resource="SecurityWebApp"/>
+	<ri:reveivingCategory rdf:resource="QandA"/>
+	<ri:value>0.9</ri:value>
+</ri:CategoryMatching>
+<ri:CategoryMatching rdf:about="ProjectConToQandA">
+	<ri:originatingCategory rdf:resource="ProjectConnection"/>
+	<ri:reveivingCategory rdf:resource="QandA"/>
+	<ri:value>0.9</ri:value>
+</ri:CategoryMatching>
+
+<!-- Dimensions Definition -->
+<ri:hasDimension rdf:about="reputationInQandA">
+	<ri:name>reputationInQandA</ri:name>
+</ri:hasDimension>
+<ri:hasDimension rdf:about="ReputationInProject">
+	<ri:name>ReputationInProject</ri:name>
+</ri:hasDimension>
+<ri:hasDimension rdf:about="rankReputation">
+	<ri:name>rankReputation</ri:name>
+</ri:hasDimension>
