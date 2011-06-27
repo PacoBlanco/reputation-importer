@@ -11,7 +11,7 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 	<ri:identifier>semanticWiki</ri:identifier>
 	<ri:homePage>http://lab.gsi.dit.upm.es/semanticwiki</ri:homePage>
 	<ri:hasCategory>
-		<Category rdf:about="QandA">
+		<Category rdf:about="SecurityWebApp">
 	</ri:hasCategory>
 	<ri:hasReputationModel>
 		<ri:ReputationModel>
@@ -34,7 +34,8 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 							<ri:importedCommunity rdf:resource="#stackoverflow.com"/>
 							<ri:importedMetric rdf:resource="#stackOverflowImportedMetric"/>
 							<ri:collectsReputationBy rdf:resource="stackOverflowImportation"/>
-							<ri:metricTransformation>
+							<ri:metricTransformation rdf:resource="stackOverflowToWikiTransformation"/>
+							<ri:trust rdf:resource="stackOverflowToWikiTrust"/>
 						</ri:ImportationUnit>
 					</ri:importsFrom>
 					
@@ -48,6 +49,8 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 							<ri:importedCommunity rdf:resource="#ohloh.net"/>
 							<ri:importedMetric rdf:resource="#ohlohKudoImportedMetric"/>
 							<ri:collectsReputationBy rdf:resource="ohlohImportation"/>
+							<ri:metricTransformation rdf:resource="ohlohKudoToWikiTransformation"/>
+							<ri:trust rdf:resource="ohlohToWikiTrust"/>
 						</ri:ImportationUnit>
 					</ri:importsFrom>
 					
@@ -61,6 +64,8 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 							<ri:importedCommunity rdf:resource="#ohloh.net"/>
 							<ri:importedMetric rdf:resource="#ohlohRankImportedMetric"/>
 							<ri:collectsReputationBy rdf:resource="ohlohImportation"/>
+							<ri:metricTransformation rdf:resource="ohlohRankImportedMetric"/>
+							<ri:trust rdf:resource="ohlohToWikiTrust"/>
 						</ri:ImportationUnit>
 					</ri:importsFrom>
 					
@@ -73,7 +78,7 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 	<ri:identifier>stackoverflow.com</ri:identifier>
 	<ri:homePage>http://stackoverflow.com</ri:homePage>
 	<ri:hasCategory>
-		<Category rdf:about="SecurityWebApp">
+		<Category rdf:about="QandA">
 	</ri:hasCategory>
 	<ri:hasReputationModel>
 		<ri:ReputationModel>
@@ -163,39 +168,23 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 </ri:Metric>
 
 <!-- Metric Transformers-->
-<ri:SqrtNumericTransformer>
+<ri:SqrtNumericTransformer rdf:about="stackOverflowToWikiTransformation">
+	<dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same"</dc:description>
 	<ri:sourceMetric rdf:resource="#stackOverflowImportedMetric"/>
-	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>	
-	<ri:trust>
-		<ri:TrustBetweenCommunities>
-			<ri:trustProvidedBy rdf:resource="ohlohToWiki"/>
-			<ri:trustProvidedBy rdf:resource="stackOverflowToWiki"/>
-		</ri:TrustBetweenCommunities>	
-	<ri:trust>
+	<ri:destinationMetric rdf:resource="#semanticWikiMetric"/>	
 </ri:SqrtNumericTransformer>
-<ri:LinealNumericTransformer>
+<ri:LinealNumericTransformer rdf:about="ohlohKudoToWikiTransformation">
+	<dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional)</dc:description>
 	<ri:sourceMetric rdf:resource="#ohlohKudoImportedMetric"/>
-	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>
-	<ri:correlationBetweenMetrics rdf:resource="QandAToProject"/>
-	<ri:trust rdf:resource="ohlohToWiki"/>
+	<ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+	<ri:correlationBetweenDimensions rdf:resource="QandAToProject"/>	
 </ri:LinealNumericTransformer>
-<ri:LogaritmicNumericTransformer>
+<ri:LogaritmicNumericTransformer rdf:about="ohlohRankToWikiTransformation">
+	<dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional)</dc:description>
 	<ri:sourceMetric rdf:resource="#ohlohRankImportedMetric"/>
-	<ri:destrinationMetric rdf:resource="#semanticWikiMetric"/>
-	<ri:correlationBetweenMetrics rdf:resource="QandAToRank"/>
-	<ri:trust>
-		<ri:TrustBetweenCommunities>
-			<ri:trustProvidedBy rdf:resource="fixedStackOverflowToWiki"/>
-			<ri:trustProvidedBy rdf:resource="ProjectConToQandA"/>			
-		</ri:TrustBetweenCommunities>	
-	<ri:trust>
+	<ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+	<ri:correlationBetweenDimensions rdf:resource="QandAToRank"/>
 </ri:LogaritmicNumericTransformer>
-
-<!-- Trust Between Communities -->
-<ri:TrustBetweenCommunities rdf:about="ohlohToWiki">
-	<ri:trustProvidedBy rdf:resource="fixedOhlohToWiki"/>
-	<ri:trustProvidedBy rdf:resource="ProjectConToQandA"/>
-</ri:TrustBetweenCommunities>
 
 <!-- Correlation Between Dimensions -->
 <ri:CorrelationBetweenDimension rdf:about="QandAToProject">
@@ -208,6 +197,16 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 	<ri:targetDimension rdf:resource="rankReputation"/>
 	<ri:correlationBetweenDimensions>1<ri:correlationBetweenDimensions>
 </ri:CorrelationBetweenDimension>
+
+<!-- Trust Between Communities -->
+<ri:TrustBetweenCommunities rdf:about="stackOverflowToWikiTrust">
+	<ri:trustProvidedBy rdf:resource="fixedStackOverflowToWiki"/>
+	<ri:trustProvidedBy rdf:resource="QandAToSecurity"/>
+</ri:TrustBetweenCommunities>
+<ri:TrustBetweenCommunities rdf:about="ohlohToWikiTrust">
+	<ri:trustProvidedBy rdf:resource="fixedOhlohToWiki"/>
+	<ri:trustProvidedBy rdf:resource="ProjectToSecurity"/>
+</ri:TrustBetweenCommunities>
 
 <!-- Fixed Communities Trust Definitions -->
 <ri:FixedCommunitiesTrust rdf:about="fixedStackOverflowToWiki">
@@ -222,14 +221,14 @@ xmlns:ri="http://purl.org/reputationImport/0.1">
 </ri:FixedCommunitiesTrust>
 
 <!-- Category Matching Definitions -->
-<ri:CategoryMatching rdf:about="SecurityToQandA">
-	<ri:originatingCategory rdf:resource="SecurityWebApp"/>
-	<ri:reveivingCategory rdf:resource="QandA"/>
+<ri:CategoryMatching rdf:about="QandAToSecurity">
+	<ri:originatingCategory rdf:resource="QandA"/>
+	<ri:reveivingCategory rdf:resource="SecurityWebApp"/>
 	<ri:value>0.9</ri:value>
 </ri:CategoryMatching>
-<ri:CategoryMatching rdf:about="ProjectConToQandA">
+<ri:CategoryMatching rdf:about="ProjectToSecurity">
 	<ri:originatingCategory rdf:resource="ProjectConnection"/>
-	<ri:reveivingCategory rdf:resource="QandA"/>
+	<ri:reveivingCategory rdf:resource="SecurityWebApp"/>
 	<ri:value>0.9</ri:value>
 </ri:CategoryMatching>
 
