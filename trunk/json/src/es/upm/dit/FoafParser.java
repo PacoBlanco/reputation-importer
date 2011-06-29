@@ -4,37 +4,53 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntResource;
-import com.hp.hpl.jena.rdf.model.Bag;
 import com.hp.hpl.jena.rdf.model.Container;
 import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.NodeIterator;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceF;
 import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.util.FileManager;
-import com.hp.hpl.jena.vocabulary.RDF;
-import com.hp.hpl.jena.vocabulary.ReasonerVocabulary;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.reasoner.rulesys.RDFSRuleReasoner;
 import com.hp.hpl.jena.reasoner.rulesys.RDFSRuleReasonerFactory;
+import com.hp.hpl.jena.util.FileManager;
+import com.hp.hpl.jena.vocabulary.RDF;
+
+import cross.reputation.model.Entity;
+import cross.reputation.model.EntityIdentifier;
+import cross.reputation.model.GlobalModel;
+import es.upm.dit.vulnerapedia.Ent_Eva;
+import es.upm.dit.vulnerapedia.ReputationWiki;
 
 public class FoafParser {
-	List<Property> propertyAccount = new ArrayList<Property>();
-	List<Property> propertyAccountName = new ArrayList<Property>();
-	List<Property> propertyAccountProfile = new ArrayList<Property>();
-	List<Resource> agentResource = new ArrayList<Resource>();
+	private List<Property> propertyAccount = new ArrayList<Property>();
+	private List<Property> propertyAccountName = new ArrayList<Property>();
+	private List<Property> propertyAccountProfile = new ArrayList<Property>();
+	private List<Resource> agentResource = new ArrayList<Resource>();
+	
+	private List<Resource> resources = new ArrayList<Resource>();
+	
+	private List<Property> communitiesProperty = new ArrayList<Property>();
+	private List<Property> collectingSystemProperty = new ArrayList<Property>();
+	private List<Property> metricDefinitionProperty = new ArrayList<Property>();
+	private List<Property> metricTransformerProperty = new ArrayList<Property>();
+	private List<Property> correlationProperty = new ArrayList<Property>();
+	private List<Property> trustCommunitiesProperty = new ArrayList<Property>();
+	private List<Property> fixedTrustProperty = new ArrayList<Property>();
+	private List<Property> categoryMatchingProperty = new ArrayList<Property>();
+	private List<Property> dimensionsProperty = new ArrayList<Property>();
+	private String userName = "";
 	
 	static public void main(String[] args) {
 		FoafParser foaf = new FoafParser();
-		foaf.foafAgent("dir/foafAndrea.rdf");
+		//foaf.foafAgent("http://localhost/foafSample2.rdf");
+		foaf.getCrossReputationGlobalModelFromRDF("dir/model0.rdf");
 	}
 	
 	public void foafAgent(String inputFileName) {
@@ -67,25 +83,22 @@ public class FoafParser {
 		// Create inference model
 		InfModel infModel = ModelFactory.createInfModel(reasoner, model);
 		
-		model = infModel;
+		//model = infModel;
 		
 		
-		propertyAccountName.add(ResourceFactory.createProperty(
-				foafNamespace, "accountName"));
-		propertyAccountProfile.add(ResourceFactory.createProperty(
-				foafNamespace, "accountProfilePage"));
+		propertyAccountName.add(ResourceFactory.createProperty(foafNamespace, "accountName"));
+		propertyAccountProfile.add(ResourceFactory.createProperty(foafNamespace, "accountProfilePage"));
 		
-		propertyAccount.add(ResourceFactory.createProperty(
-				foafNamespace, "account"));
-		propertyAccount.add(ResourceFactory.createProperty(
-				foafNamespace, "holdsAccount"));
+		propertyAccount.add(ResourceFactory.createProperty(foafNamespace, "account"));
+		propertyAccount.add(ResourceFactory.createProperty(foafNamespace, "holdsAccount"));
 				
 		agentResource.add(ResourceFactory.createResource(foafNamespace + "Agent"));
 		agentResource.add(ResourceFactory.createResource(foafNamespace + "Person"));
-		Resource person = ResourceFactory.createResource(foafNamespace + "Person" );
+		//Resource person = ResourceFactory.createResource(foafNamespace + "Person" );
 		
 		for(Resource agent : agentResource) {				
 			ResIterator iters = model.listResourcesWithProperty(RDF.type,agent);
+			
 			if (iters.hasNext()) {
 			    System.out.println("The database contains resource Person for:");
 			    while (iters.hasNext()) {
@@ -113,17 +126,22 @@ public class FoafParser {
 			    	StmtIterator stmtI = model.listStatements(resource, null, (RDFNode)null);
 			    	while(stmtI.hasNext()) {
 			    		Statement statement = stmtI.nextStatement();
+			    		if (statement.getPredicate().toString().equals("http://xmlns.com/foaf/0.1/name")){
+			    			userName = statement.getObject().toString();
+			    		}
 			    		System.out.println("   triple "+statement.getPredicate()+" - "+statement.getObject());
 			    	}
 			    	for(Property property : propertyAccount) {
 				    	StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
+						Entity entity = new Entity(userName);
 				    	while(stmtI1.hasNext()) {
 				    		Statement statement = stmtI1.nextStatement();			    		
 				    		System.out.println("   OnlineAccount "+statement.getObject());
+				    		String accountURL = "";
+				    		String accountUserName = "";
 				    		if(statement.getObject().isResource()) {
 				    			Resource onlineAccount = statement.getObject().asResource();				    			
-				    			NodeIterator nodess = model.listObjectsOfProperty(
-				    					onlineAccount, RDF.type);
+				    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
 						    	while(nodess.hasNext()) {
 						    		RDFNode node = nodess.nextNode();
 						    		if(node.isResource()) {
@@ -135,15 +153,47 @@ public class FoafParser {
 				    						property2, (RDFNode)null);
 				    				Statement statement2 = stmtI2.nextStatement();
 				    				System.out.println("      AccountName "+statement2.getObject());
+				    				accountUserName = statement2.getObject().toString();
 				    			}
 				    			for(Property property2 : propertyAccountProfile) {
 				    				StmtIterator stmtI2 = model.listStatements(onlineAccount, 
 				    						property2, (RDFNode)null);
-				    				Statement statement2 = stmtI2.nextStatement();
-				    				System.out.println("      AccountProfile "+statement2.getObject());
+				    				if(stmtI2.hasNext()){
+					    				Statement statement2 = stmtI2.nextStatement();
+					    				System.out.println("      AccountProfile "+statement2.getObject());
+					    				accountURL = statement2.getObject().toString();
+				    				}
 				    			}
+				    			if(accountUserName.equalsIgnoreCase("not_exist")) {
+				    				ReputationWiki.notExistantUser.add(userName);
+				    				continue;
+				    			}
+				    			try{
+				    				Double value = Double.parseDouble(accountUserName);
+				    				ReputationWiki.userPredefined.add(new Ent_Eva(new Entity(userName),value));
+				    				continue;
+				    				
+				    			}catch (Exception e) {}
+				    			
+				    			String domain = ReputationWiki.findDomain(accountURL);
+								if(domain == null) {
+									System.out.println("Error: domain is not known from user:"+
+									entity.getUniqueIdentificator()+" and it is discarted: "+ accountURL);
+									continue;
+								}
+								if(!accountUserName.equals("")){
+									entity.addIdentificatorInCommunities(GlobalModel.getCommunities().get(domain),
+										new EntityIdentifier(accountUserName,null));
+								}
+								else{
+									entity.addIdentificatorInCommunities(GlobalModel.getCommunities().get(domain),
+										new EntityIdentifier(entity.getUniqueIdentificator(),accountURL));
+								}
+					    		
+								if(!entity.getIdentificatorInCommunities().isEmpty()) {
+									GlobalModel.addEntity(entity);
+								}
 				    		}
-				    		
 				    	}
 			    	}
 			    }
@@ -220,6 +270,7 @@ public class FoafParser {
 		} else {
 			System.out.println("No subject with RDF.type OnlineAccount were found in the database");
 		}
+		ConfigureModel.GetMoreAccounts();
 	}
 	
 	public void getContainerResources (Resource resource, 
@@ -245,6 +296,144 @@ public class FoafParser {
     	} catch (java.lang.ClassCastException e) {
     		System.out.println("   "+resourceName+" does not have resources inside");
     	}
+	}
+	
+	public void getCrossReputationGlobalModelFromRDF(String inputFileName){
+	
+        String riNamespace = "http://purl.org/reputationImport/0.1";
+        // create an empty model
+        Model model = ModelFactory.createOntologyModel(); // createDefaultModel();
+
+        // use the FileManager to find the input file
+        InputStream in = FileManager.get().open( inputFileName );
+        if (in == null) {
+            throw new IllegalArgumentException(
+                   "File: " + inputFileName + " not found");
+        }
+
+        // read the RDF/XML file
+        model.read(in, "", null);
+        
+        System.out.println("Base Namespace:"+model.getNsPrefixURI(""));
+        if(model.getNsPrefixURI("foaf") != null) {
+        	riNamespace = model.getNsPrefixURI("ri");
+            System.out.println("ri namespace:"+riNamespace);
+        }
+        
+        addPropertiesAndResources();
+        
+        for(Resource agent : resources) {                           
+            ResIterator iters = model.listResourcesWithProperty(RDF.type,agent);
+            if (iters.hasNext()) {
+                System.out.println("The database contains resource for:");
+                while (iters.hasNext()) {
+                    Resource resource = iters.nextResource();
+                    String resourceName = null;
+                    if(resource.getLocalName() != null) {
+                            resourceName = resource.getLocalName();
+                    } else if(resource.getId() != null) {
+                    	if(resource.getId().getLabelString() != null) {
+                    		resourceName = resource.getId().getLabelString();
+                        } else {
+                        	resourceName = resource.getId().toString();
+                        }
+                    } else if(resource.getURI() != null) {
+                            resourceName = resource.getURI();
+                    }
+                    System.out.println("  " + resourceName+" class:"+resource.getClass());
+                    NodeIterator nodes = model.listObjectsOfProperty(resource, RDF.type);
+                    while(nodes.hasNext()) {
+                        RDFNode node = nodes.nextNode();
+                        if(node.isResource()) {
+                                System.out.println("   type " + node.asResource().getURI());
+                        }
+                    }
+                    StmtIterator stmtI = model.listStatements(resource, null, (RDFNode)null);
+                    while(stmtI.hasNext()) {
+                            Statement statement = stmtI.nextStatement();
+                            System.out.println("   triple "+statement.getPredicate()+" - "+statement.getObject());
+                    }
+                    for(Property property : propertyAccount) {
+                        StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
+                        while(stmtI1.hasNext()) {
+                            Statement statement = stmtI1.nextStatement();                                   
+                            System.out.println("   OnlineAccount "+statement.getObject());
+                            if(statement.getObject().isResource()) {
+                                Resource onlineAccount = statement.getObject().asResource();                                                    
+                                NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
+                                while(nodess.hasNext()) {
+                                    RDFNode node = nodess.nextNode();
+                                    if(node.isResource()) {
+                                        System.out.println("      type " + node.asResource().getURI());
+                                    }
+                                }
+                                for(Property property2 : propertyAccountName) {
+                                    StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
+                                    Statement statement2 = stmtI2.nextStatement();
+                                    System.out.println("      AccountName "+statement2.getObject());
+                                }
+                                for(Property property2 : propertyAccountProfile) {
+                                    StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
+                                    Statement statement2 = stmtI2.nextStatement();
+                                    System.out.println("      AccountProfile "+statement2.getObject());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+         }               
+            
+        ResIterator iters = model.listSubjectsWithProperty(RDF.type,riNamespace+"Person");
+        if (iters.hasNext()) {
+            System.out.println("The database contains literal person for:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+                System.out.println("No simple String foafNamespace+Person were found in the database");
+        }
+        
+        Property propertyOnlineAccount = ResourceFactory.createProperty(riNamespace, "OnlineAccount");                
+        iters = model.listSubjectsWithProperty(propertyOnlineAccount);
+        if (iters.hasNext()) {
+            System.out.println("The database contains OnlineAccount for:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No PROPERTY OnlineAccount were found in the database");
+        }               
+        
+	}
+	
+	private void addPropertiesAndResources(){
+		
+		String riNamespace = "http://purl.org/reputationImport/0.1";
+		
+        resources.add(ResourceFactory.createResource(riNamespace + "Community"));
+        /*resources.add(ResourceFactory.createResource(riNamespace + "CollectingSystem"));
+        resources.add(ResourceFactory.createResource(riNamespace + "Metric"));
+        resources.add(ResourceFactory.createResource(riNamespace + "SqrtNumericTransformer"));
+        resources.add(ResourceFactory.createResource(riNamespace + "ExponentialNumericTransformer"));
+        resources.add(ResourceFactory.createResource(riNamespace + "LogaritmicNumericTransformer"));
+        resources.add(ResourceFactory.createResource(riNamespace + "LinealNumericTransformer"));
+        resources.add(ResourceFactory.createResource(riNamespace + "CorrelationBetweenDimension"));
+        resources.add(ResourceFactory.createResource(riNamespace + "TrustBetweenCommunities"));
+        resources.add(ResourceFactory.createResource(riNamespace + "FixedCommunitiesTrust"));
+        resources.add(ResourceFactory.createResource(riNamespace + "CategoryMatching"));
+        resources.add(ResourceFactory.createResource(riNamespace + "hasDimension"));*/
+        
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasCategory"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasReputationModel"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "reputationModule"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "mapsMetric"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "importsFrom"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasCategory"));
 	}
 	
 }
