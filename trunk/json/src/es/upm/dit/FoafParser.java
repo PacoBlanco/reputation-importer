@@ -36,6 +36,8 @@ public class FoafParser {
 	
 	private List<Resource> resources = new ArrayList<Resource>();
 	
+	String riNamespace = "http://purl.org/reputationImport/0.1/";
+	
 	private List<Property> communitiesProperty = new ArrayList<Property>();
 	private List<Property> collectingSystemProperty = new ArrayList<Property>();
 	private List<Property> metricDefinitionProperty = new ArrayList<Property>();
@@ -50,7 +52,7 @@ public class FoafParser {
 	static public void main(String[] args) {
 		FoafParser foaf = new FoafParser();
 		//foaf.foafAgent("http://localhost/foafSample2.rdf");
-		foaf.getCrossReputationGlobalModelFromRDF("dir/model0.rdf");
+		foaf.getCrossReputationGlobalModelFromRDF("dir/model4.rdf");
 	}
 	
 	public void foafAgent(String inputFileName) {
@@ -298,9 +300,7 @@ public class FoafParser {
     	}
 	}
 	
-	public void getCrossReputationGlobalModelFromRDF(String inputFileName){
-	
-        String riNamespace = "http://purl.org/reputationImport/0.1";
+	public void getCrossReputationGlobalModelFromRDF(String inputFileName){        
         // create an empty model
         Model model = ModelFactory.createOntologyModel(); // createDefaultModel();
 
@@ -314,15 +314,47 @@ public class FoafParser {
         // read the RDF/XML file
         model.read(in, "", null);
         
+        // create the reasoner factory and the reasoner
+		Resource conf = model.createResource();
+		//conf.addProperty( ReasonerVocabulary.PROPtraceOn, "true" );
+		RDFSRuleReasoner reasoner = (RDFSRuleReasoner) RDFSRuleReasonerFactory.theInstance().create(conf);
+		// Create inference model
+		InfModel infModel = ModelFactory.createInfModel(reasoner, model);
+		
+		model = infModel;
+        
         System.out.println("Base Namespace:"+model.getNsPrefixURI(""));
-        if(model.getNsPrefixURI("foaf") != null) {
+        
+        if(model.getNsPrefixURI("ri") != null) {
         	riNamespace = model.getNsPrefixURI("ri");
             System.out.println("ri namespace:"+riNamespace);
         }
+        Resource dimension = ResourceFactory.createResource(riNamespace + "Dimension");
+        Resource categoryMatching = ResourceFactory.createResource(riNamespace + "CategoryMatching");
+        Resource fixedCommunitiesTrust = ResourceFactory.createResource(
+        		riNamespace + "FixedCommunitiesTrust");
+        Resource trustBetweenCommunities = ResourceFactory.
+        		createResource(riNamespace + "TrustBetweenCommunities");
+        Resource correlationBetweenDimension = ResourceFactory.
+        		createResource(riNamespace + "CorrelationBetweenDimension");
+        Resource logaritmicNumericTransformer = ResourceFactory.
+        		createResource(riNamespace + "LogaritmicNumericTransformer");
+        Resource linealNumericTransformer = ResourceFactory.
+				createResource(riNamespace + "LinealNumericTransformer");
+        Resource sqrtNumericTransformer = ResourceFactory.
+				createResource(riNamespace + "SqrtNumericTransformer");
+        Resource metric = ResourceFactory.
+				createResource(riNamespace + "Metric");
         
-        addPropertiesAndResources();
+        Resource collectingSystem = ResourceFactory.
+        		createResource(riNamespace + "CollectingSystem");
         
-        for(Resource agent : resources) {                           
+        Resource community = ResourceFactory.
+		createResource(riNamespace + "Community");
+        
+        //addPropertiesAndResources();
+        
+        /*for(Resource agent : resources) {                   sqrtNumericTransformer        
             ResIterator iters = model.listResourcesWithProperty(RDF.type,agent);
             if (iters.hasNext()) {
                 System.out.println("The database contains resource for:");
@@ -382,11 +414,11 @@ public class FoafParser {
                     }
                 }
             }
-         }               
-            
-        ResIterator iters = model.listSubjectsWithProperty(RDF.type,riNamespace+"Person");
+         }  */
+        
+        ResIterator iters = model.listSubjectsWithProperty(RDF.type,dimension);
         if (iters.hasNext()) {
-            System.out.println("The database contains literal person for:");
+            System.out.println("The database contains subjects of type dimension:");
             while (iters.hasNext()) {
                 Resource resource = iters.nextResource();
                 System.out.println("  " + resource.getLocalName());
@@ -394,28 +426,174 @@ public class FoafParser {
                 
             }
         } else {
-                System.out.println("No simple String foafNamespace+Person were found in the database");
+            System.out.println("No simple String " + riNamespace+ "Dimension were found in the database");
         }
         
-        Property propertyOnlineAccount = ResourceFactory.createProperty(riNamespace, "OnlineAccount");                
-        iters = model.listSubjectsWithProperty(propertyOnlineAccount);
+        
+        
+        iters = model.listResourcesWithProperty(RDF.type,categoryMatching);
         if (iters.hasNext()) {
-            System.out.println("The database contains OnlineAccount for:");
+            System.out.println("The database contains resources of type CategoryMatching:");
             while (iters.hasNext()) {
                 Resource resource = iters.nextResource();
                 System.out.println("  " + resource.getLocalName());
+               // node.
+                
             }
         } else {
-            System.out.println("No PROPERTY OnlineAccount were found in the database");
-        }               
+            System.out.println("No simple String "+riNamespace+
+            		"CategoryMatching were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,fixedCommunitiesTrust);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type fixedCommunitiesTrust:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"FixedCommunitiesTrust were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,trustBetweenCommunities);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type trustBetweenCommunities:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"trustBetweenCommunities were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,correlationBetweenDimension);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type CorrelationBetweenDimension:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"CorrelationBetweenDimension were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,logaritmicNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type LogaritmicNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"LogaritmicNumericTransformer were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,linealNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type linealNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"linealNumericTransformer were found in the database");
+        }        
+        iters = model.listSubjectsWithProperty(RDF.type,sqrtNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type SqrtNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"SqrtNumericTransformer were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,metric);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type Metric:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"Metric were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,collectingSystem);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type CollectingSystem:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"CollectingSystem were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,community);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type Community:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"Metric were found in the database");
+        }
+        /*
+        iters = model.listSubjects();
+        if (iters.hasNext()) {
+            System.out.println("Subjects:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } 
+        
+        StmtIterator stms = model.listStatements();
+        if (stms.hasNext()) {
+            System.out.println("Statements:");
+            while (stms.hasNext()) {
+                Statement stm = stms.nextStatement();
+                System.out.println("  " + stm.getSubject()+"-"+stm.getPredicate()
+                		+"-"+stm.getObject());
+               // node.
+                
+            }
+        }
+        */        
+                     
         
 	}
 	
 	private void addPropertiesAndResources(){
 		
-		String riNamespace = "http://purl.org/reputationImport/0.1";
-		
-        resources.add(ResourceFactory.createResource(riNamespace + "Community"));
+		resources.add(ResourceFactory.createResource(riNamespace + "Community"));
         /*resources.add(ResourceFactory.createResource(riNamespace + "CollectingSystem"));
         resources.add(ResourceFactory.createResource(riNamespace + "Metric"));
         resources.add(ResourceFactory.createResource(riNamespace + "SqrtNumericTransformer"));
