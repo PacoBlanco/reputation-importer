@@ -7,11 +7,28 @@ xmlns:dc="http://purl.org/dc/elements/1.1/"
 xmlns:ri="http://purl.org/reputationImport/0.1/">
 
 <!-- Community definitions -->﻿
+
+<ri:Community rdf:about="#stackoverflow.com">
+	<ri:identifier>stackoverflow.com</ri:identifier>
+	<ri:homePage>http://stackoverflow.com</ri:homePage>
+	<ri:hasCategory>
+		<ri:Category rdf:about="#QandA"/>
+	</ri:hasCategory>
+	<ri:hasReputationModel>
+		<ri:ReputationModel>
+			<ri:name>stackoverflowReputationModel</ri:name>
+			<dc:description>Reputation Model of the Community StackOverflow.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>﻿
+			<ri:resultCollectionType rdf:resource="http://purl.org/reputationImport/0.1/Unique"/>
+			<ri:Accesibility rdf:resource="http://purl.org/reputationImport/0.1/Visible"/>
+			<ri:resultCollectionType>Unique</ri:resultCollectionType>
+		</ri:ReputationModel>
+	</ri:hasReputationModel>
+</ri:Community>
 <ri:Community rdf:about="#semanticWiki">
 ﻿	<ri:identifier>semanticWiki</ri:identifier>
-		<ri:homePage>http://lab.gsi.dit.upm.es/semanticwiki</ri:homePage>
-		<ri:hasCategory>
-			<ri:Category rdf:about="#SecurityWebApp"/>
+	<ri:homePage>http://lab.gsi.dit.upm.es/semanticwiki</ri:homePage>
+	<ri:hasCategory>
+		<ri:Category rdf:about="#SecurityWebApp"/>
 	</ri:hasCategory>
 	<ri:hasReputationModel>
 		<ri:ReputationModel>
@@ -66,7 +83,6 @@ xmlns:ri="http://purl.org/reputationImport/0.1/">
 							<ri:trust rdf:resource="#ohlohToWikiTrust"/>
 						</ri:ImportationUnit>
 					</ri:importsFrom>
-﻿  ﻿  ﻿  ﻿  ﻿  
 				</ri:ReputationImporter>
 			</ri:reputationModule>
 		</ri:ReputationModel>
