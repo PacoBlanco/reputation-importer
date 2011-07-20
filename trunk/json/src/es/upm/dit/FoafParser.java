@@ -41,6 +41,7 @@ public class FoafParser {
 	private List<Property> communitiesProperty = new ArrayList<Property>();
 	private List<Property> communitiesReputationModel = new ArrayList<Property>();
 	private List<Property> communitiesReputationModelProperties = new ArrayList<Property>();
+	private List<Property> communitiesImportsFrom = new ArrayList<Property>();
 	private List<Property> collectingSystemProperty = new ArrayList<Property>();
 	private List<Property> metricDefinitionProperty = new ArrayList<Property>();
 	private List<Property> metricTransformerProperty = new ArrayList<Property>();
@@ -349,29 +350,69 @@ public class FoafParser {
         	    		Statement statement = stmtI.nextStatement();
         	    		System.out.println("   triple "+statement.getPredicate()+" - "+statement.getObject());
         	    	}
-			    	for(Property property : communitiesProperty) {
-				    	StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
-				    	while(stmtI1.hasNext()) {
-				    		Statement statement = stmtI1.nextStatement();			    		
-				    		System.out.println("   OnlineAccount "+statement.getObject());
-				    		if(statement.getObject().isResource()) {
-				    			Resource onlineAccount = statement.getObject().asResource();				    			
-				    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
-						    	while(nodess.hasNext()) {
-						    		RDFNode node = nodess.nextNode();
-						    		if(node.isResource()) {
-						    			System.out.println("      type " + node.asResource().getURI());
-						    		}
-						    	}
-				    			for(Property property2 : communitiesReputationModel) {
-				    				StmtIterator stmtI2 = model.listStatements(onlineAccount, 
-				    						property2, (RDFNode)null);
-				    				Statement statement2 = stmtI2.nextStatement();
-				    				System.out.println("      Properties "+statement2.getObject());
-				    			}
-				    		}
+        	    	if(res.getLocalName().toString().equals("Community")){
+				    	for(Property property : communitiesProperty) {
+					    	StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
+					    	while(stmtI1.hasNext()) {
+					    		Statement statement = stmtI1.nextStatement();			    		
+					    		System.out.println("   Nodes "+statement.getObject());
+					    		if(statement.getObject().isResource()) {
+					    			Resource onlineAccount = statement.getObject().asResource();				    			
+					    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
+							    	while(nodess.hasNext()) {
+							    		RDFNode node = nodess.nextNode();
+							    		if(node.isResource()) {
+							    			System.out.println("      type " + node.asResource().getURI());
+							    		}
+							    	}
+					    			for(Property property2 : communitiesReputationModelProperties) {
+					    				StmtIterator stmtI2 = model.listStatements(onlineAccount, 
+					    						property2, (RDFNode)null);
+					    				if(stmtI2.hasNext()){
+						    				Statement statement2 = stmtI2.nextStatement();
+						    				System.out.println("      Properties "+ property2.getLocalName() + ": " + statement2.getObject());
+						    				if(statement2.getObject().isResource()){
+						    					Resource reputationModule = statement2.getObject().asResource();
+						    					NodeIterator nodess2 = model.listObjectsOfProperty(reputationModule, RDF.type);
+						    					while(nodess2.hasNext()){
+						    						RDFNode node2 = nodess2.nextNode();
+						    						if(node2.isResource()){
+						    							System.out.println("         type " + node2.asResource().getURI());
+						    							for(Property property3 : communitiesReputationModel){
+						    								StmtIterator stmtI3 = model.listStatements(reputationModule, property3, (RDFNode)null);
+						    								if(stmtI3.hasNext()){
+						    									Statement statement3 = stmtI3.nextStatement();
+						    									System.out.println("            Properties "+ 
+						    											property3.getLocalName() + ": " + statement3.getObject());
+						    									if(statement3.getObject().isResource()){
+						    										Resource importsFrom = statement3.getObject().asResource();
+						    										NodeIterator nodess3 = model.listObjectsOfProperty(importsFrom, RDF.type);
+						    										while(nodess3.hasNext()){
+						    											RDFNode node3 = nodess3.nextNode();
+						    											if(node3.isResource()){
+						    												System.out.println("            type " + node2.asResource().getURI());
+						    												for(Property property4 : communitiesImportsFrom){
+						    													StmtIterator stmtI4 = model.listStatements(importsFrom, property4, (RDFNode)null);
+						    													if(stmtI4.hasNext()){
+						    														Statement statement4 = stmtI4.nextStatement();
+											    									System.out.println("               Properties "+ 
+											    											property4.getLocalName() + ": " + statement4.getObject());
+						    													}
+						    												}
+						    											}
+						    										}
+						    									}
+						    								}	
+						    							}
+						    						}
+						    					}
+						    				}
+					    				}
+					    			}
+					    		}
+					    	}
 				    	}
-			    	}
+        	    	}
                 }
             } else {
                 System.out.println("No simple String " + riNamespace + res.getLocalName() +  " were found in the database");
@@ -402,12 +443,18 @@ public class FoafParser {
         resources.add(ResourceFactory.createResource(riNamespace + "Dimension"));
         
         communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasReputationModel"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "ReputationModel"));
         communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "name"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "description"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
-
+        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "reputationModule"));
+        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
+        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
+        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "usesMetric"));
+        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "importsFrom"));
+        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "mapsMetric"));
+        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "importedCommunity"));
+        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "importedMetric"));
+        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "collectsReputationBy"));
+        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "metricTransformation"));
+        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "trust"));
 	}
 	
 }
