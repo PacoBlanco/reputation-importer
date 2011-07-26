@@ -219,8 +219,7 @@ public class FoafParser {
 			System.out.println("No simple String foafNamespace+Person were found in the database");
 		}
 		
-		Property propertyOnlineAccount = ResourceFactory.createProperty(
-				foafNamespace, "OnlineAccount");
+		Property propertyOnlineAccount = ResourceFactory.createProperty(foafNamespace, "OnlineAccount");
 		iters = model.listSubjectsWithProperty(propertyOnlineAccount);
 		if (iters.hasNext()) {
 		    System.out.println("The database contains OnlineAccount for:");
@@ -358,7 +357,7 @@ public class FoafParser {
 					    		System.out.println("   Nodes "+statement.getObject());
 					    		if(statement.getObject().isResource()) {
 					    			Resource onlineAccount = statement.getObject().asResource();				    			
-					    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
+					    			NodeIterator nodess = model.listObjectsOfProperty(onlneAccount, RDF.type);
 							    	while(nodess.hasNext()) {
 							    		RDFNode node = nodess.nextNode();
 							    		if(node.isResource()) {
@@ -366,8 +365,7 @@ public class FoafParser {
 							    		}
 							    	}
 					    			for(Property property2 : communitiesReputationModelProperties) {
-					    				StmtIterator stmtI2 = model.listStatements(onlineAccount, 
-					    						property2, (RDFNode)null);
+					    				StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
 					    				if(stmtI2.hasNext()){
 						    				Statement statement2 = stmtI2.nextStatement();
 						    				System.out.println("      Properties "+ property2.getLocalName() + ": " + statement2.getObject());
@@ -390,7 +388,7 @@ public class FoafParser {
 						    										while(nodess3.hasNext()){
 						    											RDFNode node3 = nodess3.nextNode();
 						    											if(node3.isResource()){
-						    												System.out.println("            type " + node2.asResource().getURI());
+						    												System.out.println("            type " + node3.asResource().getURI());
 						    												for(Property property4 : communitiesImportsFrom){
 						    													StmtIterator stmtI4 = model.listStatements(importsFrom, property4, (RDFNode)null);
 						    													if(stmtI4.hasNext()){
@@ -412,15 +410,29 @@ public class FoafParser {
 					    		}
 					    	}
 				    	}
+        	    	}else if(res.getLocalName().toString().equals("CollectingSystem")){
+        	    		for(Property property : collectingSystemProperty) {
+        	    			StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
+        	    			while(stmtI1.hasNext()) {
+					    		Statement statement = stmtI1.nextStatement();			    		
+					    		System.out.println("   Nodes "+statement.getObject());
+					    		if(statement.getObject().isResource()) {
+					    			Resource onlineAccount = statement.getObject().asResource();				    			
+					    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
+							    	while(nodess.hasNext()) {
+							    		RDFNode node = nodess.nextNode();
+							    		if(node.isResource()) {
+							    			System.out.println("      type " + node.asResource().getURI());
+							    		}
+							    	}
+					    		}
+        	    			}
+        	    		}
         	    	}
                 }
             } else {
                 System.out.println("No simple String " + riNamespace + res.getLocalName() +  " were found in the database");
             }  
-            
-            /*if (res.getLocalName().toString().equals("Community")){
-            	
-            }*/
             
         }
                      
@@ -445,6 +457,8 @@ public class FoafParser {
         communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasReputationModel"));
         communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "name"));
         communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "reputationModule"));
+        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
+        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
         communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
         communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
         communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "usesMetric"));
@@ -455,6 +469,9 @@ public class FoafParser {
         communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "collectsReputationBy"));
         communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "metricTransformation"));
         communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "trust"));
+        
+        collectingSystemProperty.add(ResourceFactory.createProperty(riNamespace, "name"));
+        collectingSystemProperty.add(ResourceFactory.createProperty(riNamespace, "uriFormat"));
 	}
 	
 }
