@@ -42,6 +42,12 @@ public class Property { // Static
             		setSCRAPPY_EXECUTOR_TYPE(SCRAPPY_EXECUTOR_LINE_COMMAND);
             	if(props.getProperty("SCRAPPY_EXECUTOR_TYPE").equals("SCRAPPY_EXECUTOR_SERVER"))
             		setSCRAPPY_EXECUTOR_TYPE(SCRAPPY_EXECUTOR_SERVER);
+            } else {
+            	if(System.getProperties().getProperty("os.name").toLowerCase().indexOf("windows") != -1) {
+            		setSCRAPPY_EXECUTOR_TYPE(Ejecutor.SCRAPPY_EXECUTOR_SERVER);
+        		} else {
+        			setSCRAPPY_EXECUTOR_TYPE(Ejecutor.SCRAPPY_EXECUTOR_LINE_COMMAND);
+        		}
             }
         }
         catch(IOException e) {
