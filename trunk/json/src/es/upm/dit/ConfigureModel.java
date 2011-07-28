@@ -311,36 +311,39 @@ public class ConfigureModel {
 	}
 	
 	static public void GetMoreAccounts() {
-		List<String> accounts;
 		for(Entity entity : GlobalModel.getEntities().values()) {
 			Map<Community,EntityIdentifier> usuario = entity.getIdentificatorInCommunities();
 			//In this form of iteration, we dont search accounts in the new accounts found or
 			//  accounts updated that have already been iterated
 			for(Object object : usuario.keySet().toArray()) {
 				Community community = (Community) object;
+				Set<String> accounts = new HashSet<String>();				
 				String userName = usuario.get(community).getName();
 				//System.out.println(userName+":"+community);
 				String url = usuario.get(community).getUrl();
 				try {
 					if(url != null) {
-						accounts = Scrapper.UserAccountsByURL(url);
+						accounts.add(url);
+						accounts.addAll(Scrapper.MoreUserAccountsByURL(url));
 					} else {
-						accounts = Scrapper.UserAccounts(userName,community.getDomainName());
+						accounts.addAll(Scrapper.UserAccounts(userName,
+								community.getDomainName()));
 					}
-					if(accounts != null) {
-						SetAccountsInEntity(entity, userName, accounts);
-					}
+					
 				} catch (Exception e) {
 					System.out.println("Error to get more accounts for entity:"+
 						entity.getUniqueIdentificator()+" with comunnity: "+community.getName()
 						+(url==null?" and user:"+userName:" and url:"+url));
 					e.printStackTrace();
 				}
-			}
+				if(accounts != null) {
+					SetAccountsInEntity(entity, userName, accounts);
+				}
+			}			
 		}		
 	}
 	
-	static private void SetAccountsInEntity(Entity entity, String userName, List<String> accounts) {
+	static private void SetAccountsInEntity(Entity entity, String userName, Collection<String> accounts) {
 		for(String accountName : accounts) {
 			Community community = getCommunityByAccountName(accountName);
 			if(community == null)
