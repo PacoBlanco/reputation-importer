@@ -6,15 +6,18 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import cross.reputation.model.GlobalModel;
 import cross.reputation.model.Metric;
+import es.upm.dit.vulnerapedia.ReputationWiki;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -623,7 +626,7 @@ public class Scrapper extends Thread{
 		        			opalDouble = 0;
 		        		}
 		        		opal += opalDouble;
-				        System.out.println("OPAL Score: "+ opal);
+				        System.out.println("OPAL One Comment Score: "+ opal);
 	        		} catch (NumberFormatException e) {
 	        			System.out.println("ERROR: OPAL doest not return a numeric" +
 	        					" value for text of size:"+opal_xml);
@@ -633,7 +636,22 @@ public class Scrapper extends Thread{
     		}
 		}
 		return opal;
-	}    
+	}
+	
+    public static void main(String[] args) throws Exception {
+    	String usuario = "anelkaos";
+		//System.out.println("Script iniciado sobre: "+NombreUsuario+" "+apellidoUsuario); 
+    	//InformacionUsuario(NombreUsuario+"+"+apellidoUsuario);
+		//UserAccounts("Gavin Sharp", "ohloh.net");
+		//UserAccounts(usuario, "sla.ckers.org");
+		//UserAccounts("Ben Torell", "serverfault.com");
+		String url = "http://foro.elhacker.net/profiles/anelkaos-u4699.html;sa,showPosts";
+		String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+		//System.out.println(scrappy_dump);
+		//informacionPostsSlackers(scrappy_dump);
+		//UserAccounts(usuario, "elhacker.net");
+    }
+    
     
     private static Map<Metric,Object> Reputation(JSONObject objeto, String cuenta) throws IOException {
     	Map<Metric,String> reputation = new HashMap<Metric,String>();
@@ -804,15 +822,15 @@ public class Scrapper extends Thread{
 			        	totalPages = Integer.parseInt(number.getString(0));
 			        }
 			        
-			        OpalExecutorService opalExec = new OpalExecutorService(Property.getTHREAD_NUMBER(), userName, Property.getTimeThreshold());
+			        OpalExecutorService opalExec = new OpalExecutorService(userName);
 			        int postsCount = 0;
 			        System.out.println("  Maximum posts: " + Property.getPOSTS_NUMBER());
 		            
-		            for (int j = 3; j <= totalPages -2; j++){
+		            for (int j = 1; j <= totalPages; j++){
 		            	
-            			if (postsCount == Property.getPOSTS_NUMBER())
+            			if (postsCount >= Property.getPOSTS_NUMBER()) {
             				break;
-		            	
+            			}		            	
 		            	if (j > 1){
 		            		urlPosts += ",page=" + j;
 		            		scrappy_dump = Ejecutor.executeScrappy(urlPosts, "0");
@@ -880,18 +898,19 @@ public class Scrapper extends Thread{
     	Map<Metric,Object> reputations = new HashMap<Metric,Object>();
     	try {
 			JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
-			String direccionWeb = "";
+			String communityID = ReputationWiki.findDomain(url); 
+			/*String direccionWeb = "";
 			if(url.contains("http://")){
 				direccionWeb = url.substring(7);				
 			}
 			if((url.indexOf("/") != -1) && (!url.contains("elhacker"))) {
 				direccionWeb += url.substring(0,url.indexOf("/"));				
-			}
+			}*/
 			for(int j=0; j<array.size(); j++){
             	JSONObject objeto_dump = array.getJSONObject(j);
             	System.out.println("-------------------------------------------------" +
             			"----------------------------------------------");
-            	Map<Metric,Object> singleReputation = Reputation(objeto_dump,direccionWeb);
+            	Map<Metric,Object> singleReputation = Reputation(objeto_dump,communityID);
             	if(singleReputation != null) {
             		reputations.putAll(singleReputation);
             	}
@@ -900,22 +919,21 @@ public class Scrapper extends Thread{
             }
 		} catch(net.sf.json.JSONException e) {
 			e.printStackTrace();
-			System.out.println("Invalid JSON String:"+scrappy_dump);
+			System.out.println("Invalid JSON String from url "+url+":\n"+scrappy_dump);
 		}
 		return reputations;
     }
     
-    static public List<String> UserAccountsByURL(String url) throws IOException {
-    	List<String> accounts = new ArrayList<String>();
-    	accounts.add(url);
+    static public Set<String> MoreUserAccountsByURL(String url) throws IOException {
+    	Set<String> accounts = new HashSet<String>();
     	url += "?tab=accounts";
-		String scrappy_dump = Ejecutor.executeScrappy(url, "0");
+    	String scrappy_dump = Ejecutor.executeScrappy(url, "0");
 		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
-        for(int j=0;j<array.size();j++){
-        	JSONObject objeto_dump = array.getJSONObject(j);
-        	accounts.addAll(GetAccounts(objeto_dump));
-        }
-        System.out.println("Accounts found:"+accounts);
+	    for(int j=0;j<array.size();j++){
+	       	JSONObject objeto_dump = array.getJSONObject(j);
+	       	accounts.addAll(GetAccounts(objeto_dump));
+	    }
+	    System.out.println("Accounts found:"+accounts);    	       
         return accounts;
     }
     
@@ -944,7 +962,7 @@ public class Scrapper extends Thread{
 		    				int indice_final = html.indexOf(accountsDefinition[i][3], indice_inicial);
 				    	    if(indice_final == -1 || indice_inicial == -1) {
 				    	    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
-				    	    			"found or the result of the search is not understable");
+				    	    			"found or the result of the search is not understandable");
 				    	    	break;
 				    	    }
 				    	    url = html.substring(indice_inicial, indice_final);
@@ -983,7 +1001,14 @@ public class Scrapper extends Thread{
 						    //System.out.println("URL devuelta:"+url);
 						    if(!url.contains("%")){
 						       	List<String> accounts = new ArrayList<String>();
-						       	accounts = UserAccountsByURL(url);
+						       	accounts.add(url);
+						       	try {
+						       		accounts.addAll(MoreUserAccountsByURL(url));
+						       	} catch (java.net.ConnectException ce) {
+						    		System.out.println("ERROR: Scrappy server Connection exception. " +
+						    				"Maybe Scrappy Server is offline.");
+						    		ce.printStackTrace();
+						    	} 
 						       	return accounts;
 						    } else {
 						    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
