@@ -1,18 +1,37 @@
 package cross.reputation.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ExponentialNumericTransformer extends NumericTransformer {
 	Double scale = null;
 	Double base = 2.0;
 	
 	public ExponentialNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) throws Exception {
+			List<Double> correlationBetweenMetrics) throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		calculateTransformers();
 	}
 	
 	public ExponentialNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics, Double base) throws Exception {
+			Double correlationBetweenMetrics) throws Exception {
+		super(sourceMetric, destinationMetric, 
+				Arrays.asList(new Double[]{correlationBetweenMetrics}));
+		calculateTransformers();
+	}
+	
+	public ExponentialNumericTransformer(Metric sourceMetric, Metric destinationMetric,
+			List<Double> correlationBetweenMetrics, Double base) throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);		
+		this.base = base;
+		calculateTransformers();
+	}
+	
+	public ExponentialNumericTransformer(Metric sourceMetric, Metric destinationMetric,
+			Double correlationBetweenMetrics, Double base) throws Exception {
+		super(sourceMetric, destinationMetric,
+				Arrays.asList(new Double[]{correlationBetweenMetrics}));		
 		this.base = base;
 		calculateTransformers();
 	}
@@ -29,8 +48,8 @@ public class ExponentialNumericTransformer extends NumericTransformer {
 		} else if(sourceScale.getMinimum() != null && destinationScale.getMinimum() != null) {
 			scale = destinationScale.getMinimum()/Math.pow(sourceScale.getMinimum(),base);	
 		}
-		System.out.println("NumeTrans:"+getSourceMetric().getIdentificator()+
-				","+getDestinationMetric().getIdentificator()+","+
+		System.out.println("NumeTrans:"+getSourceMetric().getIdentifier()+
+				","+getDestinationMetric().getIdentifier()+","+
 				getCorrelationBetweenMetrics()+": sc:"+scale);
 	}
 	
@@ -60,6 +79,14 @@ public class ExponentialNumericTransformer extends NumericTransformer {
 		} else {
 			return valueTransformed;
 		}
+	}
+
+	public Double getScale() {
+		return scale;
+	}
+
+	public Double getBase() {
+		return base;
 	}	
 
 }

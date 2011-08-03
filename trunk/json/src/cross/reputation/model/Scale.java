@@ -5,6 +5,9 @@ import java.util.Map;
 
 abstract public class Scale {
 	String name;
+	
+	public Scale() {		
+	}
 
 	public Scale(String name) {
 		this.name = name;
@@ -23,5 +26,5 @@ abstract public class Scale {
 	abstract public Object doAverage(Object value, int elements);
 	abstract public Object addTrust(Object value, Double trust);
 	abstract public Object aggregateValues(Map<CommunityMetricToImport,Object> values);
-	
+	abstract public String toString(String offset);
 }

@@ -12,6 +12,9 @@ public class Community {
 	private Set<Metric> metrics = new HashSet<Metric>();
 	private Map<Entity, Set<Metric>> entities = new HashMap<Entity, Set<Metric>>();
 	
+	public Community() {		
+	}
+	
 	public Community(String name, String domainName, String categories[], Metric metric) {
 		if(name == null && domainName == null) {
 			System.out.println("Error: name and domainName cannot be null in community creation");
@@ -118,5 +121,24 @@ public class Community {
 			}
 		}
 		return true;
+	}
+	public String toString(String offset) {
+		String result = offset+"name:"+name+"\n";
+		result += offset+"domainName:"+domainName+"\n";
+		result += offset+"categories:";
+		if(categories != null) {
+			for(String category : categories) {
+				result += category+", ";
+			}
+		}
+		result += "\n"+offset+"metrics:"+"\n";
+		if(metrics != null) {
+			for(Metric metric : metrics) {
+				result += "\n"+offset+"     "+metric+"\n";
+				result += "\n"+metric.toString(offset+"          ");
+			}
+		}
+		result += offset+"entities:"+entities;
+		return result;
 	}
 }

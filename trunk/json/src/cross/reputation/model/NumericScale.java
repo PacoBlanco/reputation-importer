@@ -8,6 +8,9 @@ public class NumericScale extends Scale {
 	private Double maximum;
 	private Double step;
 	
+	public NumericScale() {		
+	}
+	
 	public NumericScale(String name, Double minimum, Double maximum, Double step) {
 		super(name);
 		this.minimum = minimum;
@@ -98,6 +101,15 @@ public class NumericScale extends Scale {
 		if(value instanceof Double)
 			return adaptToScale((Double)value);
 		return null;
+	}
+	
+	@Override
+	public String toString(String offset) {
+		String string = offset+"name:"+name+"\n";
+		string += offset+"minimum:"+minimum+"\n";
+		string += offset+"maximum:"+maximum+"\n";
+		string += offset+"step:"+step;
+		return string;
 	}
 
 	public Double getMinimum() {

@@ -1,16 +1,18 @@
 package cross.reputation.model;
 
+import java.util.List;
+
 public abstract class NumericTransformer extends MetricTransformer {
 
 	public NumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) throws Exception {
+			List<Double> correlationBetweenMetrics) throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		if(!(sourceMetric.getScale() instanceof NumericScale)) {			
-			throw new Exception("SourceMetric: "+sourceMetric.getIdentificator()+" has a scale:"
+			throw new Exception("SourceMetric: "+sourceMetric.getIdentifier()+" has a scale:"
 					+sourceMetric.getScale().getName()+" not numeric");
 		}
 		if(!(destinationMetric.getScale() instanceof NumericScale)) {			
-			throw new Exception("SourceMetric: "+destinationMetric.getIdentificator()+" has a scale:"
+			throw new Exception("SourceMetric: "+destinationMetric.getIdentifier()+" has a scale:"
 					+destinationMetric.getScale().getName()+" not numeric");
 		}		
 	}

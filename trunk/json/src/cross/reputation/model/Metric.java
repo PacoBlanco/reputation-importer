@@ -5,21 +5,25 @@ import java.util.List;
 import java.util.Map;
 
 public class Metric {
-	private String identificator;
+	private String identifier;
 	private Dimension dimension;
 	private Scale scale;
+	private String description;
+	
+	public Metric() {		
+	}
 	
 	public Metric(String identificator, Dimension dimension, Scale scale) {
-		this.identificator = identificator;
+		this.identifier = identificator;
 		this.dimension = dimension;
 		this.scale = scale;
 	}
 	
-	public String getIdentificator() {
-		return identificator;
+	public String getIdentifier() {
+		return identifier;
 	}
-	public void setIdentificator(String identificator) {
-		this.identificator = identificator;
+	public void setIdentifier(String identificator) {
+		this.identifier = identificator;
 	}		
 	public Dimension getDimension() {
 		return dimension;
@@ -32,6 +36,12 @@ public class Metric {
 	}
 	public void setScale(Scale scale) {
 		this.scale = scale;
+	}	
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	public Object sumValues(Object value, Object valueToSum) {
 		return getScale().sumValues(value, valueToSum);
@@ -44,5 +54,13 @@ public class Metric {
 	}
 	public Object aggregateValues(Map<CommunityMetricToImport,Object> values) {
 		return getScale().aggregateValues(values);
+	}
+	
+	public String toString(String offset) {
+		String result = offset+"identifier:"+identifier+"\n";
+		result += offset+"description:"+description+"\n";
+		result += offset+"dimension:"+dimension.getName()+"\n";
+		result += offset+"scale"+"\n"+scale.toString(offset+"     ");
+		return result;
 	}
 }

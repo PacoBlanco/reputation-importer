@@ -176,7 +176,7 @@ public class GlobalModel {
 			System.out.println("Error: metric is null");
 			return null;
 		}
-		metrics.put(metric.getIdentificator(),metric);
+		metrics.put(metric.getIdentifier(),metric);
 		return metric;
 	}
 	static public Entity addEntity(Entity entity) {
@@ -235,7 +235,7 @@ public class GlobalModel {
 			if(evaluation != null) {
 				System.out.println("Evaluation:"+evaluation);
 				System.out.println("  sourMetr:"+(evaluation.getMetric()==null?
-						null:evaluation.getMetric().getIdentificator()));
+						null:evaluation.getMetric().getIdentifier()));
 				System.out.println("  Ent:"+(evaluation.getDestinationEntity()==null?
 						null:evaluation.getDestinationEntity().getUniqueIdentificator()));
 				System.out.println("  DesCom:"+(evaluation.getCommunity()==null?
