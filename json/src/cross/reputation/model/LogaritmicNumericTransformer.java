@@ -1,19 +1,37 @@
 package cross.reputation.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class LogaritmicNumericTransformer extends NumericTransformer {
 	Double base = 10.0;
 	Double difference;
 	Double scale;
 	
 	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) throws Exception  {
+			List<Double> correlationBetweenMetrics) throws Exception  {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
 		calculateTransformers();
 	}
 	
 	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics, Double base) throws Exception  {
+			Double correlationBetweenMetrics) throws Exception  {
+		super(sourceMetric, destinationMetric,
+				Arrays.asList(new Double[]{correlationBetweenMetrics}));
+		calculateTransformers();
+	}
+	
+	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
+			List<Double> correlationBetweenMetrics, Double base) throws Exception  {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
+		this.base = base;
+		calculateTransformers();
+	}
+	
+	public LogaritmicNumericTransformer(Metric sourceMetric, Metric destinationMetric,
+			Double correlationBetweenMetrics, Double base) throws Exception  {
+		super(sourceMetric, destinationMetric, 
+				Arrays.asList(new Double[]{correlationBetweenMetrics}));
 		this.base = base;
 		calculateTransformers();
 	}
@@ -33,8 +51,8 @@ public class LogaritmicNumericTransformer extends NumericTransformer {
 		} else if(sourceScale.getMinimum() != null && destinationScale.getMinimum() != null) {
 			difference = sourceScale.getMinimum() - destinationScale.getMinimum();			
 		}
-		System.out.println("NumeTrans:"+getSourceMetric().getIdentificator()+","+
-		getDestinationMetric().getIdentificator()+","+getCorrelationBetweenMetrics()+": sc:"+
+		System.out.println("NumeTrans:"+getSourceMetric().getIdentifier()+","+
+		getDestinationMetric().getIdentifier()+","+getCorrelationBetweenMetrics()+": sc:"+
 		scale+" dif:"+difference);
 	}
 	
@@ -57,6 +75,17 @@ public class LogaritmicNumericTransformer extends NumericTransformer {
 			return valueTransformed;
 		}
 	}
-	
+
+	public Double getBase() {
+		return base;
+	}
+
+	public Double getDifference() {
+		return difference;
+	}
+
+	public Double getScale() {
+		return scale;
+	}	
 
 }

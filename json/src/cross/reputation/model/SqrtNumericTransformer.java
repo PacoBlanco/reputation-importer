@@ -1,5 +1,7 @@
 package cross.reputation.model;
 
+import java.util.List;
+
 public class SqrtNumericTransformer extends ExponentialNumericTransformer {
 	
 	public SqrtNumericTransformer(Metric sourceMetric,
@@ -8,4 +10,9 @@ public class SqrtNumericTransformer extends ExponentialNumericTransformer {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics, 0.5);		
 	}
 	
+	public SqrtNumericTransformer(Metric sourceMetric,
+			Metric destinationMetric, List<Double> correlationBetweenMetrics)
+			throws Exception {
+		super(sourceMetric, destinationMetric, correlationBetweenMetrics, 0.5);		
+	}
 }

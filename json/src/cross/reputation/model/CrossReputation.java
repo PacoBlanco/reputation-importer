@@ -99,7 +99,7 @@ public class CrossReputation {
 						evaluation.getValues().size());
 					System.out.println("  -SR:before trans:"+values+" elems:"+
 							evaluation.getValues().size()+" c:"+communityMetricToImport.getCommunity().getDomainName()+" m:"+
-							communityMetricToImport.getMetric().getIdentificator());
+							communityMetricToImport.getMetric().getIdentifier());
 					try {
 						values = exTransformer.tranformation(values, false);
 					} catch(Exception e) {
@@ -116,7 +116,7 @@ public class CrossReputation {
 				exTransformer.getCorrelationBetweenMetrics()+"*"+communityMetricToImport.getTrust()
 				+") SR:"+communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities)+" c:"+
 				communityMetricToImport.getDestinationCommunity().getDomainName()+" m:"+
-				communityMetricToImport.getDestinationMetric().getIdentificator());
+				communityMetricToImport.getDestinationMetric().getIdentifier());
 		return communityMetricToImport.getMetric().addTrust(values,trustByMetricsAndCommunities);		
 	}
 	
@@ -241,8 +241,8 @@ public class CrossReputation {
 			}
 			for(Metric metric : community.getEntities().get(destinationEntity)) {
 				for(CommunityMetricToImport metricToImport : metricsToImport) {
-					if(metric.getIdentificator().equalsIgnoreCase(
-							metricToImport.getMetric().getIdentificator())) {
+					if(metric.getIdentifier().equalsIgnoreCase(
+							metricToImport.getMetric().getIdentifier())) {
 						metricsToImportByEntity.add(metricToImport);
 					}
 				}
@@ -259,7 +259,7 @@ public class CrossReputation {
 		}
 		Object value = destinationMetric.aggregateValues(values);
 		System.out.println("-Eva:"+entity.getUniqueIdentificator()+","+destinationMetric.
-				getIdentificator()+","+value);
+				getIdentifier()+","+value);
 		updateEvaluation(entity,destinationMetric,
 				destinationMetric.getScale().adaptToScale(value));
 		return value;

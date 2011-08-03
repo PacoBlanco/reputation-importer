@@ -1,12 +1,22 @@
 package cross.reputation.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class LinealNumericTransformer extends NumericTransformer {
 	private Double scale;
 	private Double difference;
 	
 	public LinealNumericTransformer(Metric sourceMetric, Metric destinationMetric,
-			Double correlationBetweenMetrics) throws Exception {
+			List<Double> correlationBetweenMetrics) throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics);
+		calculateTransformers();
+	}
+	
+	public LinealNumericTransformer(Metric sourceMetric, Metric destinationMetric,
+			Double correlationBetweenMetrics) throws Exception {
+		super(sourceMetric, destinationMetric,
+				Arrays.asList(new Double[]{correlationBetweenMetrics}));
 		calculateTransformers();
 	}
 
@@ -48,4 +58,13 @@ public class LinealNumericTransformer extends NumericTransformer {
 		//getDestinationMetric().getIdentificator()+","+getCorrelationBetweenMetrics()+": sc:"+
 		//scale+" dif:"+difference);
 	}
+
+	public Double getScale() {
+		return scale;
+	}
+
+	public Double getDifference() {
+		return difference;
+	}	
+	
 }
