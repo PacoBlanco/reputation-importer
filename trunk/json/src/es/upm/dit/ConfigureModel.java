@@ -225,11 +225,11 @@ public class ConfigureModel {
 				System.out.println("  SourCom:"+(metriCom.getCommunity() == null?
 						null:metriCom.getCommunity().getName()));
 				System.out.println("  SourMet:"+(metriCom.getMetric() == null?
-						null:metriCom.getMetric().getIdentificator()));
+						null:metriCom.getMetric().getIdentifier()));
 				System.out.println("  DesCom:"+(metriCom.getDestinationCommunity() == null?
 						null:metriCom.getDestinationCommunity().getName()));
 				System.out.println("  DesMet:"+(metriCom.getDestinationMetric() == null?
-						null:metriCom.getDestinationMetric().getIdentificator()));
+						null:metriCom.getDestinationMetric().getIdentifier()));
 				System.out.println("  Tru:"+metriCom.getTrust());
 			} else
 				System.out.println("MetriCom:"+metriCom);
@@ -242,7 +242,7 @@ public class ConfigureModel {
 		if(metrics != null) {
 			for(Metric metric : metrics) {
 			if(metric != null) {
-					System.out.println("  Metric:"+metric.getIdentificator());
+					System.out.println("  Metric:"+metric.getIdentifier());
 					System.out.println("    Dim:"+(metric.getDimension() == null?
 							null:metric.getDimension().getName()) );
 					System.out.println("    Sca:"+(metric.getScale() == null?
@@ -259,7 +259,7 @@ public class ConfigureModel {
 				if(metrics != null) {
 					for(Metric metric : metrics) {
 						if(metric != null)
-							System.out.println("    Metric:"+metric.getIdentificator());
+							System.out.println("    Metric:"+metric.getIdentifier());
 						else
 							System.out.println("    Metric:"+metric);
 					}
