@@ -420,21 +420,21 @@ public class ReputationWiki {
 									metric,value));
 							System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "
 							+community.getName()+ " url:"+communityEntity.get(community).getUrl()
-							+" met:"+metric.getIdentificator()+" rep:"+value);
+							+" met:"+metric.getIdentifier()+" rep:"+value);
 						}
 					} else {
 						for(Metric metric : reputationMap.keySet()) {
 							Metric sourceMetric = null;							
 							for(Metric comMetric : community.getMetrics()) {
-								if(metric == null || !metric.getIdentificator().equalsIgnoreCase(
-										comMetric.getIdentificator())) {
+								if(metric == null || !metric.getIdentifier().equalsIgnoreCase(
+										comMetric.getIdentifier())) {
 									continue;									
 								}
 								sourceMetric = comMetric;
 								break;
 							}
 							if(sourceMetric == null) {							
-								System.out.println("ERROR: metric parsed("+(metric==null?null:metric.getIdentificator())
+								System.out.println("ERROR: metric parsed("+(metric==null?null:metric.getIdentifier())
 									+") does not correspond to any metric of the community("+community.getName()+
 									"):"+community.getMetrics()+". Its score is ignored");
 								continue;
@@ -443,7 +443,7 @@ public class ReputationWiki {
 									entity,sourceMetric,reputationMap.get(metric)));
 							System.out.println("Ent:"+entity.getUniqueIdentificator()+" Com: "
 							+community.getName()+ " url:"+communityEntity.get(community).getUrl()
-							+" met:"+sourceMetric.getIdentificator()+" rep:"+reputationMap.get(metric));
+							+" met:"+sourceMetric.getIdentifier()+" rep:"+reputationMap.get(metric));
 							
 						}							
 					}
