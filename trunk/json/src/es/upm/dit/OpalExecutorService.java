@@ -7,24 +7,26 @@ import java.util.concurrent.TimeUnit;
 
 
 public class OpalExecutorService {
-	
 	private ExecutorService exec;
 	private String userName;
 	private double opalSum = 0;
+	private int threads = Property.getTHREAD_NUMBER();
 	private int timeThreshold = Property.getTimeThreshold();
 	
-	OpalExecutorService(int threads, String userName, int timeThreshold) {
+	OpalExecutorService(String userName) {
 		exec = Executors.newFixedThreadPool(threads);
-		this.userName = userName;
-		this.timeThreshold = timeThreshold;
+		this.userName = userName;		
 	}
 	
-	public synchronized void execute(final String postURL) {
+	public void execute(final String postURL) {
 		exec.execute(new Runnable() {
 			public void run(){
-				try {	
-					opalSum += Scrapper.informacionPostsSlackers(userName,Ejecutor.executeScrappy(postURL, "0"));
-					
+				try {
+					double opalFromPost = Scrapper.informacionPostsSlackers(
+							userName,Ejecutor.executeScrappy(postURL, "0"));					
+					synchronized (OpalExecutorService.this) {
+						opalSum += opalFromPost;						
+					}					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
