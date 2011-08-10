@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+import cross.reputation.model.Category;
 import cross.reputation.model.Dimension;
 import cross.reputation.model.Entity;
 import cross.reputation.model.EntityIdentifier;
@@ -33,43 +34,43 @@ public class ConfigureModel {
 		Dimension rankReputation = new Dimension("rankReputation");		
 		
 		
-		String qandACategory = GlobalModel.addCategory("QandA");
-		String securityWebAppCategory = GlobalModel.addCategory("SecurityWebApp");
-		String projectConnCategory = GlobalModel.addCategory("ProjectConnection");
+		Category qandACategory = GlobalModel.addCategory("QandA");
+		Category securityWebAppCategory = GlobalModel.addCategory("SecurityWebApp");
+		Category projectConnCategory = GlobalModel.addCategory("ProjectConnection");
 		
 		
 		GlobalModel.addScale(new NumericScale("stackOverflowScale",200000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("stackOverflowMetric", reputationInQandA,
 				GlobalModel.getScales().get("stackOverflowScale")));
-		String stackOverflowCategories[] = {qandACategory};
+		Category stackOverflowCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("stackoverflow.com","stackoverflow.com",
 				stackOverflowCategories,GlobalModel.getMetrics().get("stackOverflowMetric")));		
 		
 		GlobalModel.addScale(new NumericScale("serverFaultScale",20000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("serverFaultMetric", reputationInQandA,
 				GlobalModel.getScales().get("serverFaultScale")));
-		String serverFaultCategories[] = {qandACategory};
+		Category serverFaultCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("serverfault.com","serverfault.com",
 				serverFaultCategories,GlobalModel.getMetrics().get("serverFaultMetric")));
 				
 		GlobalModel.addScale(new NumericScale("webAppsStackExchangeScale",20000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("webAppsStackExchangeMetric", reputationInQandA,
 				GlobalModel.getScales().get("webAppsStackExchangeScale")));
-		String webAppsStackExchangeCategories[] = {qandACategory};
+		Category webAppsStackExchangeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("webapps.stackexchange.com","webapps.stackexchange.com",
 				webAppsStackExchangeCategories,GlobalModel.getMetrics().get("webAppsStackExchangeMetric")));
 				
 		GlobalModel.addScale(new NumericScale("questionsSecuritytubeScale",20000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("questionsSecuritytubeMetric", reputationInQandA,
 				GlobalModel.getScales().get("questionsSecuritytubeScale")));
-		String questionsSecuritytubeCategories[] = {qandACategory};
+		Category questionsSecuritytubeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("questions.securitytube.net","questions.securitytube.net",
 				questionsSecuritytubeCategories,GlobalModel.getMetrics().get("questionsSecuritytubeMetric")));
 				
 		GlobalModel.addScale(new NumericScale("security.StackexchangeScale",2000.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("security.StackexchangeMetric", reputationInQandA,
 				GlobalModel.getScales().get("security.StackexchangeScale")));
-		String securityStackexchangeCategories[] = {qandACategory};
+		Category securityStackexchangeCategories[] = {qandACategory};
 		GlobalModel.addCommunity(new Community("security.stackexchange.com","security.stackexchange.com",
 				securityStackexchangeCategories,GlobalModel.getMetrics().get("security.StackexchangeMetric")));
 		
@@ -106,11 +107,11 @@ public class ConfigureModel {
 				return total;
 			}
 		});		
-		String semanticWikiCategories[] = {securityWebAppCategory};
+		Category semanticWikiCategories[] = {securityWebAppCategory};
 		Community wiki = new Community("semanticWiki","lab.gsi.dit.upm.es/semanticwiki",
 				semanticWikiCategories,GlobalModel.getMetrics().get("semanticWikiMetric"));
 		
-		String ohlohCategories[] = {projectConnCategory};		
+		Category ohlohCategories[] = {projectConnCategory};		
 		Set<Metric> ohlohMetrics = new HashSet<Metric>();
 		GlobalModel.addScale(new NumericScale("ohlohKudoScale",10.0,0.0,1.0));
 		Metric ohlohKudoMetric = GlobalModel.addMetric(new Metric("ohlohKudoMetric",
@@ -126,7 +127,7 @@ public class ConfigureModel {
 		GlobalModel.addScale(new NumericScale("slackersScale",10.0,0.0,1.0));
 		GlobalModel.addMetric(new Metric("slackersMetric", reputationInQandA,
 				GlobalModel.getScales().get("slackersScale")));
-		String slackersCategories[] = {GlobalModel.addCategory("QandA")};
+		Category slackersCategories[] = {GlobalModel.addCategory("QandA")};
 		GlobalModel.addCommunity(new Community("sla.ckers.org","sla.ckers.org",
 				slackersCategories,GlobalModel.getMetrics().get("slackersMetric")));
 		
