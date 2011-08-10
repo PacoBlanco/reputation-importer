@@ -47,15 +47,15 @@ abstract public class MetricTransformer {
 	
 	public String toString(String offset) {
 		String result = offset+"description:"+description+"\n";
-		result += offset+"sourceMetric:"+sourceMetric;
-		result += sourceMetric.toString(offset+"      ");
-		result += offset+"destinationMetric:"+destinationMetric;
-		result += destinationMetric.toString(offset+"      ");
+		result += offset+"sourceMetric:"+sourceMetric+"\n";
+		result += sourceMetric.toString(offset+"      ")+"\n";
+		result += offset+"destinationMetric:"+destinationMetric+"\n";
+		result += destinationMetric.toString(offset+"      ")+"\n";
 		result += offset+"correlationBetweenMetrics:";
 		for(Double value : correlationBetweenMetrics) {
 			result += value+", ";
 		}
-		return result+"\n";
+		return result;
 	}
 	
 	public void addCorrelationBetweenMetrics(Double correlationBetweenMetric) {

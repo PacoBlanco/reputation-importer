@@ -3,9 +3,8 @@ package cross.reputation.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReputationImporter extends ReputationAlgorithm {
+public class ReputationImporterBehaviour extends ReputationBehaviour {
 	List<MetricMapping> mapsMetrics;
-	//List<CommunityMetricToImport> importsFrom;
 	List<ImportationUnit> importsFrom;
 	
 	public List<MetricMapping> getMapsMetrics() {
@@ -28,12 +27,11 @@ public class ReputationImporter extends ReputationAlgorithm {
 	}
 	
 	public String toString(String offset) {
-		String result = super.toString(offset);
-		result += "\n"+offset+"mapsMetrics size:"+((mapsMetrics==null)?
+		String result = offset+"mapsMetrics size:"+((mapsMetrics==null)?
         		"null":mapsMetrics.size());
         if(mapsMetrics != null) {
 	        for(MetricMapping metMap : mapsMetrics) {
-	        	result+="\n"+offset+"     metricMapping:" + metMap + "\n" +
+	        	result+="\n"+offset+" metricMapping:" + metMap + "\n" +
 	        		metMap.toString(offset+"     ");
 	        }
         }
@@ -41,11 +39,15 @@ public class ReputationImporter extends ReputationAlgorithm {
         		"null":importsFrom.size());
         if(importsFrom != null) {
 	        for(ImportationUnit impUnit : importsFrom) {
-	        	result+="\n"+offset+"     importsFrom:" + impUnit + "\n" +
+	        	result+="\n"+offset+" importsFrom:" + impUnit + "\n" +
 	        		impUnit.toString(offset+"     ");
 	        }
         }
-        return result;
+        String last = super.toString(offset);
+		if(last.isEmpty()) {
+			return result;
+		}
+		return result+"\n"+last;
 	}
 	
 	static public List<Class<? extends ReputationAlgorithm>> listSubclasses() {

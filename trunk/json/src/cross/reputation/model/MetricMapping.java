@@ -24,4 +24,14 @@ public class MetricMapping {
 		this.value = value;
 	}
 	
+	public String toString(String offset) {
+		String result = offset+"importedMetric:" +
+        		getImportedMetric()+"\n"+
+        		getImportedMetric().toString(offset+"     ");
+        result += "\n"+offset+"resultMetric:" +
+        		getResultMetric()+"\n"+
+        		getResultMetric().toString(offset+"     ");
+        result += "\n"+offset+"value:" + getValue();
+		return result;
+	}
 }

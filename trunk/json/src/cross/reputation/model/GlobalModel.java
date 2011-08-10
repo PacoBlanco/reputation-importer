@@ -16,7 +16,7 @@ import cross.reputation.model.Scale;
 
 public class GlobalModel {
 	static private Map<String,Community> communities = new HashMap<String,Community>();
-	static private Set<String> categories = new HashSet<String>();
+	static private Set<Category> categories = new HashSet<Category>();
 	static private Map<String,Map<String,Double>> categoryMatching = 
 		new HashMap<String,Map<String,Double>>();
 	static private Map<Community,Map<Community,Double>> fixedTrustBetweenCommunities =
@@ -32,7 +32,7 @@ public class GlobalModel {
 	static public Map<String, Community> getCommunities() {
 		return communities;
 	}
-	static public Set<String> getCategories() {
+	static public Set<Category> getCategories() {
 		return categories;
 	}
 	static public Map<String,Map<String,Double>> getCategoryMatching() {
@@ -41,10 +41,10 @@ public class GlobalModel {
 	static public Double getCategoryLinealAverageMatching(Community sourceCommunity, 
 			Community destinationCommunity) {
 		Double total = null;
-		for (String category : destinationCommunity.getCategories()) {
+		for (Category category : destinationCommunity.getCategories()) {
 			Double value = null;
 			Map<String,Double> destinCategoryMatching = categoryMatching.get(category);
-			for(String sourceCategory : sourceCommunity.getCategories()) {
+			for(Category sourceCategory : sourceCommunity.getCategories()) {
 				if(destinCategoryMatching.containsKey(sourceCategory)) {
 					if(value == null)
 						value = destinCategoryMatching.get(sourceCategory);
@@ -60,7 +60,7 @@ public class GlobalModel {
 		//System.out.println("value catMatc for:"+sourceCommunity.getName()+","+
 		//		destinationCommunity.getName()+":"+(total == null ? 
 		//		null : total/destinationCommunity.getCategories().length));
-		return (total == null ? null : total/destinationCommunity.getCategories().length);
+		return (total == null ? null : total/destinationCommunity.getCategories().size());
 		
 	}
 	static public Map<Community,Map<Community,Double>> getFixedTrustBetweenCommunities() {
@@ -163,11 +163,12 @@ public class GlobalModel {
 		}
 		communities.put(community.getName(), community);
 	}
-	static public String addCategory(String category) {
-		if(category == null) {
+	static public Category addCategory(String categoryName) {
+		if(categoryName == null) {
 			System.out.println("Error: category is null");
 			return null;
 		}
+		Category category = new Category(categoryName);
 		categories.add(category);
 		return category;
 	}

@@ -8,6 +8,9 @@ public class Entity {
 	private Map<Community, EntityIdentifier> identificatorInCommunities = 
 		new HashMap<Community, EntityIdentifier>();
 	
+	public Entity() {		
+	}
+	
 	public Entity(String uniqueIdentificator) {
 		this.uniqueIdentificator = uniqueIdentificator;
 	}

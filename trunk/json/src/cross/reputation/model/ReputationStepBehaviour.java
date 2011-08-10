@@ -2,7 +2,7 @@ package cross.reputation.model;
 
 import java.util.List;
 
-public class ReputationStep extends ReputationAlgorithm{
+public class ReputationStepBehaviour extends ReputationBehaviour {
 	int stepIdentificator;
 
 	public int getStepIdentificator() {
@@ -14,8 +14,12 @@ public class ReputationStep extends ReputationAlgorithm{
 	}
 	
 	public String toString(String offset) {
-		return super.toString(offset) + "\n" +
-			offset + "stepIdentificator:" + stepIdentificator;
+		String result = offset + "stepIdentificator:" + stepIdentificator;
+		String last = super.toString(offset);
+		if(last.isEmpty()) {
+			return result;
+		}
+		return result+"\n"+last;
 	}
 	
 	static public List<Class<? extends ReputationAlgorithm>> listSubclasses() {

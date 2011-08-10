@@ -1,5 +1,6 @@
 package cross.reputation.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class NumericTransformer extends MetricTransformer {
@@ -35,5 +36,12 @@ public abstract class NumericTransformer extends MetricTransformer {
 		return value;
 	}
 	
-
+	static public List<Class<? extends MetricTransformer>> listSubclasses() {
+		List<Class<?  extends MetricTransformer>> list = 
+			new ArrayList<Class<? extends MetricTransformer>>();
+		list.add(ExponentialNumericTransformer.class);
+		list.add(LinealNumericTransformer.class);
+		list.add(LogaritmicNumericTransformer.class);
+		return list;		
+	}
 }
