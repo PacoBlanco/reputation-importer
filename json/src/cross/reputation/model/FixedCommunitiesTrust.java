@@ -30,8 +30,8 @@ public class FixedCommunitiesTrust extends TrustBetweenCommunities {
 	
 	public String toString(String offset) {
 		String string = super.toString(offset);
-		string += offset+"communityScorer:"+communityScorer+"\n";
-		string += offset+"communityScored:"+communityScored+"\n";
+		string += "\n"+offset+"communityScorer:"+communityScorer+"\n";
+		string += offset+"communityScored:"+communityScored;
 		return string;
 	}
 	

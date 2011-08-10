@@ -67,4 +67,7 @@ public class LinealNumericTransformer extends NumericTransformer {
 		return difference;
 	}	
 	
+	static public List<Class<? extends MetricTransformer>> listSubclasses() {
+		return null;
+	}
 }

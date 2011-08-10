@@ -11,4 +11,7 @@ public class EntityType {
 		this.type = type;
 	}	
 	
+	public String toString(String offset) {
+		return offset+"type:"+type;
+	}
 }

@@ -3,16 +3,18 @@ package cross.reputation.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReputationAlgorithm {
-	String name;
-	List<AccessType> accesibilities;
-	CollectionType resultCollectionType;
-	List<EntityType> entityTypes;
-	List<Metric> usesMetrics;
-	List<ReputationStep> reputationSteps;
-	List<ReputationValue> reputationSources;
-	List<ReputationValue> reputationResults;
-	String description;
+public class ReputationAlgorithmImplementation extends ReputationBehaviour 
+		implements ReputationAlgorithmI {
+	String name = null;
+	List<AccessType> accesibilities = null;
+	CollectionType resultCollectionType = null;
+	List<EntityType> entityTypes = null;
+	List<Metric> usesMetrics = null;
+	List<ReputationStep> reputationSteps = null;
+	List<ReputationValue> reputationSources = null;
+	List<ReputationValue> reputationResults = null;
+	String description = null;
+	Integer stepIdentifier = null;
 	
 	public String getName() {
 		return name;
@@ -141,17 +143,32 @@ public class ReputationAlgorithm {
 						reputationValue.toString(offset+"      ");						
 			}
 		}
-		return result;
+		result += "\n"+offset+"stepIdentifier:"+stepIdentifier;
+		String last = super.toString(offset);
+		if(last.isEmpty()) {
+			return result;
+		}
+		return result+"\n"+last;
 	}
 	
-	static public List<Class<? extends ReputationAlgorithm>> listSubclasses() {
-		List<Class<? extends ReputationAlgorithm>> list = 
-			new ArrayList<Class<? extends ReputationAlgorithm>>();
-		list.add(ReputationStep.class);
-		list.add(ReputationImporter.class);
-		list.add(CollectingAlgorithm.class);
-		list.add(ReputationModule.class);
-		list.add(ReputationModel.class);
+	@Override
+	public Integer getStepIdentifier() {
+		return stepIdentifier;
+	}
+	@Override
+	public void setStepIdentifier(Integer stepIdentifier) {
+		this.stepIdentifier = stepIdentifier;		
+	}
+	
+	static public List<Class<? extends ReputationBehaviour>> listSubclasses() {
+		List<Class<? extends ReputationBehaviour>> list = 
+			new ArrayList<Class<? extends ReputationBehaviour>>();
+		list.add(ReputationStepBehaviour.class);
+		list.add(ReputationImporterBehaviour.class);
+		list.add(CollectingAlgorithmBehaviour.class);
+		list.add(ReputationModuleBehaviour.class);
+		list.add(ReputationModelBehaviour.class);
 		return list;		
 	}
+	
 }

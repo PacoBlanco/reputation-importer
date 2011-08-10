@@ -15,4 +15,8 @@ public class SqrtNumericTransformer extends ExponentialNumericTransformer {
 			throws Exception {
 		super(sourceMetric, destinationMetric, correlationBetweenMetrics, 0.5);		
 	}
+	
+	static public List<Class<? extends MetricTransformer>> listSubclasses() {
+		return null;
+	}
 }

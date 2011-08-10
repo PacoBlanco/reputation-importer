@@ -59,8 +59,10 @@ public class Metric {
 	public String toString(String offset) {
 		String result = offset+"identifier:"+identifier+"\n";
 		result += offset+"description:"+description+"\n";
-		result += offset+"dimension:"+dimension.getName()+"\n";
-		result += offset+"scale"+"\n"+scale.toString(offset+"     ");
+		result += offset+"dimension:"+
+				((dimension==null)?"null":dimension.getName())+"\n";
+		result += offset+"scale:"+
+				((scale==null)?"null":scale+"\n"+scale.toString(offset+"     "));
 		return result;
 	}
 }

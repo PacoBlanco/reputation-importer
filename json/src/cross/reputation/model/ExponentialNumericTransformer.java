@@ -89,5 +89,11 @@ public class ExponentialNumericTransformer extends NumericTransformer {
 		return base;
 	}	
 
+	static public List<Class<? extends MetricTransformer>> listSubclasses() {
+		List<Class<? extends MetricTransformer>> list = 
+			new ArrayList<Class<? extends MetricTransformer>>();
+		list.add(SqrtNumericTransformer.class);
+		return list;		
+	}
 }
 

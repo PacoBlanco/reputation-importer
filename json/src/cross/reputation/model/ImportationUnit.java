@@ -4,7 +4,7 @@ public class ImportationUnit {
 	Community importedCommunity;
 	Metric importedMetric;
 	MetricTransformer metricTransformation;
-	CollectingAlgorithm collectsReputationBy;
+	ReputationAlgorithmImplementation collectsReputationBy;
 	TrustBetweenCommunities trust;
 	
 	public Community getImportedCommunity() {
@@ -25,10 +25,11 @@ public class ImportationUnit {
 	public void setMetricTransformation(MetricTransformer metricTransformation) {
 		this.metricTransformation = metricTransformation;
 	}
-	public CollectingAlgorithm getCollectsReputationBy() {
+	public ReputationAlgorithmImplementation getCollectsReputationBy() {
 		return collectsReputationBy;
 	}
-	public void setCollectsReputationBy(CollectingAlgorithm collectsReputationBy) {
+	public void setCollectsReputationBy(
+			ReputationAlgorithmImplementation collectsReputationBy) {
 		this.collectsReputationBy = collectsReputationBy;
 	}
 	public TrustBetweenCommunities getTrust() {
@@ -37,5 +38,31 @@ public class ImportationUnit {
 	public void setTrust(TrustBetweenCommunities trust) {
 		this.trust = trust;
 	}
-	
+	public String toString(String offset) {
+		String result = offset+"importedMetric:" +
+			importedMetric;
+        if(importedMetric != null) {
+        	result += "\n"+importedMetric.toString(offset+"     ");
+        }
+        result += "\n"+offset+"importedCommunity:" +
+        		importedCommunity;
+        if(importedCommunity != null) {
+        	result += "\n"+importedCommunity.toString(offset+"     ");
+        }
+        result += "\n"+offset+"metricTransformation:" +
+        		metricTransformation;
+        if(metricTransformation != null) {
+        	result += "\n"+metricTransformation.toString(offset+"     ");
+        }
+        result += "\n"+offset + "collectsReputationBy:" +
+        		collectsReputationBy;
+        if(collectsReputationBy != null) {
+        	result += "\n"+collectsReputationBy.toString(offset+"     ");
+        }
+        result += "\n"+offset+"trust:" +trust;
+        if(trust != null) {
+        	result += "\n"+trust.toString(offset+"     ");
+        }
+		return result;
+	}
 }

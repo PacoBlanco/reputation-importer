@@ -28,9 +28,9 @@ public class TrustBetweenCommunities {
 	}
 	
 	public String toString(String offset) {
-		String string = offset+"value:"+value+"\n";
+		String string = offset+"value:"+value;
 		for(TrustBetweenCommunities truBetInside : trustProvidedBy) {
-			string += truBetInside.toString(offset+"     ");		
+			string += "\n"+truBetInside.toString(offset+"     ");		
 		}
 		return string;
 	}

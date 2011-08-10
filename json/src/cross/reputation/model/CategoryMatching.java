@@ -30,8 +30,8 @@ public class CategoryMatching extends TrustBetweenCommunities {
 	
 	public String toString(String offset) {
 		String string = super.toString(offset);
-		string += offset+"originatingCategory:"+originatingCategory+"\n";
-		string += offset+"receivingCategory:"+receivingCategory+"\n";
+		string += "\n"+offset+"originatingCategory:"+originatingCategory+"\n";
+		string += offset+"receivingCategory:"+receivingCategory;
 		return string;
 	}
 }

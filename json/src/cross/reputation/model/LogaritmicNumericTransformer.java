@@ -88,4 +88,7 @@ public class LogaritmicNumericTransformer extends NumericTransformer {
 		return scale;
 	}	
 
+	static public List<Class<? extends MetricTransformer>> listSubclasses() {
+		return null;
+	}
 }
