@@ -271,7 +271,7 @@ public class ConfigureModel {
 		}
 	}
 	
-	static public Collection<Entity> SetWikiUserEntitiesAndAccounts() {
+	static public Collection<Entity> SetWikiUserEntitiesAndAccounts() throws Exception {
 		/*Entity administrator = GlobalModel.addEntity(new Entity("Administrator"));
 		administrator.addIdentificatorInCommunities(GlobalModel.getCommunities().get("serverfault.com"),
 				new EntityIdentifier("Ben Torell",null));
@@ -328,7 +328,7 @@ public class ConfigureModel {
 						accounts.addAll(Scrapper.MoreUserAccountsByURL(url));
 					} else {
 						accounts.addAll(Scrapper.UserAccounts(userName,
-								community.getDomainName()));
+								community.getDomainName(),true));
 					}
 					
 				} catch (Exception e) {

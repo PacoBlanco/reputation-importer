@@ -2,11 +2,11 @@ package cross.reputation.model;
 
 import com.hp.hpl.jena.rdf.model.Resource;
 
-public class DimensionCorrelation {
+public class ScaleCorrelation {
 	private Resource resource;
-	private Dimension sourceDimension;
-	private Dimension targetDimension;
-	private Double correlationValue;	
+	private Scale sourceScale;
+	private Scale targetScale;
+	private Double correlationValue;
 	
 	public Resource getResource() {
 		return resource;
@@ -14,17 +14,17 @@ public class DimensionCorrelation {
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
-	public Dimension getSourceDimension() {
-		return sourceDimension;
+	public Scale getSourceScale() {
+		return sourceScale;
 	}
-	public void setSourceDimension(Dimension sourceDimension) {
-		this.sourceDimension = sourceDimension;
+	public void setSourceScale(Scale sourceScale) {
+		this.sourceScale = sourceScale;
 	}
-	public Dimension getTargetDimension() {
-		return targetDimension;
+	public Scale getTargetScale() {
+		return targetScale;
 	}
-	public void setTargetDimension(Dimension targetDimension) {
-		this.targetDimension = targetDimension;
+	public void setTargetScale(Scale targetScale) {
+		this.targetScale = targetScale;
 	}
 	public Double getCorrelationValue() {
 		return correlationValue;
@@ -34,8 +34,8 @@ public class DimensionCorrelation {
 	}
 	public String toString(String offset) {
 		StringBuilder result = new StringBuilder(
-				offset+"sourceDimension:"+sourceDimension);
-		result.append("\n"+offset+"targetDimension:"+targetDimension);
+				offset+"sourceScale:"+sourceScale);
+		result.append("\n"+offset+"targetScale:"+targetScale);
 		result.append("\n"+offset+"correlationValue:"+correlationValue);
 		return result.toString();
 	}

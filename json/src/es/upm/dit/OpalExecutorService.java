@@ -13,7 +13,7 @@ public class OpalExecutorService {
 	private int threads = Property.getTHREAD_NUMBER();
 	private int timeThreshold = Property.getTimeThreshold();
 	
-	OpalExecutorService(String userName) {
+	public OpalExecutorService(String userName) {
 		exec = Executors.newFixedThreadPool(threads);
 		this.userName = userName;		
 	}

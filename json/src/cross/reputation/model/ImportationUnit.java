@@ -1,12 +1,21 @@
 package cross.reputation.model;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class ImportationUnit {
-	Community importedCommunity;
-	Metric importedMetric;
-	MetricTransformer metricTransformation;
-	ReputationAlgorithmImplementation collectsReputationBy;
-	TrustBetweenCommunities trust;
+	private Resource resource;
+	private Community importedCommunity;
+	private Metric importedMetric;
+	private MetricTransformer metricTransformation;
+	private ReputationAlgorithmImplementation collectsReputationBy;
+	private TrustBetweenCommunities trust;
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public Community getImportedCommunity() {
 		return importedCommunity;
 	}

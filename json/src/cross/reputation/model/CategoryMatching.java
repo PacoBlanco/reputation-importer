@@ -1,9 +1,9 @@
 package cross.reputation.model;
 
 public class CategoryMatching extends TrustBetweenCommunities {
-	Category originatingCategory;
-	Category receivingCategory;
-	
+	private Category originatingCategory;
+	private Category receivingCategory;
+		
 	public CategoryMatching() {
 		super();
 	}
@@ -30,8 +30,10 @@ public class CategoryMatching extends TrustBetweenCommunities {
 	
 	public String toString(String offset) {
 		String string = super.toString(offset);
-		string += "\n"+offset+"originatingCategory:"+originatingCategory+"\n";
-		string += offset+"receivingCategory:"+receivingCategory;
+		string += "\n"+offset+"originatingCategory:"+((originatingCategory==null)?"null":
+			originatingCategory.getName())+"\n";
+		string += offset+"receivingCategory:"+((receivingCategory==null)?"null":
+			receivingCategory.getName());
 		return string;
 	}
 }

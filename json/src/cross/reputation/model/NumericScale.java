@@ -11,8 +11,12 @@ public class NumericScale extends Scale {
 	public NumericScale() {		
 	}
 	
-	public NumericScale(String name, Double minimum, Double maximum, Double step) {
+	public NumericScale(String name, Double minimum, Double maximum, 
+			Double step) throws Exception {
 		super(name);
+		if(maximum == minimum) {
+			throw new Exception("Maximum and minimum values cannot be the same");
+		}
 		this.minimum = minimum;
 		this.maximum = maximum;
 		if(maximum != null && minimum != null && maximum < minimum) {

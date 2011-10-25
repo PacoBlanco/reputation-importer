@@ -1,10 +1,19 @@
 package cross.reputation.model;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class MetricMapping {
-	Metric importedMetric;
-	Metric resultMetric;
-	double value;
+	private Resource resource;
+	private Metric importedMetric;
+	private Metric resultMetric;
+	private Double value;
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public Metric getImportedMetric() {
 		return importedMetric;
 	}
@@ -17,10 +26,10 @@ public class MetricMapping {
 	public void setResultMetric(Metric resultMetric) {
 		this.resultMetric = resultMetric;
 	}
-	public double getValue() {
+	public Double getValue() {
 		return value;
 	}
-	public void setValue(double value) {
+	public void setValue(Double value) {
 		this.value = value;
 	}
 	

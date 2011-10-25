@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class Metric {
+	private Resource resource;
 	private String identifier;
 	private Dimension dimension;
 	private Scale scale;
@@ -19,6 +22,12 @@ public class Metric {
 		this.scale = scale;
 	}
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public String getIdentifier() {
 		return identifier;
 	}

@@ -3,6 +3,8 @@ package cross.reputation.model;
 import java.net.URI;
 import java.util.List;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class CollectingSystem extends CollectingAlgorithm {
 	URI uriFormat;
 	

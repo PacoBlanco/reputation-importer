@@ -4,8 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReputationBehaviour {
-	List<ReputationBehaviour> behaviours;
-	
+	ReputationAlgorithmImplementation root;
+	List<ReputationBehaviour> behaviours = new ArrayList<ReputationBehaviour>();	
+		
+	public ReputationAlgorithmImplementation getRoot() {
+		return root;
+	}
+
+	public void setRoot(ReputationAlgorithmImplementation root) {
+		this.root = root;
+	}
+
 	public void addBehaviourInstance(ReputationBehaviour behaviour) {
 		if(behaviours == null) {
 			behaviours = new ArrayList<ReputationBehaviour>();
@@ -21,33 +30,36 @@ public class ReputationBehaviour {
 		this.behaviours = behaviours;
 	}
 	
-	public boolean addBehaviour(ReputationBehaviour behaviour) throws Exception {
+	public boolean addBehaviour(ReputationBehaviour behaviour,
+			ReputationAlgorithmImplementation repAlg) throws Exception {
 		if(behaviours == null) {
 			behaviours = new ArrayList<ReputationBehaviour>();
 		}
-		return verifyAndAddSubclass(behaviour);
+		return verifyAndAddSubclass(behaviour, repAlg);
 	}
 	
-	public boolean addBehaviour(Class<? extends ReputationBehaviour> behaviour) 
-			throws Exception {
+	public boolean addBehaviour(Class<? extends ReputationBehaviour> behaviour,
+			ReputationAlgorithmImplementation repAlg) throws Exception {
 		if(behaviours == null) {
 			behaviours = new ArrayList<ReputationBehaviour>();
 		}
-		return verifyAndAddSubclass(behaviour.newInstance());
+		return verifyAndAddSubclass(behaviour.newInstance(), repAlg);
 	}
 	
-	public boolean verifyAndAddSubclass(ReputationBehaviour instance) throws Exception {
+	public boolean verifyAndAddSubclass(ReputationBehaviour instance,
+			ReputationAlgorithmImplementation repAlg) throws Exception {
+		instance.setRoot(repAlg);
 		Class<? extends	ReputationBehaviour> newBehaviour = instance.getClass();
 		for(ReputationBehaviour behaviour : behaviours) {
 			if(behaviour.getClass() == newBehaviour) {
 				return false;
 			}
-			if(behaviour.getClass() == ReputationModelBehaviour.class) {
+			/*if(behaviour.getClass() == ReputationModelBehaviour.class) {
 				if(newBehaviour == ReputationModuleBehaviour.class) {
 					throw new Exception("ReputationModule class cannot be" +
 							" instanced over ReputationModel object");
 				}
-			}
+			}*/
 			if(behaviour.getClass() == ReputationImporterBehaviour.class) {
 				if(newBehaviour == CollectingAlgorithmBehaviour.class) {
 					throw new Exception("CollectingAlgorithm class cannot be" +
@@ -90,6 +102,7 @@ public class ReputationBehaviour {
 		if(newBehaviour == ReputationalActionBehaviour.class ||
 				newBehaviour == CollectingSystemBehaviour.class) {
 			ReputationBehaviour behaviour = CollectingAlgorithmBehaviour.class.newInstance();
+			behaviour.setRoot(repAlg);
 			behaviour.addBehaviourInstance(instance);
 			addBehaviourInstance(behaviour);
 			return true;

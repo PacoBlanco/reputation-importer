@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import cross.reputation.model.GlobalModel;
 import cross.reputation.model.Metric;
+import cross.reputation.model.ModelException;
 import es.upm.dit.vulnerapedia.ReputationWiki;
 
 import net.sf.json.JSONArray;
@@ -25,7 +26,7 @@ import net.sf.json.JSONSerializer;
 
 
 
-public class Scrapper extends Thread{
+public class Scrapper extends Thread {
 	
 	private static String NombreUsuario = "";
 	private static String ApellidoUsuario_Espacio = "";
@@ -478,7 +479,7 @@ public class Scrapper extends Thread{
 	 * Metodo privado auxiliar que llama a la clase Ejecutor, que a su vez ejecuta
 	 * la herramienta OPAL para un texto dado.
 	 */	
-	private static String opal_parser(String texto) throws IOException{
+	static String opal_parser(String texto) throws IOException{
 		String opal_xml = Ejecutor.ejecuta_opal(texto);
 		//System.out.println("Opal exit:"+opal_xml);
 		return opal_xml;
@@ -588,8 +589,15 @@ public class Scrapper extends Thread{
 		}
 	}
 	
-	public static double informacionPostsSlackers (String userName, String scrappy_dump) throws IOException{		
-		JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
+	public static double informacionPostsSlackers (String userName, 
+			String scrappy_dump) throws Exception{		
+		JSONArray array = null; 
+		try {
+			array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);			
+		} catch(net.sf.json.JSONException e) {
+			ModelException.sendMessage(ModelException.INFO,
+				"Invalid JSON String from useName "+userName+":\n"+scrappy_dump);
+		}
 		JSONObject objeto_dump = array.getJSONObject(0);
 		double opal = 0;
 		int k = 0;
@@ -608,6 +616,9 @@ public class Scrapper extends Thread{
 	        			k = j;
 		        		break;
 	        		}
+	        	} else {
+	        		ModelException.sendMessage(ModelException.SCRAPPY_ERROR,
+	        				"");
 	        	}
     		}
     		//Empieza a sacar la puntuacion de las respuestas siguientes a la del usuario:
@@ -631,10 +642,17 @@ public class Scrapper extends Thread{
 	        			System.out.println("ERROR: OPAL doest not return a numeric" +
 	        					" value for text of size:"+opal_xml);
 	        		}
-	        	}
-    			
+	        	} else {
+	        		ModelException.sendMessage(ModelException.INFO,
+	            		"Slackers scrappy template could be out of date or incorrect. " +
+	    				"There is not http://purl.org/dc/elements/1.1/PostText found.");
+	        	}  			
     		}
-		}
+		} else {
+			ModelException.sendMessage(ModelException.INFO,
+            	"Slackers scrappy template could be out of date or incorrect. " +
+    			"There is not http://purl.org/dc/elements/1.1/UserName found.");
+    	}
 		return opal;
 	}
 	
@@ -938,26 +956,27 @@ public class Scrapper extends Thread{
     }
     
     //Para obtener la url del usuario que queramos	
-    static public List<String> UserAccounts (String usuario, String initialSite) 
-    		throws MalformedURLException, IOException{
+    static public List<String> UserAccounts (String usuario, String initialSite, 
+    		boolean searchAssociatedAccounts) throws MalformedURLException, IOException{
     	usuario = usuario.replace(" ", "+");
     	String url = "";
     	String web = "";
     	for(int i=0;i<accountsDefinition.length;i++){
-    		if (initialSite.equals(accountsDefinition[i][0])){
+    		if (initialSite.endsWith(accountsDefinition[i][0])){
 				if (i == 0 || i == 1 || i == 2) {						
 					web = accountsDefinition[i][1] + usuario;
 				}else{
-					web = accountsDefinition[i][1] + initialSite + "/users+" + usuario;
+					web = accountsDefinition[i][1] + accountsDefinition[i][0] + "/users+" + usuario;
+					//web = accountsDefinition[i][1] + initialSite + "/users+" + usuario;
 				}
 				System.out.println("Execute query:"+web);
 	    		Web file = new Web (web);
-	        	String MIME    = file.getMIMEType( );
+	        	String MIME = file.getMIMEType( );
 	        	Object content = file.getContent( );
 		    	if ( MIME.equals( "text/html" ) && content instanceof String ){
 		    		try{
 		    			String html = content.toString();
-		    			if (i == 0 || i == 1){
+		    			if (i == 0 || i == 1){ //sla.sckers.org(0) and elhacker.net(1)
 		    				int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][2]);
 		    				int indice_final = html.indexOf(accountsDefinition[i][3], indice_inicial);
 				    	    if(indice_final == -1 || indice_inicial == -1) {
@@ -990,11 +1009,13 @@ public class Scrapper extends Thread{
 			    	    	System.out.println("Accounts found:"+accounts);
 				            return accounts;			    	    		
 		    			} else if (i == 3 || i == 4 || i == 5 || i == 6 || i == 7){
-		    				int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
+		    				//System.out.println(html);
+		    				int indice_inicial = html.toLowerCase().indexOf(accountsDefinition[i][0]+"/users/");
+		    				//int indice_inicial = html.toLowerCase().indexOf(initialSite+"/users/");
 		    				int indice_final = html.indexOf("\"", indice_inicial);
 					    	if (indice_final == -1 || indice_inicial == -1){
 					    		System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+
-		    	    			"found or the result of the search is not understable");
+		    	    				"found or the result of the search is not understable");
 					    		break;
 					    	}
 					    	url = html.substring(indice_inicial, indice_final);
@@ -1002,13 +1023,15 @@ public class Scrapper extends Thread{
 						    if(!url.contains("%")){
 						       	List<String> accounts = new ArrayList<String>();
 						       	accounts.add(url);
-						       	try {
-						       		accounts.addAll(MoreUserAccountsByURL(url));
-						       	} catch (java.net.ConnectException ce) {
-						    		System.out.println("ERROR: Scrappy server Connection exception. " +
-						    				"Maybe Scrappy Server is offline.");
-						    		ce.printStackTrace();
-						    	} 
+						       	if(searchAssociatedAccounts) {
+							       	try {
+							       		accounts.addAll(MoreUserAccountsByURL(url));
+							       	} catch (java.net.ConnectException ce) {
+							    		System.out.println("ERROR: Scrappy server Connection exception. " +
+							    				"Maybe Scrappy Server is offline.");
+							    		ce.printStackTrace();
+							    	}							       	
+						       	}
 						       	return accounts;
 						    } else {
 						    	System.out.println("INFO: User "+usuario+" in "+initialSite+" not "+

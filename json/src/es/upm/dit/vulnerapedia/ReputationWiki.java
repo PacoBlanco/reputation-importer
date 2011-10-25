@@ -122,7 +122,7 @@ public class ReputationWiki {
 		}		
 	}
 	
-	static public void setUserAccountsFromJSON(String lastFileName) throws IOException {
+	static public void setUserAccountsFromJSON(String lastFileName) throws Exception {
 		File userFile = new File(directory + lastFileName);
 		System.out.println("File to process:"+userFile.getAbsolutePath());
 		FileReader fileReader = new FileReader(userFile);
@@ -186,7 +186,7 @@ public class ReputationWiki {
 			
 	}
 	
-	static public void setUserAccountsFromFile(String lastFileName) throws IOException {
+	static public void setUserAccountsFromFile(String lastFileName) throws Exception {
 		File userFile = new File(directory + lastFileName);
 		System.out.println("File to process:"+userFile.getAbsolutePath());
 		FileReader fileReader = new FileReader(userFile);
