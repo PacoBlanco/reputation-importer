@@ -3,19 +3,30 @@ package cross.reputation.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class ReputationAlgorithmImplementation extends ReputationBehaviour 
 		implements ReputationAlgorithmI {
-	String name = null;
-	List<AccessType> accesibilities = null;
-	CollectionType resultCollectionType = null;
-	List<EntityType> entityTypes = null;
-	List<Metric> usesMetrics = null;
-	List<ReputationStep> reputationSteps = null;
-	List<ReputationValue> reputationSources = null;
-	List<ReputationValue> reputationResults = null;
-	String description = null;
-	Integer stepIdentifier = null;
+	private Resource resource = null;
+	private String name = null;
+	private List<AccessType> accesibilities = null;
+	private CollectionType resultCollectionType = null;
+	private List<EntityType> entityTypes = null;
+	private List<Metric> usesMetrics = null;
+	private List<ReputationValue> reputationSources = null;
+	private List<ReputationValue> reputationResults = null;
+	private String description = null;
+	private Integer stepIdentifier = null;
+	private ReputationAlgorithmImplementation definedByReputationModel = null;
+	private String objectClass = null;
+	private String algorithmPath = null;
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public String getName() {
 		return name;
 	}
@@ -48,6 +59,18 @@ public class ReputationAlgorithmImplementation extends ReputationBehaviour
 			entityTypes = new ArrayList<EntityType>();
 		}
 		entityTypes.add(entityType);
+	}	
+	public String getObjectClass() {
+		return objectClass;
+	}
+	public void setObjectClass(String objectClass) {
+		this.objectClass = objectClass;
+	}
+	public String getAlgorithmPath() {
+		return algorithmPath;
+	}
+	public void setAlgorithmPath(String algorithmPath) {
+		this.algorithmPath = algorithmPath;
 	}
 	public List<Metric> getUsesMetrics() {
 		return usesMetrics;
@@ -57,15 +80,6 @@ public class ReputationAlgorithmImplementation extends ReputationBehaviour
 			usesMetrics = new ArrayList<Metric>();
 		}
 		usesMetrics.add(usesMetric);
-	}
-	public List<ReputationStep> getReputationSteps() {
-		return reputationSteps;
-	}
-	public void addReputationSteps(ReputationStep reputationStep) {
-		if(reputationSteps == null) {
-			reputationSteps = new ArrayList<ReputationStep>();
-		}
-		reputationSteps.add(reputationStep);
 	}
 	public List<ReputationValue> getReputationSources() {
 		return reputationSources;
@@ -85,6 +99,7 @@ public class ReputationAlgorithmImplementation extends ReputationBehaviour
 		}
 		reputationResults.add(reputationResult);
 	}
+	
 	public String getDescription() {
 		return description;
 	}
@@ -92,9 +107,19 @@ public class ReputationAlgorithmImplementation extends ReputationBehaviour
 		this.description = description;
 	}
 	
+	public ReputationAlgorithmImplementation getDefinedByReputationModel() {
+		return definedByReputationModel;
+	}
+	public void setDefinedByReputationModel(
+			ReputationAlgorithmImplementation definedByReputationModel) {
+		this.definedByReputationModel = definedByReputationModel;
+	}
+	
 	public String toString(String offset) {
 		String result = offset+"name:"+name+"\n";
 		result += offset+"description:"+description+"\n";
+		result += offset+"objectClass:"+objectClass+"\n";
+		result += offset+"algorithmPath:"+algorithmPath+"\n";
 		result += offset+"accesibilities:"+
 				((accesibilities == null)?"null":"");
 		if(accesibilities != null) {
@@ -119,14 +144,19 @@ public class ReputationAlgorithmImplementation extends ReputationBehaviour
 						metric.toString(offset+"      ");
 			}
 		}
-		result += "\n"+offset+"reputationSteps size:"+
+		result += "\n"+offset+"definedByReputationModel:"+
+				((definedByReputationModel == null)?"null":definedByReputationModel);
+		if(definedByReputationModel != null) {
+			result += "\n"+definedByReputationModel.toString(offset+"     ");
+		}
+		/*result += "\n"+offset+"reputationSteps size:"+
 				((reputationSteps == null)?"null":reputationSteps.size());
 		if(reputationSteps != null) {
 			for(ReputationStep reputationStep : reputationSteps) {
 				result += "\n"+offset+"ReputationStep:"+reputationStep+"\n"+
 						reputationStep.toString(offset+"      ");
 			}
-		}
+		}*/
 		result += "\n"+offset+"reputationSources size:"+
 				((reputationSources == null)?"null":reputationSources.size());
 		if(reputationSources != null) {

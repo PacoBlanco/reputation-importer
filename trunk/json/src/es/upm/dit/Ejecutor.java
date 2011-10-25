@@ -107,11 +107,11 @@ public class Ejecutor{
     	}
     }
     			
-    static public String executeScrappy (String urlServer, String texto, 
+    /*static public String executeScrappy (String urlServer, String texto, 
     		String tipo) throws IOException{	
     	Web file   = new Web(urlServer+URLEncoder.encode(texto),"UTF-8");
 		return file.getContent().toString();
-    }
+    }*/
 
     static public void ConfigureExtractorMode(int mode, String urlServer) {
     	SCRAPPY_EXECUTOR_TYPE = mode;

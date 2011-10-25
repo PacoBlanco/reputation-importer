@@ -1,13 +1,12 @@
 package es.upm.dit;
 
+import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
 import java.net.URI;
+import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.Set;
 import com.hp.hpl.jena.rdf.model.InfModel;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.NodeIterator;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.ResIterator;
@@ -34,15 +32,15 @@ import cross.reputation.model.AccessType;
 import cross.reputation.model.CategoricScale;
 import cross.reputation.model.Category;
 import cross.reputation.model.CategoryMatching;
-import cross.reputation.model.CollectingAlgorithm;
 import cross.reputation.model.CollectingAlgorithmBehaviour;
-import cross.reputation.model.CollectingSystem;
 import cross.reputation.model.CollectingSystemBehaviour;
 import cross.reputation.model.CollectionType;
 import cross.reputation.model.Community;
 import cross.reputation.model.Dimension;
 import cross.reputation.model.DimensionCorrelation;
+import cross.reputation.model.DiscardException;
 import cross.reputation.model.Entity;
+import cross.reputation.model.EntityIdentifier;
 import cross.reputation.model.EntityType;
 import cross.reputation.model.ExponentialNumericTransformer;
 import cross.reputation.model.FixedCommunitiesTrust;
@@ -52,53 +50,114 @@ import cross.reputation.model.LogaritmicNumericTransformer;
 import cross.reputation.model.Metric;
 import cross.reputation.model.MetricMapping;
 import cross.reputation.model.MetricTransformer;
-import cross.reputation.model.ReputationAlgorithmI;
+import cross.reputation.model.ModelException;
 import cross.reputation.model.ReputationAlgorithmImplementation;
 import cross.reputation.model.ReputationBehaviour;
+import cross.reputation.model.ReputationEvaluation;
 import cross.reputation.model.ReputationImporterBehaviour;
 import cross.reputation.model.ReputationModelBehaviour;
-import cross.reputation.model.ReputationModule;
 import cross.reputation.model.NumericScale;
 import cross.reputation.model.NumericTransformer;
-import cross.reputation.model.ReputationAlgorithm;
-import cross.reputation.model.ReputationModel;
 import cross.reputation.model.ReputationModuleBehaviour;
-import cross.reputation.model.ReputationStep;
+import cross.reputation.model.ReputationObject;
 import cross.reputation.model.ReputationStepBehaviour;
 import cross.reputation.model.ReputationValue;
-import cross.reputation.model.ReputationalAction;
 import cross.reputation.model.ReputationalActionBehaviour;
 import cross.reputation.model.Scale;
+import cross.reputation.model.ScaleCorrelation;
 import cross.reputation.model.SqrtNumericTransformer;
 import cross.reputation.model.TrustBetweenCommunities;
+import cross.reputation.model.ValidateModel;
 
 public class ReputationParser {
 	String riNamespace = "http://purl.org/reputationImport/0.1/";
 	String dcNamespace = "http://purl.org/dc/elements/1.1/";
-	Map<Resource,Class<? extends ReputationBehaviour>> reputationAlgorithmSubclasses;
-	Map<Property,Class<? extends ReputationBehaviour>> reputationSubclassesProperties;
-	Map<Property,Class<? extends ReputationBehaviour>> reputationSubclassSubjectProperties;
-	Map<Resource,Set<Object>> cache = new HashMap<Resource,Set<Object>>();
+	String foafNamespace = "http://xmlns.com/foaf/0.1/";
+	private String base = "";
+	private Map<Resource,Class<? extends ReputationBehaviour>> reputationAlgorithmSubclasses;
+	private Map<Property,Class<? extends ReputationBehaviour>> reputationSubclassesProperties;
+	private Map<Property,Class<? extends ReputationBehaviour>> reputationSubclassSubjectProperties;
+	private Set<Resource> foafAgentClasses;
+	private Model model;
+	private Map<Resource,Set<Object>> cache = new HashMap<Resource,Set<Object>>();
 	
 	static public void main(String[] args) throws Exception {
-		ReputationParser parser = new ReputationParser();
-		//foaf.foafAgent("http://localhost/foafSample2.rdf");
-		
-		/* Tests with reflect.Proxy to add dinamically interfaces
-		Class[] interfacesArray = new Class[] {ReputationAlgorithmI.class};		
-		java.lang.reflect.Proxy proxy = Proxy.newProxyInstance(
-				ReputationAlgorithm.class.getClassLoader(), interfacesArray, arg2)
-		*/
-		parser.getCrossReputationGlobalModelFromRDF("dir/model0.rdf");
+		//String modelPath = "dir/model3.rdf";
+		String modelPath = "dir/modelWithEntities.rdf";
+		ReputationParser parser = new ReputationParser(modelPath);
+		parser.getCrossReputationGlobalModelFromRDF();
 	}
 	
 	public ReputationParser() throws Exception {
-		reputationAlgorithmSubclasses();		
+		reputationAlgorithmSubclasses();
+		foafAgentClasses();
 	}
 	
-	public void getCrossReputationGlobalModelFromRDF(String inputFileName){        
+	public ReputationParser(String modelPath) throws Exception {
+		base = Util.getXmlBaseFromFile(modelPath);		
+		setParametersFromModel(modelPath);
+		reputationAlgorithmSubclasses();
+		foafAgentClasses();
+	}
+	
+	private void setParametersFromModel(String modelPath) throws Exception {
+		// create an empty model
+        model = ModelFactory.createOntologyModel(); // createDefaultModel();
+
+        // use the FileManager to find the input file
+        //FileManager.get().getFromCache(filenameOrURI)
+        File modelFile = new File(modelPath);
+        InputStream in = FileManager.get().open(modelPath);
+        if (in == null) {
+            throw new IllegalArgumentException(
+                   "File: " + modelPath + " not found");
+        }
+
+        //if(model.getNsPrefixURI(""))
+        // read the RDF/XML file
+        if(es.upm.dit.Property.getBASE_URI_MODE() == 
+        		es.upm.dit.Property.BASE_OR_ABSOLUTE_PATH){
+        	model.read("file:"+modelFile.getAbsolutePath());
+        } else if(es.upm.dit.Property.getBASE_URI_MODE() == 
+        		es.upm.dit.Property.BASE_OR_FILE_PATH){
+        	model.read("file:"+modelPath);
+        } else {
+        	model.read(in, "", null);
+        }
+               
+        // create the reasoner factory and the reasoner
+		Resource conf = model.createResource();
+		//conf.addProperty( ReasonerVocabulary.PROPtraceOn, "true" );
+		RDFSRuleReasoner reasoner = (RDFSRuleReasoner) RDFSRuleReasonerFactory.theInstance().create(conf);
+		// Create inference model
+		InfModel infModel = ModelFactory.createInfModel(reasoner, model);
+		
+		model = infModel;
+        
+		//RDFReader reader = model.getReader("RDF/XML");
+        ModelException.sendMessage(ModelException.INFO, 
+        		"Base Namespace:"+model.getNsPrefixURI(""));
+                
+        if(model.getNsPrefixURI("ri") != null) {
+        	riNamespace = model.getNsPrefixURI("ri");
+        	ModelException.sendMessage(ModelException.INFO, 
+            		"ri namespace:"+riNamespace);
+        }
+        if(model.getNsPrefixURI("dc") != null) {
+        	dcNamespace = model.getNsPrefixURI("dc");
+        	ModelException.sendMessage(ModelException.INFO, 
+            		"dc namespace:"+dcNamespace);
+        }
+        if(model.getNsPrefixURI("foaf") != null) {
+        	foafNamespace = model.getNsPrefixURI("foaf");
+        	ModelException.sendMessage(ModelException.INFO, 
+            		"foafNamespace namespace:"+foafNamespace);
+        }
+	}	
+	
+	/*public void getCrossReputationGlobalModelFromRDF(String inputFileName){        
         // create an empty model
-        Model model = ModelFactory.createOntologyModel(); // createDefaultModel();
+        model = ModelFactory.createOntologyModel(); // createDefaultModel();
 
         // use the FileManager to find the input file
         InputStream in = FileManager.get().open( inputFileName );
@@ -129,6 +188,14 @@ public class ReputationParser {
         	dcNamespace = model.getNsPrefixURI("dc");
             System.out.println("dc namespace:"+dcNamespace);
         }
+        if(model.getNsPrefixURI("foaf") != null) {
+        	foafNamespace = model.getNsPrefixURI("foaf");
+            System.out.println("foafNamespace namespace:"+foafNamespace);
+        }
+        getCrossReputationGlobalModelFromRDF();
+	}*/
+	
+    public void getCrossReputationGlobalModelFromRDF() {        	    
         Resource dimension = ResourceFactory.createResource(riNamespace + "Dimension");
         Resource categoryMatching = ResourceFactory.createResource(riNamespace + "CategoryMatching");
         Resource fixedCommunitiesTrust = ResourceFactory.createResource(
@@ -184,31 +251,43 @@ public class ReputationParser {
         		riNamespace + "importsFrom");
         
         try {
-			printDimensions(model);
-        	printCategories(model);
-        	printCategoryMatchings(model);
-        	printFixedCommunitiesTrust(infModel);
-        	printTrustBetweenCommunities(model);
-        	printCollectingSystems(model);
-        	printDimensionCorrelations(model);
-        	printScales(model);
-        	printNumericScales(model);
-        	printMetrics(model);
-        	printLogaritmicNumericTransformers(model);
-        	printLinealNumericTransformers(model);
-        	printSqrtNumericTransformers(model);
-        	printMetricMappings(model);
-        	printImportationUnits(model);
-        	printReputationImporters(model);
-			printReputationModels(model);
-        	printAllReputationAlgorithms(model);
-			printCommunities(model);
-			//printEntities(model);
+        	//printDimensions(model);
+        	//printCategories(model);
+        	//printCategoryMatchings(model);
+        	//printFixedCommunitiesTrust(model);
+        	//printTrustBetweenCommunities(model);
+        	//printCollectingSystems(model);
+        	//printDimensionCorrelations(model);
+        	//printScaleCorrelations(model);
+        	//printScales(model);
+        	//printAllScales(model);
+        	//printNumericScales(model);
+        	//printMetrics(model);
+        	//printLogaritmicNumericTransformers(model);
+        	//printLinealNumericTransformers(model);
+        	//printSqrtNumericTransformers(model);
+        	//printMetricMappings(model);
+        	//printImportationUnits(model);
+        	//printReputationImporters(model);
+        	//printReputationModels(model);
+        	//printAllReputationAlgorithms(model);
+        	printCommunities(model);
+			printEntities(model);
 			//printReputationValues(model);
 			//printReputationObjects(model);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}               
+	}
+	
+	private void foafAgentClasses() {
+		if(foafAgentClasses == null) {
+			foafAgentClasses = new HashSet<Resource>();
+		}
+		foafAgentClasses.add(ResourceFactory.createResource(foafNamespace + "Agent"));
+		foafAgentClasses.add(ResourceFactory.createResource(foafNamespace + "Person"));
+		foafAgentClasses.add(ResourceFactory.createResource(foafNamespace + "Organization"));
+		foafAgentClasses.add(ResourceFactory.createResource(foafNamespace + "Group"));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -264,6 +343,9 @@ public class ReputationParser {
 		reputationSubclassSubjectProperties.put(ResourceFactory.
 				createProperty(riNamespace + "importsFrom"),
 				ReputationImporterBehaviour.class);
+		reputationSubclassSubjectProperties.put(ResourceFactory.
+				createProperty(riNamespace + "uriFormat"),
+				CollectingSystemBehaviour.class);
 	}
 	
 	
@@ -294,12 +376,13 @@ public class ReputationParser {
 	public Community getLimitedCommunity(Model model, Resource resource) throws Exception {
 		Community community = (Community) getResourceFromCache(resource, Community.class);
 		if(community == null) {
-			community = new Community();			
+			community = new Community();
+			community.setResource(resource);
 		} else {
 			return community;
 		}
-		// Specific Attributes and Properties of Community Class //
-		// name //
+		// Limited Attributes and Properties of Community Class //
+		// identifier //
 		Property identifier = ResourceFactory.createProperty(
 				riNamespace + "identifier");
 		StmtIterator stmtI1 = model.listStatements(resource, 
@@ -308,8 +391,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate identifier property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("identifier property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"identifier property of Community resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				community.setName(statement.getObject().asLiteral().getString());
 			}
@@ -317,23 +403,597 @@ public class ReputationParser {
 		return community;
 	}
 	
-	public Entity getEntity(Model model, Resource resource) throws Exception {
+	public EntityIdentifier getFoafOnlineAccount(Model model, 
+			Resource resource) throws Exception {
+		EntityIdentifier onlAcc = (EntityIdentifier) getResourceFromCache(
+				resource, EntityIdentifier.class);
+		if(onlAcc != null) {
+			return onlAcc;					
+		}
+		onlAcc = new EntityIdentifier();
+		onlAcc.setResource(resource);
+		addResourceInstanceToCache(resource, onlAcc);
+		// Specific Attributes and Properties of Foaf:OnlineAccount Class //
+		// foafAccountName //
+		Property foafAccountName = ResourceFactory.createProperty(
+				foafNamespace + "accountName");
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				foafAccountName, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate name property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.ONLINEACCOUNT,
+						"name property of OnlineAccount resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				onlAcc.setName(statement.getObject().asLiteral().getString());
+			}
+		}
+		// foafAccountProfilePage //
+		Property foafAccountProfilePage = ResourceFactory.createProperty(
+				foafNamespace + "accountProfilePage");
+		stmtI1 = model.listStatements(resource, 
+				foafAccountProfilePage, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate name property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.ONLINEACCOUNT,
+						"name property of OnlineAccount resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				onlAcc.setUrl(statement.getObject().asLiteral().getString());
+			}
+		}
+		// belongsTo //
+		Property belongsTo = ResourceFactory.createProperty(
+				riNamespace + "belongsTo");		
+		stmtI1 = model.listStatements(resource, 
+				belongsTo, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate belongsTo property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ONLINEACCOUNT,
+						"belongsTo property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				onlAcc.setBelongsTo(getLimitedCommunity(model, 
+						statement.getObject().asResource()));
+			}
+		}
+		return onlAcc;
+	}
+	
+	public Entity getFoafAgent(Model model, Resource resource) throws Exception {
+		Entity entity = getEntity(model, resource, Entity.class);
+		// Specific Attributes and Properties of Foaf:Agent Class //
+		// name //
+		Property name = ResourceFactory.createProperty(
+				foafNamespace + "name");
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				name, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate name property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.FOAFAGENT,
+						"name property of resource foaf:Agent:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				entity.setUniqueIdentificator(statement.getObject(
+						).asLiteral().getString());
+			}
+		}
+		return entity;
+	}
+	
+	public List<Entity> getEntities(boolean validate) throws Exception {
+		List<Entity> entities = new ArrayList<Entity>();
+		Resource entity = ResourceFactory.createResource(
+				riNamespace + "Entity");
+		ResIterator iters = model.listSubjectsWithProperty(
+				RDF.type,entity);
+		while (iters.hasNext()) {
+			Resource resource = iters.nextResource();
+			Entity entityIns = getEntity(model,resource,null);
+			if(!validate || ValidateModel.validateEntity(entityIns)) {
+				entities.add(entityIns);
+			} else {
+				ModelException.sendMessage(ModelException.WARNING,"entity(" +
+						"resource:"+entityIns.getResource()+") dicarted");
+			}			
+		}
+		return entities;
+	}
+	
+	public Entity getEntity(Model model, Resource resource, Class<?> clazz) 
+			throws Exception {
+		//Or Entity.class or clazz.class
 		Entity entity = (Entity) getResourceFromCache(resource, Entity.class);
 		if(entity != null) {
 			return entity;
 		}
-		entity = new Entity();
-		addResourceInstanceToCache(resource,entity);
+		if(clazz == null) {
+			StmtIterator stmtI1 = model.listStatements(resource, RDF.type, (RDFNode)null);						
+			while(stmtI1.hasNext()) {
+				Statement typeStatement = stmtI1.nextStatement();
+				for(Resource resourceType : foafAgentClasses) {
+					if(typeStatement.getObject().asResource().getURI().equals(
+							resourceType.getURI())) {
+						return getFoafAgent(model, resource);
+					}
+				}								
+			}
+			//The default option:Entity class
+			entity = new Entity();
+			entity.setResource(resource);
+			addResourceInstanceToCache(resource,entity);
+		} else {		
+			entity = (Entity) clazz.newInstance(); //new Entity();
+			entity.setResource(resource);
+			addResourceInstanceToCache(resource,entity);
+		}		
 		
-		// Specific Attributes and Properties of Community Class //
-		
+		// Specific Attributes and Properties of Entity Class //
+		// identifier //
+		Property identifier = ResourceFactory.createProperty(
+				riNamespace + "identifier");
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				identifier, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate identifier property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"identifier property of Entity resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				entity.setUniqueIdentificator(statement.getObject(
+						).asLiteral().getString());
+			}
+		}
+		// hasReputation //
+		Property hasReputation = ResourceFactory.createProperty(
+				riNamespace + "hasMetric");		
+		stmtI1 = model.listStatements(resource, 
+				hasReputation, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasReputation property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"hasReputation property of Entity resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationObject repObj = (ReputationObject) getResourceFromCache(
+						statement.getObject().asResource(), ReputationObject.class);
+				if(repObj == null) {
+					repObj = getReputationObject(model, 
+							statement.getObject().asResource());					
+				}
+				entity.addHasReputation(repObj);
+			}
+		}
+		// hasValue //
+		Property hasValue = ResourceFactory.createProperty(
+				riNamespace + "hasValue");		
+		stmtI1 = model.listStatements(resource, 
+				hasValue, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasValue property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"hasValue property of Entity resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationValue repVal = (ReputationValue) getResourceFromCache(
+						statement.getObject().asResource(), ReputationValue.class);
+				if(repVal == null) {
+					repVal = getReputationValue(model, 
+							statement.getObject().asResource());					
+				}
+				entity.addHasValue(repVal);
+			}
+		}
+		// hasEvaluation //
+		Property hasEvaluation = ResourceFactory.createProperty(
+				riNamespace + "hasEvaluation");		
+		stmtI1 = model.listStatements(resource, 
+				hasEvaluation, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasEvaluation property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"hasEvaluation property of Entity resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationEvaluation repEva = (ReputationEvaluation) getResourceFromCache(
+						statement.getObject().asResource(), ReputationEvaluation.class);
+				if(repEva == null) {
+					repEva = getReputationEvaluation(model, 
+							statement.getObject().asResource());					
+				}
+				entity.addHasEvaluation(repEva);
+			}
+		}
+		// foafAccount //
+		Property foafAccount = ResourceFactory.createProperty(
+				foafNamespace + "account");		
+		stmtI1 = model.listStatements(resource, 
+				foafAccount, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate foafAccount property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"foafAccount property of Entity resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				entity.addOnlineAccount(getFoafOnlineAccount(model, 
+						statement.getObject().asResource()));
+			}
+		}
+		// foafHoldsAccount //
+		Property foafHoldsAccount = ResourceFactory.createProperty(
+				foafNamespace + "holdsAccount");		
+		stmtI1 = model.listStatements(resource, 
+				foafHoldsAccount, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate foafHoldsAccount property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.ENTITY,
+						"foafHoldsAccount property of Entity resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				entity.addOnlineAccount(getFoafOnlineAccount(model, 
+						statement.getObject().asResource()));
+			}
+		}		
 		return entity;
+	}
+	
+	public ReputationObject getReputationObject(Model model, 
+			Resource resource) throws Exception {
+		ReputationObject repObj = (ReputationObject) getResourceFromCache(
+				resource, ReputationObject.class);
+		if(repObj == null) {
+			repObj = new ReputationObject();
+			repObj.setResource(resource);
+			addResourceInstanceToCache(resource,repObj);
+		} else {
+			return repObj;
+		}
+		// Specific Attributes and Properties of ReputationEvaluation Class //
+		// fromCommunity //
+		Property fromCommunity = ResourceFactory.createProperty(
+				riNamespace + "fromCommunity");		
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				fromCommunity, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate fromCommunity property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONOBJECT,
+						"fromCommunity property of ReputationObject resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				Community community = (Community) getResourceFromCache(
+						statement.getObject().asResource(), Community.class);
+				if(community == null) {
+					community = getCommunity(model, 
+							statement.getObject().asResource());					
+				}
+				repObj.setFromCommunity(community);
+			}
+		}
+		// hasValue //
+		Property hasValue = ResourceFactory.createProperty(
+				riNamespace + "hasValue");		
+		stmtI1 = model.listStatements(resource, 
+				hasValue, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasValue property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONOBJECT,
+						"hasValue property of ReputationObject resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationValue repVal = (ReputationValue) getResourceFromCache(
+						statement.getObject().asResource(), ReputationValue.class);
+				if(repVal == null) {
+					repVal = getReputationValue(model, 
+							statement.getObject().asResource());					
+				}
+				repObj.addHasValue(repVal);
+			}
+		}
+		// owner //
+		Property owner = ResourceFactory.createProperty(
+				riNamespace + "owner");		
+		stmtI1 = model.listStatements(resource, 
+				owner, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate owner property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONOBJECT,
+						"owner property of ReputationObject resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				Entity entity = (Entity) getResourceFromCache(
+						statement.getObject().asResource(), Entity.class);
+				if(entity == null) {
+					entity = getEntity(model,statement.getObject().asResource(),null);					
+				}
+				repObj.setOwner(entity);
+			}
+		}
+		return repObj;
+	}
+	
+	public ReputationEvaluation getReputationEvaluation(Model model, 
+			Resource resource) throws Exception {
+		ReputationEvaluation repEva = (ReputationEvaluation) getResourceFromCache(
+				resource, ReputationEvaluation.class);
+		if(repEva == null) {
+			repEva = new ReputationEvaluation();
+			repEva.setResource(resource);
+			addResourceInstanceToCache(resource,repEva);
+		} else {
+			return repEva;
+		}
+		// Specific Attributes and Properties of ReputationEvaluation Class //
+		// collectionIdentifier //
+		Property identifier = ResourceFactory.createProperty(
+				riNamespace + "collectionIdentifier");
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				identifier, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate collectionIdentifier property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION,
+						"collectionIdentifier property of ReputationEvaluation resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				repEva.setCollectionIdentifier(statement.getObject(
+						).asLiteral().getString());
+			}
+		}
+		// target //
+		Property target = ResourceFactory.createProperty(
+				riNamespace + "target");		
+		stmtI1 = model.listStatements(resource, 
+				target, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate target property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION,
+						"target property of ReputationEvaluation resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				Entity targetImp = (Entity) getResourceFromCache(
+						statement.getObject().asResource(), Entity.class);
+				if(targetImp == null) {
+					targetImp = getEntity(model,statement.getObject().asResource(),null);					
+				}
+				repEva.setTarget(targetImp);
+			}
+		}
+		// hasMetric //
+		Property hasMetric = ResourceFactory.createProperty(
+				riNamespace + "hasMetric");		
+		stmtI1 = model.listStatements(resource, 
+				hasMetric, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasMetric property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION,
+						"hasMetric property of ReputationEvaluation resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				Metric metric = (Metric) getResourceFromCache(
+						statement.getObject().asResource(), Metric.class);
+				if(metric == null) {
+					metric = getMetric(model, 
+							statement.getObject().asResource());					
+				}
+				repEva.setHasMetric(metric);
+			}
+		}
+		return repEva;
 	}	
+	
+	public ReputationValue getReputationValue(Model model, Resource resource) throws Exception {
+		ReputationValue repVal = (ReputationValue) getResourceFromCache(
+				resource, ReputationValue.class);
+		if(repVal == null) {
+			repVal = new ReputationValue();
+			repVal.setResource(resource);
+			addResourceInstanceToCache(resource,repVal);
+		} else {
+			return repVal;
+		}
+		// Specific Attributes and Properties of ReputationValue Class //
+		// collectionIdentifier //
+		Property identifier = ResourceFactory.createProperty(
+				riNamespace + "collectionIdentifier");
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				identifier, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate collectionIdentifier property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"collectionIdentifier property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				repVal.setCollectionIdentifier(statement.getObject(
+						).asLiteral().getString());
+			}
+		}
+		// timeStamp //
+		Property homePage = ResourceFactory.createProperty(
+				riNamespace + "timeStamp");
+		stmtI1 = model.listStatements(resource, 
+				homePage, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate timeStamp property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"timeStamp property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				DateFormat dt = DateFormat.getDateTimeInstance(); 
+				repVal.setTimeStamp(dt.parse(statement.getObject(
+						).asLiteral().getString()));
+			}
+		}
+		// expirationTime //
+		Property expirationTime = ResourceFactory.createProperty(
+				riNamespace + "expirationTime");
+		stmtI1 = model.listStatements(resource, 
+				expirationTime, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate expirationTime property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"expirationTime property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				DateFormat dt = DateFormat.getDateTimeInstance(); 
+				repVal.setExpirationTime(dt.parse(statement.getObject(
+						).asLiteral().getString()));
+			}
+		}
+		// obtainedBy //
+		Property obtainedBy = ResourceFactory.createProperty(
+				riNamespace + "obtainedBy");		
+		stmtI1 = model.listStatements(resource, 
+				obtainedBy, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate obtainedBy property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"obtainedBy property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationAlgorithmImplementation repAlg = (ReputationAlgorithmImplementation)
+					getResourceFromCache(statement.getObject().asResource(), 
+							ReputationAlgorithmImplementation.class);
+				if(repAlg == null) {
+					repAlg = getReputationAlgorithm(model, 
+							statement.getObject().asResource(),null);					
+				}
+				repVal.setObtainedBy(repAlg);
+			}
+		}
+		// owner //
+		Property owner = ResourceFactory.createProperty(
+				riNamespace + "owner");		
+		stmtI1 = model.listStatements(resource, 
+				owner, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate owner property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"owner property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				Entity entity = (Entity) getResourceFromCache(
+						statement.getObject().asResource(), Entity.class);
+				if(entity == null) {
+					entity = getEntity(model,statement.getObject().asResource(),null);					
+				}
+				repVal.setOwner(entity);
+			}
+		}
+		// hasEvaluation //
+		Property hasEvaluation = ResourceFactory.createProperty(
+				riNamespace + "hasEvaluation");		
+		stmtI1 = model.listStatements(resource, 
+				hasEvaluation, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate hasEvaluation property //
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONVALUE,
+						"hasEvaluation property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ReputationEvaluation repEva = (ReputationEvaluation) getResourceFromCache(
+						statement.getObject().asResource(), ReputationEvaluation.class);
+				if(repEva == null) {
+					repEva = getReputationEvaluation(model, 
+							statement.getObject().asResource());					
+				}
+				repVal.addHasEvaluations(repEva);
+			}
+		}
+		return repVal;
+	}
 	
 	public Community getCommunity(Model model, Resource resource) throws Exception {
 		Community community = (Community) getResourceFromCache(resource, Community.class);
 		if(community == null) {
 			community = new Community();
+			community.setResource(resource);
 			addResourceInstanceToCache(resource,community);
 		} else {
 			return community;
@@ -348,8 +1008,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate identifier property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("identifier property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"identifier property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				community.setName(statement.getObject().asLiteral().getString());
 			}
@@ -363,8 +1026,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate homePage property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("homePage property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"homePage property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				community.setDomainName(statement.getObject().asLiteral().getString());
 			}
@@ -378,8 +1044,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate hasCategory property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("hasCategory property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"hasCategory property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Category category = (Category) getResourceFromCache(
 						statement.getObject().asResource(), Category.class);
@@ -399,8 +1068,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate hasReputationModel property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("hasReputationModel property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"hasReputationModel property of Community resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ReputationAlgorithmImplementation repAlg = (ReputationAlgorithmImplementation)
 					getResourceFromCache(statement.getObject().asResource(),
@@ -421,14 +1093,17 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate hasEntity property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("hasEntity property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.COMMUNITY,
+						"hasEntity property of Community resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Entity entity = (Entity) getResourceFromCache(
 						statement.getObject().asResource(), Entity.class);
 				if(entity == null) {
 					entity = getEntity(model, 
-							statement.getObject().asResource());					
+							statement.getObject().asResource(),null);					
 				}
 				community.addEntity(entity);
 			}
@@ -436,24 +1111,52 @@ public class ReputationParser {
 		return community;
 	}
 	
-	public void printCommunities(Model model) throws Exception {
+	public List<Community> getCommunities(boolean validate) throws Exception {
+		List<Community> communities = new ArrayList<Community>();
 		Resource community = ResourceFactory.createResource(
 				riNamespace + "Community");
 		ResIterator iters = model.listSubjectsWithProperty(
 				RDF.type,community);
-		if (iters.hasNext()) {
+		while (iters.hasNext()) {
+			Resource resource = iters.nextResource();
+			Community communityIns = getCommunity(model,resource);
+			if(!validate || ValidateModel.validateCommunity(communityIns)) {
+				communities.add(communityIns);
+			} else {
+				ModelException.sendMessage(ModelException.WARNING,"community(" +
+						"resource:"+communityIns.getResource()+") dicarted");
+			}
+		}
+		return communities;
+	}
+	
+	public void printCommunities(Model model) throws Exception {
+		List<Community> communities = getCommunities(true);
+		if(!communities.isEmpty()) {
 		    System.out.println("The database contains subjects" +
 		    		" of type community:");
-		    while (iters.hasNext()) {
-		        Resource resource = iters.nextResource();
-		        System.out.println("  " + resource.getLocalName());
-		        Community communityInstance = 
-		        	getCommunity(model,resource);
-		        System.out.println(communityInstance.toString("     ")); 
+		    for(Community community : communities) {
+		        System.out.println("  " + community.getResource().getLocalName());
+		        System.out.println(community.toString("     ")); 
 		    }
 		} else {
 		    System.out.println("No simple String riNamespace+" +
 		    		"community were found in the database");
+		}
+	}
+	
+	public void printEntities(Model model) throws Exception {
+		List<Entity> entities = getEntities(true);
+		if(!entities.isEmpty()) {
+		    System.out.println("The database contains subjects" +
+		    		" of type entity:");
+		    for(Entity entity : entities) {
+		        System.out.println("  " + entity.getResource().getLocalName());
+		        System.out.println(entity.toString("     ")); 
+		    }
+		} else {
+		    System.out.println("No simple String riNamespace+" +
+		    		"Entity were found in the database");
 		}
 	}
 	
@@ -486,8 +1189,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate mapsMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("mapsMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
+						"mapsMetric property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				MetricMapping metMap = (MetricMapping) getResourceFromCache(
 						statement.getObject().asResource(), MetricMapping.class);
@@ -507,8 +1213,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate importsFrom property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("importsFrom property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"importsFrom property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ImportationUnit impUni = (ImportationUnit) getResourceFromCache(
 						statement.getObject().asResource(), ImportationUnit.class);
@@ -542,8 +1251,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate mapsMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("mapsMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
+						"mapsMetric property of ReputationImporter resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				MetricMapping metMap = (MetricMapping) getResourceFromCache(
 						statement.getObject().asResource(),MetricMapping.class);
@@ -563,8 +1275,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate importsFrom property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("importsFrom property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
+						"importsFrom property of ReputationImporter resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ImportationUnit impUni = (ImportationUnit) getResourceFromCache(
 						statement.getObject().asResource(),ImportationUnit.class);
@@ -607,6 +1322,7 @@ public class ReputationParser {
 			return impUni;
 		}
 		impUni = new ImportationUnit();
+		impUni.setResource(resource);
 		addResourceInstanceToCache(resource, impUni);
 		Property importedCommunity = ResourceFactory.createProperty(
 				riNamespace + "importedCommunity");
@@ -617,8 +1333,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate importedCommunity property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("importedCommunity property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
+						"importedCommunity property of ImportationUnit resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Community community = (Community) getResourceFromCache(
 						statement.getObject().asResource(), Community.class);
@@ -638,8 +1357,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate importedMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("importedMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
+						"importedMetric property of MetricMapping resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Metric metric = (Metric) getResourceFromCache(
 						statement.getObject().asResource(),Metric.class);
@@ -659,8 +1381,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate collectsReputationBy property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("collectsReputationBy property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
+						"collectsReputationBy property of ImportationUnit resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ReputationAlgorithmImplementation colAlg = (
 						ReputationAlgorithmImplementation) getResourceFromCache(
@@ -681,8 +1406,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate metricTransformation property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("metricTransformation property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
+						"metricTransformation property of ImportationUnit resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				MetricTransformer metTra = (MetricTransformer) 
 					getResourceFromCache(statement.getObject().asResource(),
@@ -703,8 +1431,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate trust property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("trust property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
+						"trust property of importationUnit ImportationUnit resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				TrustBetweenCommunities truBet = (TrustBetweenCommunities) 
 					getResourceFromCache(statement.getObject().asResource(),
@@ -748,6 +1479,7 @@ public class ReputationParser {
 			return metMap;
 		}
 		metMap = new MetricMapping();
+		metMap.setResource(resource);
 		addResourceInstanceToCache(resource, metMap);
 		Property value = ResourceFactory.createProperty(
 				riNamespace + "value");
@@ -758,8 +1490,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate value property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("value property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.METRICMAPPING,
+						"value property of MetricMapping resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				metMap.setValue(statement.getObject().asLiteral().getDouble());
 			}
@@ -773,8 +1508,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate importedMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("importedMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRICMAPPING,
+						"importedMetric property of MetricMapping resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Metric metric = (Metric) getResourceFromCache(
 						statement.getObject().asResource(),Metric.class);
@@ -793,8 +1531,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate resultMetric property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("resultMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRICMAPPING,
+						"resultMetric property of MetricMapping resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Metric metric = (Metric) getResourceFromCache(
 						statement.getObject().asResource(),Metric.class);
@@ -828,12 +1569,32 @@ public class ReputationParser {
 		}
 	}
 	
+	public List<Metric> getMetrics(boolean validate) throws Exception {
+		List<Metric> metrics = new ArrayList<Metric>();
+		Resource metric = ResourceFactory.createResource(
+				riNamespace + "Metric");
+		ResIterator iters = model.listSubjectsWithProperty(
+				RDF.type,metric);
+		while (iters.hasNext()) {
+			Resource resource = iters.nextResource();
+			Metric metricIns = getMetric(model, resource);
+			if(!validate || ValidateModel.validateMetric(metricIns)) {
+				metrics.add(metricIns);
+			} else {
+				ModelException.sendMessage(ModelException.WARNING,"entity(" +
+						"resource:"+metricIns.getResource()+") dicarted");
+			}			
+		}
+		return metrics;
+	}
+	
 	public Metric getMetric(Model model, Resource resource) throws Exception {
 		Metric metric = (Metric) getResourceFromCache(resource, Metric.class);
 		if(metric != null) {			
 			return metric;
 		}
 		metric = new Metric();
+		metric.setResource(resource);
 		addResourceInstanceToCache(resource, metric);
 		// identifier //
 		Property identifier = ResourceFactory.createProperty(
@@ -844,8 +1605,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate identificator property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("identificator property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.METRIC,
+						"identificator property of Metric resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				metric.setIdentifier(statement.getObject().asLiteral().getString());
 			}
@@ -859,8 +1623,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate description property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("description property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.METRIC,
+						"description property of Metric resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				metric.setDescription(statement.getObject().asLiteral().getString());
 			}
@@ -874,8 +1641,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate hasScale property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("hasScale property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRIC,
+						"hasScale property of Metric resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Scale scale = (Scale) getResourceFromCache(
 						statement.getObject().asResource(),Scale.class);
@@ -894,8 +1664,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate hasDimension property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("hasDimension property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRIC,
+						"hasDimension property of Metric resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				Dimension dimension = (Dimension) getResourceFromCache(
 						statement.getObject().asResource(),Dimension.class);
@@ -928,13 +1701,7 @@ public class ReputationParser {
 		    System.out.println("No simple String riNamespace+" +
 		    		"metric were found in the database");
 		}
-	}
-	
-	public ReputationValue getReputationValue(Model model, Resource resource) {
-		ReputationValue reputationValue = new ReputationValue();
-		
-		return reputationValue;
-	}
+	}	
 	
 	public CategoricScale getCategoricScale(Model model, 
 			Resource resource) throws Exception {
@@ -953,8 +1720,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate allowValue property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("allowValue property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.SCALE,
+						"allowValue property of CategoricScale resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				categoricScale.addCategories(statement.getObject().asLiteral().getString());
 			}
@@ -979,8 +1749,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate minimum property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("minimum property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.NUMERIC_SCALE,
+						"minimum property of NumericScale resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				numericScale.setMinimum(statement.getObject().asLiteral().getDouble());
 			}
@@ -994,8 +1767,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate maximum property */
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("maximum property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.NUMERIC_SCALE,
+						"maximum property of NumericScale resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				numericScale.setMaximum(statement.getObject().asLiteral().getDouble());
 			}
@@ -1009,8 +1785,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate step property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("step property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.NUMERIC_SCALE,
+						"step property of NumericScale resource:"+
+						resource.getURI()+" is not a literal")){
+					return null;
+				}
 			} else {
 				numericScale.setStep(statement.getObject().asLiteral().getDouble());
 			}
@@ -1068,8 +1847,11 @@ public class ReputationParser {
 				}				
 			}
 			if(type == null) {
-				throw new Exception("Impossible to instanciate a generic Scale. " +
-						"Please, see the model and assign a specific type.");			
+				if(!ModelException.throwException(ModelException.SCALE,
+						"Impossible to instanciate a generic Scale(resource:"+resource+"" +
+						"Please, see the model and assign a specific type.")) {
+					return null;
+				}
 			}
 		}		
 		Scale scale = (Scale) getResourceFromCache(resource, type);
@@ -1077,6 +1859,7 @@ public class ReputationParser {
 			return scale;
 		}		
 		scale = type.newInstance();
+		scale.setResource(resource);
 		addResourceInstanceToCache(resource, scale);		
 		// name //
 		Property name = ResourceFactory.createProperty(riNamespace + "name");
@@ -1086,8 +1869,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate name property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("name property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.SCALE,
+						"name property of scale resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				scale.setName(statement.getObject().asLiteral().getString());
 			}
@@ -1113,7 +1899,37 @@ public class ReputationParser {
 		    }
 		} else {
 		    System.out.println("No simple String riNamespace+" +
-		    		"scale were found in the database");
+		    		"Scale were found in the database");
+		}
+	}
+	
+	public void printAllScales(Model model) throws Exception {
+		Set<Resource> resourcesCache = new HashSet<Resource>();
+		Set<Resource> scaleClasses = new HashSet<Resource>();		
+		scaleClasses.add(ResourceFactory.
+				createResource(riNamespace + "Scale"));
+		scaleClasses.add(ResourceFactory.
+				createResource(riNamespace + "NumericScale"));
+		scaleClasses.add(ResourceFactory.
+				createResource(riNamespace + "CategoricScale"));
+		for(Resource scale : scaleClasses) {
+			ResIterator iters = model.listSubjectsWithProperty(
+					RDF.type,scale);
+			while (iters.hasNext()) {
+			  	resourcesCache.add(iters.nextResource());
+			}
+		}		
+		
+		if (!resourcesCache.isEmpty()) {
+			System.out.println("The database contains subjects" +
+    			" of type scale:");
+		    for(Resource resource : resourcesCache) {
+		        System.out.println("  " + resource.getLocalName());
+		        System.out.println(getScale(model,resource,null).toString("     "));		        	        
+		    }
+		} else {
+		    System.out.println("No simple String riNamespace+" +
+		    		"Scale were found in the database");
 		}
 	}
 	
@@ -1167,8 +1983,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate type property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("type property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.ENTITYTYPE,
+						"type property of EntityType resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				entityType.setType(statement.getObject().asLiteral().getString());
 			}
@@ -1176,6 +1995,7 @@ public class ReputationParser {
 		return entityType;
 	}
 	
+	/*
 	public ReputationAlgorithmImplementation getReputationStep(
 			Model model, Resource resource) throws Exception {
 		ReputationAlgorithmImplementation reputationStep = 
@@ -1243,7 +2063,7 @@ public class ReputationParser {
 			}
 		}
 		return behaviour;
-	}
+	}*/
 	
 	/*
 	@SuppressWarnings("unchecked")
@@ -1439,8 +2259,9 @@ public class ReputationParser {
 			ReputationAlgorithmImplementation repAlg) throws Exception {
 		ReputationBehaviour behaviour = (ReputationBehaviour
 				) getResourceFromCache(resource, subclass);
-		if(behaviour != null) {			
-			repAlg.addBehaviour(behaviour);
+		if(behaviour != null) {
+			repAlg.addBehaviour(behaviour, repAlg);
+			//behaviour.setRoot(repAlg);
 			return;
 		}
 		Method method = null;						
@@ -1449,7 +2270,8 @@ public class ReputationParser {
 					Model.class, Resource.class);
 			behaviour = (ReputationBehaviour)method.invoke(this, 
 					model, resource);
-			repAlg.addBehaviour(behaviour);			
+			repAlg.addBehaviour(behaviour, repAlg);
+			//behaviour.setRoot(repAlg);
 		} catch (NoSuchMethodException e) {
 			try {
 				//method = this.getClass().getMethod("get"+subclass.getSimpleName(),
@@ -1458,13 +2280,14 @@ public class ReputationParser {
 						Model.class, Resource.class, Class.class);
 				behaviour = (ReputationBehaviour)method.invoke(
 						this, model, resource, null);
-				repAlg.addBehaviour(behaviour);				
+				repAlg.addBehaviour(behaviour, repAlg);
+				//behaviour.setRoot(repAlg);
 			} catch (NoSuchMethodException e1) {
 				e1.printStackTrace();
 				for(Method methoz : this.getClass().getMethods()) {
 					System.out.println(methoz);
 				}
-				throw new Exception("Not method get"+subclass.getSimpleName()+
+				throw new Exception("System Bug: Not method get"+subclass.getSimpleName()+
 						" with args: (Model, Resource) or (Model, Resource, Class)"
 						+" for subclass "+subclass+" (method:"+method+")");
 			} 
@@ -1481,6 +2304,7 @@ public class ReputationParser {
 			return repAlg;
 		}		
 		repAlg = new ReputationAlgorithmImplementation();
+		repAlg.setResource(resource);
 		addResourceInstanceToCache(resource, repAlg);
 		if(types == null) {			
 			StmtIterator stmtI1 = model.listStatements(resource, RDF.type, (RDFNode)null);						
@@ -1516,13 +2340,57 @@ public class ReputationParser {
 					behaviour = type.newInstance();
 					addResourceInstanceToCache(resource, behaviour);
 				}
-				repAlg.addBehaviour(behaviour);				
+				repAlg.addBehaviour(behaviour, repAlg);
+				//behaviour.setRoot(repAlg);
 			}
 		}
 
 		// Specific Attributes and Properties of ReputationalAlgorithm Class //
 		setAttibutesAndProperties(model, resource, repAlg);
+		setApiParameters(model, resource, repAlg);
 		return repAlg;
+	}
+	
+	void setApiParameters(Model model, Resource resource, 
+			ReputationAlgorithmImplementation repAlg) throws Exception {
+		Property property = ResourceFactory.
+				createProperty(riNamespace + "objectClass");
+		// objectClass //
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				property, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			/* validate objectClass property */
+			if(!statement.getObject().isLiteral()) {	    		
+				if(ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"objectClass property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a literal")) {
+					repAlg = null;
+					return;
+				}
+			} else {
+				repAlg.setObjectClass(statement.getObject().asLiteral().getString());		    	
+			}
+		}
+		property = ResourceFactory.
+				createProperty(riNamespace + "algorithmPath");
+		// algorithmPath //
+		stmtI1 = model.listStatements(resource, 
+				property, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			/* validate algorithmPath property */
+			if(!statement.getObject().isLiteral()) {	    		
+				if(ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"algorithmPath property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a literal")) {
+					repAlg = null;
+					return;
+				}
+			} else {
+				repAlg.setAlgorithmPath(statement.getObject().asLiteral().getString());		    	
+			}
+		}
 	}
 	
 	void setAttibutesAndProperties(Model model, Resource resource, 
@@ -1539,8 +2407,17 @@ public class ReputationParser {
 				throw new Exception("uriFormat property of resource:"+
 						resource.getURI()+" is not a resource");
 			} else {
-				repAlg.addAccesibility(getAccessType(
-						statement.getObject().asResource()));
+				AccessType type = getAccessType(statement.getObject().asResource());
+				if(type == null) {
+					if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM, 
+							"accessType(resource:"+statement.getObject().asResource()+
+							") from ReputationAlgorithm(resource"+resource+") is not known")) {
+						repAlg = null;
+						return;
+					}
+				} else {
+					repAlg.addAccesibility(type);
+				}
 			}
 		}
 		Property name = ResourceFactory.
@@ -1552,8 +2429,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate name property */
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("name property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"name property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a literal")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				repAlg.setName(statement.getObject().asLiteral().getString());		    	
 			}
@@ -1567,15 +2448,25 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate resultCollectionType property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("resultCollectionType property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"resultCollectionType property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				CollectionType collectionType = (CollectionType) getResourceFromCache(
 						statement.getObject().asResource(),CollectionType.class);
 				if(collectionType == null) {
 					collectionType = getCollectionType(statement.getObject().asResource());				
 				}
-				repAlg.setResultCollectionType(collectionType);		    	
+				if(collectionType == null) {
+					ModelException.throwException(ModelException.REPUTATIONALGORITHM, 
+							"collectionType(resource:"+statement.getObject().asResource()+
+							" from ReputationAlgorithm(resource"+resource+") is not known");
+				} else {
+					repAlg.setResultCollectionType(collectionType);
+				}
 			}
 		}
 		Property description = ResourceFactory.
@@ -1587,8 +2478,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* description name property */
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("name description of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"dc:description property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a literal")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				repAlg.setDescription(statement.getObject().asLiteral().getString());		    	
 			}
@@ -1602,8 +2497,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate entityType property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("entityType property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"entityType property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				EntityType entityTypeIns = (EntityType) getResourceFromCache(
 						statement.getObject().asResource(),EntityType.class);
@@ -1623,8 +2522,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate usesMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("usesMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"usesMetric property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				Metric metric = (Metric) getResourceFromCache(
 						statement.getObject().asResource(),Metric.class);
@@ -1643,8 +2546,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate reputationSource property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("reputationSource property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"reputationSource property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				ReputationValue reputationValue = (ReputationValue) getResourceFromCache(
 						statement.getObject().asResource(),ReputationValue.class);
@@ -1664,8 +2571,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate reputationResult property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("reputationResult property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"reputationResult property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				ReputationValue reputationValue = (ReputationValue) getResourceFromCache(
 						statement.getObject().asResource(),ReputationValue.class);
@@ -1674,6 +2585,26 @@ public class ReputationParser {
 							statement.getObject().asResource());				
 				}
 				repAlg.addReputationResults(reputationValue);		    	
+			}
+		}
+		/* definedByReputationModel */
+		Property definedByReputationModel = ResourceFactory.createProperty(
+				riNamespace + "definedByReputationModel");
+		stmtI1 = model.listStatements(resource, 
+				definedByReputationModel, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			/* validate definedByReputationModel property */
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"definedByReputationModel property of ReputationAlgorithm resource:"+
+						resource.getURI()+" is not a resource")) {
+					repAlg = null;
+					return;
+				}
+			} else {
+				repAlg.setDefinedByReputationModel(getReputationAlgorithm(
+						model,statement.getObject().asResource(),null));		    	
 			}
 		}
 		// stepIdentifier //
@@ -1685,8 +2616,12 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate stepIdentifier property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("stepIdentifier property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+						"stepIdentifier property of resource:"+
+						resource.getURI()+" is not a literal")) {
+					repAlg = null;
+					return;
+				}
 			} else {
 				repAlg.setStepIdentifier(
 						statement.getObject().asLiteral().getInt());		    	
@@ -1737,8 +2672,12 @@ public class ReputationParser {
 				if(object.isResource()) {
 					resourcesCache.add(object.asResource());
 				} else {
-					throw new Exception("Property "+property.getURI()+" has the object "
-							+object+" that is not a resource");
+					if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM,
+							"Property "+property.getURI()+" has the object "
+							+object+" that is not a resource when it must be a " +
+							"ReputationAlgorithm instance")) {
+						continue;
+					}
 				}
 			}			
 		}
@@ -1749,6 +2688,7 @@ public class ReputationParser {
 		      	System.out.println("  " + resource.getLocalName());
 			    ReputationAlgorithmImplementation repAlgInstance = 
 			       	getReputationAlgorithm(model,resource,null);
+			    System.out.println("  "+repAlgInstance);
 			    System.out.println(repAlgInstance.toString("     "));
 			}
 		} else {
@@ -1881,8 +2821,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate obtainsReputationsBy property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("obtainsReputationsBy property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONMODULE,
+						"obtainsReputationsBy property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ReputationAlgorithmImplementation repAlg = 
 					(ReputationAlgorithmImplementation) getResourceFromCache(
@@ -1901,23 +2844,27 @@ public class ReputationParser {
 			Resource resource, Class<? extends ReputationBehaviour> type) throws Exception {
 		ReputationModuleBehaviour behaviour = (ReputationModuleBehaviour) 
 			getResourceFromCache(resource, ReputationModuleBehaviour.class);
-		if(behaviour != null) {			
+		if(behaviour != null) {
+			//System.out.println("CACHE FOUND with reputationModuleBehaviour:"+behaviour);
 			return behaviour;
 		}		
 		behaviour = new ReputationModuleBehaviour();
 		addResourceInstanceToCache(resource, behaviour);
 		// Specific Attributes and Properties of ReputationModule Class //
-		// obtainsReputationsBy //
-		Property obtainsReputationsBy = ResourceFactory.createProperty(
-				riNamespace + "obtainsReputationsBy");
+		// obtainsReputationBy //
+		Property obtainsReputationBy = ResourceFactory.createProperty(
+				riNamespace + "obtainsReputationBy");
 		StmtIterator stmtI1 = model.listStatements(resource, 
-				obtainsReputationsBy, (RDFNode)null);
+				obtainsReputationBy, (RDFNode)null);
 		while(stmtI1.hasNext()) {
 			Statement statement = stmtI1.nextStatement();
-			/* validate obtainsReputationsBy property */
+			/* validate obtainsReputationBy property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("obtainsReputationsBy property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONMODULE,
+						"obtainsReputationBy property of resource:"+
+						resource.getURI()+" is not a resource")) {
+							return null;
+						}
 			} else {
 				ReputationAlgorithmImplementation repAlg = 
 					(ReputationAlgorithmImplementation) getResourceFromCache(
@@ -1958,8 +2905,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate reputationModel property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("reputationModule property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONMODEL,
+						"reputationModule property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ReputationAlgorithmImplementation repAlg = 
 					(ReputationAlgorithmImplementation) getResourceFromCache(
@@ -1993,8 +2943,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate reputationModule property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("reputationModule property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.REPUTATIONMODEL,
+						"reputationModule property of resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				ReputationAlgorithmImplementation repAlg = 
 					(ReputationAlgorithmImplementation) getResourceFromCache(
@@ -2060,8 +3013,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate uriFormat property */
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("uriFormat property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.COLLECTINGSYSTEM,
+						"uriFormat property of CollectingSystem resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				colSysBeh.setUriFormat(new URI(
 						statement.getObject().asLiteral().getString()));
@@ -2090,8 +3046,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate uriFormat property */
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("uriFormat property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.COLLECTINGSYSTEM,
+						"uriFormat property of CollectingSystem resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				behaviour.setUriFormat(new URI(
 						statement.getObject().asLiteral().getString()));
@@ -2121,14 +3080,37 @@ public class ReputationParser {
 		}
 	}
 	
+	public List<MetricTransformer> getMetricTransformers(
+			boolean validate) throws Exception {
+		List<MetricTransformer> transformers = new ArrayList<MetricTransformer>();
+		Resource metricTransformer = ResourceFactory.createResource(
+				riNamespace + "MetricTransformer");
+		ResIterator iters = model.listSubjectsWithProperty(
+				RDF.type,metricTransformer);
+		while (iters.hasNext()) {
+			Resource resource = iters.nextResource();
+			MetricTransformer tranformerIns = getMetricTransformer(model,resource,null);
+			if(!validate || ValidateModel.validateMetricTransformer(tranformerIns)) {
+				transformers.add(tranformerIns);
+			} else {
+				ModelException.sendMessage(ModelException.WARNING,"entity(" +
+						"resource:"+tranformerIns.getResource()+") dicarted");
+			}			
+		}
+		return transformers;
+	}
+	
 	class MetricTransformerInstances {
+		String identifier;
 		Metric sourceMetric;
 		Metric destinationMetric;
 		List<Double> correlationBetweenMetrics;
 		String description;
 		
-		MetricTransformerInstances(Metric sourceMetric, Metric destinationMetric,
-				List<Double> correlationBetweenMetrics, String description) {
+		MetricTransformerInstances(String identifier, Metric sourceMetric, 
+				Metric destinationMetric, List<Double> correlationBetweenMetrics, 
+				String description) {
+			this.identifier = identifier;
 			this.sourceMetric = sourceMetric;
 			this.destinationMetric = destinationMetric;
 			this.correlationBetweenMetrics = correlationBetweenMetrics;
@@ -2176,9 +3158,12 @@ public class ReputationParser {
 				}								
 			}
 			if(type == null) {
-				throw new Exception("Resource "+resource+" cannot be defined" +
-					" as a direct instance of MetricMapping. You must not use" +
-					" abstract subclasses");		
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"Resource "+resource+" cannot be defined" +
+						" as a direct instance of MetricTransformer. You must not use" +
+						" abstract subclasses")) {
+					return null;
+				}		
 			}
 		} else {
 			
@@ -2192,10 +3177,12 @@ public class ReputationParser {
 					instances.sourceMetric,
 					instances.destinationMetric,
 					instances.correlationBetweenMetrics);
+			metTra.setResource(resource);
 			addResourceInstanceToCache(resource, metTra);
 			metTra.setDescription(instances.description);
+			metTra.setIdentifier(instances.identifier);
 		} catch(Exception e) {
-			throw new Exception("Not constructor with args: (Metric, " +
+			throw new Exception("System Bug: Not constructor with args: (Metric, " +
 					"Metric, List) exist for type:"+type);
 		}
 		return metTra;
@@ -2203,18 +3190,39 @@ public class ReputationParser {
 	
 	public MetricTransformerInstances getMetricTransformer(
 			Model model, Resource resource) throws Exception {
+		Property identifier = ResourceFactory.
+				createProperty(riNamespace + "identifier");
+		/* identifier */
+		String identifierInstance = null;		
+		StmtIterator stmtI1 = model.listStatements(resource, 
+				identifier, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate identifier property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"identifier property of MetricTransformer resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
+			} else {
+				identifierInstance = statement.getObject().asLiteral().getString();		    	
+			}
+		}
 		Property sourceMetric = ResourceFactory.
 				createProperty(riNamespace + "sourceMetric");
 		/* sourceMetric */
 		Metric sourceInstance = null;		
-		StmtIterator stmtI1 = model.listStatements(resource, 
-				sourceMetric, (RDFNode)null);
+		stmtI1 = model.listStatements(resource, sourceMetric, (RDFNode)null);
 		while(stmtI1.hasNext()) {
 			Statement statement = stmtI1.nextStatement();
 			/* validate sourceMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("sourceMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"sourceMetric property of MetricTransformer resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				sourceInstance = (Metric) getResourceFromCache(
 					statement.getObject().asResource(),Metric.class);
@@ -2233,8 +3241,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate destinationMetric property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("destinationMetric property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"destinationMetric property of MetricTransformer resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
 			} else {
 				destinationInstance = (Metric) getResourceFromCache(
 						statement.getObject().asResource(),Metric.class);
@@ -2264,22 +3275,20 @@ public class ReputationParser {
 		List<Double> correlationsInstance = new ArrayList<Double>();
 		Property correlationBetweenDimensions = ResourceFactory.
 				createProperty(riNamespace + "correlationBetweenDimensions");
-		DimensionCorrelation correlationInstance = null;
 		stmtI1 = model.listStatements(resource, 
 				correlationBetweenDimensions, (RDFNode)null);
 		while(stmtI1.hasNext()) {
 			Statement statement = stmtI1.nextStatement();
 			// validate correlationBetweenMetrics property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("correlationBetweenDimensions property of resource:"+
-						resource.getURI()+" is not a resource");
-			} else {
-				correlationInstance = (DimensionCorrelation) getResourceFromCache(
-						statement.getObject().asResource(),DimensionCorrelation.class);
-				if(correlationInstance == null) {
-					correlationInstance = getDimensionCorrelation(model,
-							statement.getObject().asResource());					
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"correlationBetweenDimensions property of MetricTransformer resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
 				}
+			} else {
+				DimensionCorrelation correlationInstance = getDimensionCorrelation(
+						model,statement.getObject().asResource());
 				//TODO: validate dimensions are the same of source and destination metrics
 				correlationsInstance.add(correlationInstance.getCorrelationValue());
 			}
@@ -2291,13 +3300,17 @@ public class ReputationParser {
 		while(stmtI1.hasNext()) {
 			Statement statement = stmtI1.nextStatement();
 			// validate correlationBetweenMetrics property //
-			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("correlationBetweenScales property of resource:"+
-						resource.getURI()+" is not a literal");
-			} else {				
+			if(!statement.getObject().isResource()) {	    		
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"correlationBetweenScales property of MetricTransformer resource:"+
+						resource.getURI()+" is not a resource")) {
+					return null;
+				}
+			} else {
+				ScaleCorrelation correlationInstance = getScaleCorrelation(
+						model,statement.getObject().asResource());
 				//TODO: validate scales are the same of source and destination metrics
-				correlationsInstance.add(
-						Double.parseDouble(statement.getObject().toString()));		    	
+				correlationsInstance.add(correlationInstance.getCorrelationValue());						    	
 			}
 		}		
 		
@@ -2311,13 +3324,16 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate description property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("description property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
+						"dc:description property of MetricTransformer resource:"+
+						resource.getURI()+" is not a literal")) {
+					return null;
+				}
 			} else {
 				descriptionInstance = statement.getObject().asLiteral().getString();		    	
 			}
 		}
-		return new MetricTransformerInstances(sourceInstance, 
+		return new MetricTransformerInstances(identifierInstance, sourceInstance, 
 				destinationInstance, correlationsInstance, descriptionInstance);
 	}
 	
@@ -2330,7 +3346,12 @@ public class ReputationParser {
 		}		
 		MetricTransformerInstances metTraInstance = 
 			getMetricTransformer(model, resource);
-		Double baseInstance = getBaseObject(model, resource);		
+		Double baseInstance;
+		try {
+			baseInstance = getBaseObject(model, resource);
+		} catch(DiscardException e) {
+			return null;
+		}	
 		if(baseInstance == null) {
 			expNum = new ExponentialNumericTransformer(
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
@@ -2340,6 +3361,7 @@ public class ReputationParser {
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
 					metTraInstance.correlationBetweenMetrics, baseInstance);
 		}
+		expNum.setResource(resource);
 		addResourceInstanceToCache(resource, expNum);
 		expNum.setDescription(metTraInstance.description);
 		return expNum;
@@ -2387,6 +3409,7 @@ public class ReputationParser {
 		sqrtNum = new SqrtNumericTransformer(
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
 					metTraInstance.correlationBetweenMetrics);
+		sqrtNum.setResource(resource);
 		addResourceInstanceToCache(resource, sqrtNum);
 		sqrtNum.setDescription(metTraInstance.description);
 		return sqrtNum;
@@ -2433,7 +3456,8 @@ public class ReputationParser {
 			getMetricTransformer(model, resource);
 		linNum = new LinealNumericTransformer(
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
-					metTraInstance.correlationBetweenMetrics);		
+					metTraInstance.correlationBetweenMetrics);
+		linNum.setResource(resource);
 		addResourceInstanceToCache(resource, linNum);
 		linNum.setDescription(metTraInstance.description);
 		return linNum;
@@ -2452,16 +3476,7 @@ public class ReputationParser {
 		        System.out.println("  " + resource.getLocalName());
 		        LinealNumericTransformer linNumInstance = 
 		        	getLinealNumericTransformer(model,resource);
-		        System.out.println("     sourceMetric:" +
-		        		linNumInstance.getSourceMetric());
-		        System.out.println("     destinationMetric:" +
-		        		linNumInstance.getDestinationMetric());
-		        System.out.println("     correlationBetMetrics:" +
-		        		linNumInstance.getCorrelationBetweenMetrics());
-		        System.out.println("     difference:" +
-		        		linNumInstance.getDifference());
-		        System.out.println("     scale:" +
-		        		linNumInstance.getScale());
+		        System.out.println(linNumInstance.toReducedString("     "));
 		    }
 		} else {
 		    System.out.println("No simple String riNamespace+" +
@@ -2479,8 +3494,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate base property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("base property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.NUMERICTRANSFORMER,
+						"base property of NumericTransformer resource:"+
+						resource.getURI()+" is not a literal")) {
+					throw new DiscardException("");
+				}
 			} else {
 				return statement.getObject().asLiteral().getDouble();
 				//return Double.parseDouble(statement.getObject().toString());		    	
@@ -2498,7 +3516,12 @@ public class ReputationParser {
 		}
 		MetricTransformerInstances metTraInstance = 
 			getMetricTransformer(model, resource);
-		Double baseInstance = getBaseObject(model, resource);
+		Double baseInstance;
+		try {
+			baseInstance = getBaseObject(model, resource);
+		} catch(DiscardException e) {
+			return null;
+		}
 		if(baseInstance == null) {
 			logNum = new LogaritmicNumericTransformer(
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
@@ -2508,6 +3531,7 @@ public class ReputationParser {
 					metTraInstance.sourceMetric, metTraInstance.destinationMetric, 
 					metTraInstance.correlationBetweenMetrics, baseInstance);
 		}
+		logNum.setResource(resource);
 		addResourceInstanceToCache(resource, logNum);
 		logNum.setDescription(metTraInstance.description);
 		return logNum;
@@ -2543,7 +3567,95 @@ public class ReputationParser {
 		    System.out.println("No simple String riNamespace+" +
 		    		"LogaritmicNumericTransformer were found in the database");
 		}
-	}	
+	}
+	
+	public ScaleCorrelation getScaleCorrelation(
+			Model model, Resource resource) throws Exception {
+		ScaleCorrelation scaCor = (ScaleCorrelation) 
+			getResourceFromCache(resource, ScaleCorrelation.class);
+		if(scaCor != null) {			
+			return scaCor;
+		}		
+		scaCor = new ScaleCorrelation();
+		scaCor.setResource(resource);
+		addResourceInstanceToCache(resource, scaCor);
+		Property sourceScale = ResourceFactory.
+				createProperty(riNamespace + "sourceScale");		
+		// sourceScale //
+        StmtIterator stmtI1 = model.listStatements(resource, 
+        		sourceScale, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+	    	Statement statement = stmtI1.nextStatement();
+	    	// validate sourceScale property //
+	    	if(!statement.getObject().isResource()) {	    		
+	    		if(!ModelException.throwException(ModelException.SCALECORRELATION,
+						"sourceScale property of ScaleCorrelation resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
+	    	} else {
+	    		scaCor.setSourceScale(getScale(
+						model, statement.getObject().asResource(),null));		    	
+	    	}
+	    }
+		Property targetScale = ResourceFactory.
+				createProperty(riNamespace + "targetScale");
+		// targetScale //
+        stmtI1 = model.listStatements(resource, 
+        		targetScale, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+	    	Statement statement = stmtI1.nextStatement();
+	    	// validate targetScale property //
+	    	if(!statement.getObject().isResource()) {	    		
+	    		if(!ModelException.throwException(ModelException.SCALECORRELATION,
+						"targetScale property of ScaleCorrelation resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
+	    	} else {
+	    		scaCor.setTargetScale(getScale(
+						model, statement.getObject().asResource(),null));		    	
+	    	}
+	    }
+		Property correlationValue = ResourceFactory.
+				createProperty(riNamespace + "correlationValue");		
+		// correlationValue //
+		stmtI1 = model.listStatements(resource, 
+				correlationValue, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+			Statement statement = stmtI1.nextStatement();
+			// validate correlationValue property //
+			if(!statement.getObject().isLiteral()) {	    		
+				if(!ModelException.throwException(ModelException.SCALECORRELATION,
+						"correlationValue property of ScaleCorrelation resource:"+
+						resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
+			} else {
+				scaCor.setCorrelationValue(
+						statement.getObject().asLiteral().getDouble());		    	
+			}
+		}		
+		return scaCor;
+	}
+	
+	public void printScaleCorrelations(Model model) throws Exception {
+		Resource scaleCorrelation = ResourceFactory.
+				createResource(riNamespace + "ScaleCorrelation");
+		ResIterator iters = model.listSubjectsWithProperty(RDF.type,scaleCorrelation);
+		if (iters.hasNext()) {
+		    System.out.println("The database contains subjects of type scaleCorrelation:");
+		    while (iters.hasNext()) {
+		        Resource resource = iters.nextResource();
+		        System.out.println("  " + resource.getLocalName());
+		        ScaleCorrelation scaCorInstance = getScaleCorrelation(model,resource);		        
+		        System.out.println(scaCorInstance.toString("     "));
+		    }
+		} else {
+		    System.out.println("No simple String riNamespace+" +
+		    		"ScaleCorrelation were found in the database");
+		}
+	}
 	
 	public DimensionCorrelation getDimensionCorrelation(
 			Model model, Resource resource) throws Exception {
@@ -2553,6 +3665,7 @@ public class ReputationParser {
 			return dimCor;
 		}		
 		dimCor = new DimensionCorrelation();
+		dimCor.setResource(resource);
 		addResourceInstanceToCache(resource, dimCor);
 		Property sourceDimension = ResourceFactory.
 				createProperty(riNamespace + "sourceDimension");		
@@ -2563,8 +3676,11 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	// validate sourceDimension property //
 	    	if(!statement.getObject().isResource()) {	    		
-	    		throw new Exception("sourceDimension property of resource:"+
-	    				resource.getURI()+" is not a resource");
+	    		if(!ModelException.throwException(ModelException.DIMENSIONCORRELATION,
+						"sourceDimension property of DimensionCorrelation resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 	    	} else {
 	    		Dimension dimension = (Dimension) getResourceFromCache(
 	    				statement.getObject().asResource(), Dimension.class);
@@ -2583,8 +3699,11 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	// validate targetDimension property //
 	    	if(!statement.getObject().isResource()) {	    		
-	    		throw new Exception("targetDimension property of resource:"+
-	    				resource.getURI()+" is not a resource");
+	    		if(!ModelException.throwException(ModelException.DIMENSIONCORRELATION,
+						"targetDimension property of DimensionCorrelation resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 	    	} else {
 	    		Dimension dimension = (Dimension) getResourceFromCache(
 	    				statement.getObject().asResource(), Dimension.class);
@@ -2603,8 +3722,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate correlationValue property //
 			if(!statement.getObject().isLiteral()) {	    		
-				throw new Exception("correlationValue property of resource:"+
-						resource.getURI()+" is not a literal");
+				if(!ModelException.throwException(ModelException.DIMENSIONCORRELATION,
+						"correlationValue property of DimensionCorrelation resource:"+
+						resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
 			} else {
 				dimCor.setCorrelationValue(
 						statement.getObject().asLiteral().getDouble());		    	
@@ -2623,12 +3745,7 @@ public class ReputationParser {
 		        Resource resource = iters.nextResource();
 		        System.out.println("  " + resource.getLocalName());
 		        DimensionCorrelation dimCorInstance = getDimensionCorrelation(model,resource);
-		        System.out.println("     sourceDimension:" +
-		        		dimCorInstance.getSourceDimension().getName());
-		        System.out.println("     targetDimension:" +
-		        		dimCorInstance.getTargetDimension().getName());
-		        System.out.println("     correlationValue:" +
-		        		dimCorInstance.getCorrelationValue());
+		        System.out.println(dimCorInstance.toString("     "));
 		    }
 		} else {
 		    System.out.println("No simple String riNamespace+" +
@@ -2646,6 +3763,7 @@ public class ReputationParser {
 		}
 		if(type != null) {
 			truBet = type.newInstance();
+			truBet.setResource(resource);
 			addResourceInstanceToCache(resource, truBet);
 		} else {
 			StmtIterator stmtI1 = model.listStatements(resource, RDF.type, (RDFNode)null);
@@ -2665,6 +3783,7 @@ public class ReputationParser {
 			}
 			if(truBet == null) {
 				truBet = new TrustBetweenCommunities();
+				truBet.setResource(resource);
 				addResourceInstanceToCache(resource, truBet);
 			}
 		}
@@ -2677,8 +3796,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			// validate trustProvidedBy property //
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("trustProvidedBy property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.TRUSTBETWEENCOMMUNITIES,
+						"trustProvidedBy property of TrustBetweenCommunities resource:"+
+						resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 			} else {
 				TrustBetweenCommunities truBetInside = (TrustBetweenCommunities) 
 						getResourceFromCache(statement.getObject().asResource(),
@@ -2700,8 +3822,11 @@ public class ReputationParser {
 				Statement statement = stmtI1.nextStatement();
 				// validate value property //
 				if(!statement.getObject().isLiteral()) {	    		
-					throw new Exception("value property of resource:"+
-							resource.getURI()+" is not a literal");
+					if(!ModelException.throwException(ModelException.TRUSTBETWEENCOMMUNITIES,
+							"value property of TrustBetweenCommunities resource:"+
+							resource.getURI()+" is not a literal")) {
+		    			return null;
+		    		}
 				} else {
 					truBet.setValue(statement.getObject().asLiteral().getDouble());
 					//truBet.setValue(Double.parseDouble(statement.getObject().toString()));		    	
@@ -2798,8 +3923,11 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	// validate originatingCategory property //
 	    	if(!statement.getObject().isResource()) {	    		
-	    		throw new Exception("communityScorer property of resource:"+
-	    				resource.getURI()+" is not a resource");
+	    		if(!ModelException.throwException(ModelException.FIXEDCOMMUNITYTRUST,
+						"communityScorer property of FixedCommunityTrust resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 	    	} else {
 	    		Community community = (Community) getResourceFromCache(
 	    				statement.getObject().asResource(), Community.class);
@@ -2821,8 +3949,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate communityScored property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("communityScored property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.FIXEDCOMMUNITYTRUST,
+						"communityScored property of FixedCommunityTrust resource:"+
+						resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 			} else {
 				Community community = (Community) getResourceFromCache(
 						statement.getObject().asResource(), Community.class);
@@ -2848,15 +3979,11 @@ public class ReputationParser {
                 Resource resource = iters.nextResource();
                 System.out.println("  " + resource.getLocalName());
                 CategoryMatching catMatInstance = getCategoryMatching(model,resource);
-                System.out.println("     originatingCategory:" +
-                		catMatInstance.getOriginatingCategory().getName());
-                System.out.println("     receivingCategory:" +
-                		catMatInstance.getReceivingCategory().getName());
-                System.out.println("     value:" +
-                		catMatInstance.getValue());
+                System.out.println(catMatInstance.toString("     "));
             }
         } else {
-            System.out.println("No simple String riNamespace+Dimension were found in the database");
+            System.out.println("No simple String riNamespace+Dimension were found" +
+            		" in the database");
         }
 	}
 	
@@ -2878,8 +4005,11 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	/* validate originatingCategory property */
 	    	if(!statement.getObject().isResource()) {	    		
-	    		throw new Exception("originatingCategory property of resource:"+
-	    				resource.getURI()+" is not a resource");
+	    		if(!ModelException.throwException(ModelException.CATEGORYMATCHING,
+						"originatingCategory property of CategoryMatching resource:"+
+	    				resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 	    	} else {
 	    		Category category = (Category) getResourceFromCache(
 	    				statement.getObject().asResource(), Category.class);
@@ -2898,8 +4028,11 @@ public class ReputationParser {
 			Statement statement = stmtI1.nextStatement();
 			/* validate receivingCategory property */
 			if(!statement.getObject().isResource()) {	    		
-				throw new Exception("receivingCategory property of resource:"+
-						resource.getURI()+" is not a resource");
+				if(!ModelException.throwException(ModelException.CATEGORYMATCHING,
+						"receivingCategory property of CategoryMatching resource:"+
+						resource.getURI()+" is not a resource")) {
+	    			return null;
+	    		}
 			} else {
 				Category category = (Category) getResourceFromCache(
 						statement.getObject().asResource(), Category.class);
@@ -2921,10 +4054,11 @@ public class ReputationParser {
                 Resource resource = iters.nextResource();
                 System.out.println("  " + resource.getLocalName());
                 Category categoryInstance = getCategory(model,resource);
-                System.out.println("     name:" + categoryInstance.getName());                				
+                System.out.println(categoryInstance.toString("     "));                				
             }
         } else {
-            System.out.println("No simple String riNamespace+Dimension were found in the database");
+            System.out.println("No simple String riNamespace+Dimension" +
+            		" were found in the database");
         }
 	}
 	
@@ -2941,12 +4075,33 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	// validate name property //
 	    	if(!statement.getObject().isLiteral()) {	    		
-	    		throw new Exception("name property of resource:"+
-	    				resource.getURI()+" is not a literal");
+	    		if(!ModelException.throwException(ModelException.CATEGORY,
+						"name property of Category resource:"+
+	    				resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
 	    	}
 	    	category = new Category(statement.getObject().asLiteral().getString());
+	    	category.setResource(resource);
 	    	addResourceInstanceToCache(resource, category); 
-	    }		
+	    }
+		Property description = ResourceFactory.createProperty(dcNamespace + "description");		
+		// description //
+        stmtI1 = model.listStatements(resource, description, (RDFNode)null);
+		while(stmtI1.hasNext()) {
+	    	Statement statement = stmtI1.nextStatement();
+	    	// validate description property //
+	    	if(!statement.getObject().isLiteral()) {
+	    		if(!ModelException.throwException(ModelException.CATEGORY,
+						"description property of Category resource:"+
+	    				resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
+	    	}
+	    	if(category != null) {
+	    		category.setDescription(statement.getObject().asLiteral().getString());
+	    	}	    	
+	    }
 		return category;
 	}
 	
@@ -2959,13 +4114,11 @@ public class ReputationParser {
                 Resource resource = iters.nextResource();
                 System.out.println("  " + resource.getLocalName());
                 Dimension dimensionInstance = getDimension(model,resource);
-                System.out.println("     name:" + dimensionInstance.getName());
-                if(dimensionInstance.getDescription() != null) {
-                	System.out.println("     description:" + dimensionInstance.getName());
-                }				
+                System.out.println(dimensionInstance.toString("     "));                				
             }
         } else {
-            System.out.println("No simple String riNamespace+Dimension were found in the database");
+            System.out.println("No simple String riNamespace+Dimension were found" +
+            		" in the database");
         }
 	}
 	
@@ -2981,27 +4134,70 @@ public class ReputationParser {
 	    	Statement statement = stmtI1.nextStatement();
 	    	/* validate name property */
 	    	if(!statement.getObject().isLiteral()) {	    		
-	    		throw new Exception("name property of resource:"+
-	    				resource.getURI()+" is not a literal");
+	    		if(!ModelException.throwException(ModelException.DIMENSION,
+						"name property of Dimension resource:"+
+	    				resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
 	    	}
 	    	dimension = new Dimension(statement.getObject().asLiteral().getString());
+	    	dimension.setResource(resource);
 	    	addResourceInstanceToCache(resource, dimension);	    	    	
 	    }
-		Property description = ResourceFactory.createProperty(riNamespace + "description");		
+		Property description = ResourceFactory.createProperty(dcNamespace + "description");		
 		// description //
         stmtI1 = model.listStatements(resource, description, (RDFNode)null);
 		while(stmtI1.hasNext()) {
 	    	Statement statement = stmtI1.nextStatement();
 	    	// validate description property //
 	    	if(!statement.getObject().isLiteral()) {
-	    		throw new Exception("description property of resource:"+
-	    				resource.getURI()+" is not a literal");
+	    		if(!ModelException.throwException(ModelException.DIMENSION,
+						"description property of Dimension resource:"+
+	    				resource.getURI()+" is not a literal")) {
+	    			return null;
+	    		}
 	    	}
 	    	if(dimension != null) {
 	    		dimension.setDescription(statement.getObject().asLiteral().getString());
 	    	}	    	
 	    }
 		return dimension;
+	}
+
+	public Model getModel() {
+		return model;
+	}
+
+	public void setModel(Model model) {
+		this.model = model;
+	}
+
+	public String getBase() {
+		return base;
+	}
+
+	public void setBase(String base) {
+		this.base = base;
+	}
+
+	public String getRiNamespace() {
+		return riNamespace;
+	}
+
+	public void setRiNamespace(String riNamespace) {
+		this.riNamespace = riNamespace;
+	}
+	public String getDcNamespace() {
+		return dcNamespace;
+	}
+	public void setDcNamespace(String dcNamespace) {
+		this.dcNamespace = dcNamespace;
+	}
+	public String getFoafNamespace() {
+		return foafNamespace;
+	}
+	public void setFoafNamespace(String foafNamespace) {
+		this.foafNamespace = foafNamespace;
 	}
 	
 }

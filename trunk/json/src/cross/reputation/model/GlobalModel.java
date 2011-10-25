@@ -23,7 +23,8 @@ public class GlobalModel {
 		new HashMap<Community,Map<Community,Double>>();
 	static private Map<String,Metric> metrics = new HashMap<String,Metric>();
 	static private Map<String,Entity> entities = new HashMap<String,Entity>();
-	static private List<MetricTransformer> metricTransformers = new ArrayList<MetricTransformer>();
+	static private Map<String,MetricTransformer> metricTransformers = 
+		new HashMap<String,MetricTransformer>();
 	static private Map<String,Scale> scales = new HashMap<String,Scale>();
 	//static private Map<Community,ReputationTransformer> reputationTransformers =
 	//	 new HashMap<Community,ReputationTransformer>();
@@ -81,7 +82,7 @@ public class GlobalModel {
 	static public Map<String, Entity> getEntities() {
 		return entities;
 	}
-	static public List<MetricTransformer> getMetricTransformers() {
+	static public Map<String,MetricTransformer> getMetricTransformers() {
 		return metricTransformers;
 	}
 	static public Map<String, Scale> getScales() {
@@ -156,12 +157,35 @@ public class GlobalModel {
 			sourceMap.put(destinationCategory,matching);
 		}
 	}
-	static public void addCommunity(Community community) {
+	static public void addCommunity(Community community) throws Exception {
 		if(community == null) {
-			System.out.println("Error: community is null");
+			ModelException.sendMessage(ModelException.ERROR, "Community to add"
+					+" in GlobalModel is null");
 			return;
 		}
+		if(community.getName() == null) {
+			ModelException.sendMessage(ModelException.ERROR, "Community(resource:"
+					+community.getResource()+") with null"
+					+"identifier cannot be added to GlobalModel");
+			return;
+		}
+		if(communities.containsKey(community.getName())) {
+			ModelException.throwException(ModelException.COMMUNITY, "There is a " +
+					"Community(resource:"+entities.get(community.getName()).
+					getResource()+") already added in GlobalModel with the same"+
+					"identifier(new resource:"+community.getResource()+")");
+		}
 		communities.put(community.getName(), community);
+	}
+	static public void addCommunities(List<Community> communitiess) throws Exception {
+		if(communitiess == null || communitiess.isEmpty()) {
+			ModelException.sendMessage(ModelException.ERROR,"There is no" +
+					" Community in the model");
+			return;
+		}
+		for(Community community : communitiess) {
+			addCommunity(community);
+		}
 	}
 	static public Category addCategory(String categoryName) {
 		if(categoryName == null) {
@@ -172,29 +196,79 @@ public class GlobalModel {
 		categories.add(category);
 		return category;
 	}
-	static public Metric addMetric(Metric metric) {
+	static public Metric addMetric(Metric metric) throws Exception {
 		if(metric == null) {
-			System.out.println("Error: metric is null");
+			ModelException.sendMessage(ModelException.ERROR, "Metric is null");
 			return null;
+		}
+		if(metric.getIdentifier() == null) {
+			ModelException.sendMessage(ModelException.ERROR, "Metric(resource:"
+					+metric.getResource()+") with null identifier cannot be" +
+					" added to GlobalModel");
+			return null;
+		}
+		if(metrics.containsKey(metric.getIdentifier())) {
+			ModelException.throwException(ModelException.COMMUNITY, "There is a " +
+					"Metric(resource:"+entities.get(metric.getIdentifier()).getResource()
+					+") already added in GlobalModel with the same identifier(new resource:"+
+					metric.getResource()+")");
 		}
 		metrics.put(metric.getIdentifier(),metric);
 		return metric;
 	}
-	static public Entity addEntity(Entity entity) {
+	static public void addMetrics(List<Metric> metricss) throws Exception {
+		if(metricss == null || metricss.isEmpty()) {
+			ModelException.sendMessage(ModelException.ERROR,"There is no Metric in the model");
+			return;
+		}
+		for(Metric metric : metricss) {
+			addMetric(metric);
+		}		
+	}
+	static public Entity addEntity(Entity entity) throws Exception {
 		if(entity == null) {
-			System.out.println("Error: entity is null");
+			ModelException.sendMessage(ModelException.ERROR,"Entity is null");
 			return null;
 		}
-		if(!entities.containsValue(entity))
-			entities.put(entity.getUniqueIdentificator(),entity);
+		if(entity.getUniqueIdentificator() == null) {
+			ModelException.sendMessage(ModelException.ERROR, "Entity(resource:"
+					+entity.getResource()+") with null identifier cannot be" +
+					" added to GlobalModel");
+			return null;
+		}
+		if(entities.containsKey(entity.getUniqueIdentificator())) {
+			ModelException.throwException(ModelException.COMMUNITY, "There is a" +
+					" Entity(resource:"+entities.get(entity.getUniqueIdentificator()).
+					getResource()+") already" +	" added in GlobalModel with the same" +
+					" identifier(new resource:"+entity.getResource()+")");
+		}
+		entities.put(entity.getUniqueIdentificator(),entity);
 		return entity;
+	}
+	static public void addEntities(List<Entity> entitiess) throws Exception {
+		if(entitiess == null || entitiess.isEmpty()) {
+			ModelException.sendMessage(ModelException.ERROR, "There is no entity in the model");
+			return;
+		}
+		for(Entity entity : entitiess) {
+			addEntity(entity);
+		}		
+	}
+	static public void addMetricTransformers(List<MetricTransformer> tranformerss) {
+		if(tranformerss == null || tranformerss.isEmpty()) {
+			System.out.println("Error: there is no MetricTransformer in the model");
+			return;
+		}
+		for(MetricTransformer transformer : tranformerss) {
+			metricTransformers.put(transformer.getIdentifier(), transformer);
+		}		
 	}
 	static public void addMetricTransformer(MetricTransformer metricTransformer) {
 		if(metricTransformer == null) {
 			System.out.println("Error: metricTransformer is null");
 			return;
 		}
-		for(int i = 0; i < metricTransformers.size(); i++) {
+		/*for(int i = 0; i < metricTransformers.size(); i++) {
 			if(metricTransformers.get(i).getDestinationMetric() == 
 					metricTransformer.getDestinationMetric()
 					&& metricTransformers.get(i).getSourceMetric() ==
@@ -202,8 +276,8 @@ public class GlobalModel {
 				metricTransformers.remove(i);
 				break;
 			}
-		}
-		metricTransformers.add(metricTransformer);
+		}*/
+		metricTransformers.put(metricTransformer.getIdentifier(),metricTransformer);
 	}
 	static public void addScale(Scale scale) {
 		if(scale == null) {

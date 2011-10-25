@@ -3,7 +3,11 @@ package cross.reputation.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 abstract public class MetricTransformer {
+	protected String identifier;
+	protected Resource resource;
 	protected Metric sourceMetric;
 	protected Metric destinationMetric;
 	protected List<Double> correlationBetweenMetrics;
@@ -18,6 +22,19 @@ abstract public class MetricTransformer {
 	
 	abstract public Object tranformation(Object value, boolean adapt) throws Exception;
 	
+	
+	public String getIdentifier() {
+		return identifier;
+	}
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
+	}
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public Metric getSourceMetric() {
 		return sourceMetric;
 	}
@@ -45,8 +62,13 @@ abstract public class MetricTransformer {
 		return trust;
 	}
 	
+	public List<Double> getCorrelationBetweenMetric() {
+		return correlationBetweenMetrics;
+	}
+	
 	public String toString(String offset) {
-		String result = offset+"description:"+description+"\n";
+		String result = offset+"identifier:"+identifier+"\n";
+		result = offset+"description:"+description+"\n";
 		result += offset+"sourceMetric:"+sourceMetric+"\n";
 		result += sourceMetric.toString(offset+"      ")+"\n";
 		result += offset+"destinationMetric:"+destinationMetric+"\n";

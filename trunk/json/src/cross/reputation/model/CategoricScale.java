@@ -1,16 +1,26 @@
 package cross.reputation.model;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class CategoricScale extends Scale {
+	private Resource resource;
 	private Set<String> categories;
 	
 	public CategoricScale() {		
 	}
-		
+	
+	
+	public Resource getResource() {
+		return resource;
+	}
+
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public Set<String> getCategories() {
 		return categories;
 	}
@@ -70,7 +80,7 @@ public class CategoricScale extends Scale {
 
 	@Override
 	public String toString(String offset) {
-		String string = offset+"name:"+name+"\n";
+		String string = offset+"name:"+getName()+"\n";
 		string += offset+"categories:";
 		for(String category : categories) {
 			string += category+", ";

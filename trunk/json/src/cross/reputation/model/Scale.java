@@ -1,10 +1,12 @@
 package cross.reputation.model;
 
-import java.util.List;
 import java.util.Map;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 abstract public class Scale {
-	String name;
+	private Resource resource;
+	protected String name;
 	
 	public Scale() {		
 	}
@@ -13,6 +15,12 @@ abstract public class Scale {
 		this.name = name;
 	}
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public String getName() {
 		return name;
 	}

@@ -68,7 +68,7 @@ public class CrossReputation {
 		}
 		Double trustByMetricsAndCommunities = null;
 		MetricTransformer exTransformer = null;
-		for(MetricTransformer transformer : GlobalModel.getMetricTransformers()){
+		for(MetricTransformer transformer : GlobalModel.getMetricTransformers().values()){
 			if(transformer.getSourceMetric() == communityMetricToImport.getMetric() &&
 					transformer.getDestinationMetric() == destinationMetric) {
 				exTransformer = transformer;

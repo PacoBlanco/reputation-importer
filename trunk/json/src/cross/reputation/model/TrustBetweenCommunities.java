@@ -3,14 +3,23 @@ package cross.reputation.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class TrustBetweenCommunities {
-	Double value;
-	List<TrustBetweenCommunities> trustProvidedBy = 
+	private Resource resource;
+	protected Double value;
+	private List<TrustBetweenCommunities> trustProvidedBy = 
 		new ArrayList<TrustBetweenCommunities>();
 	
 	public TrustBetweenCommunities(){		
 	}
 	
+	public Resource getResource() {
+		return resource;
+	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public void setValue(Double value) {
 		this.value = value;
 	}

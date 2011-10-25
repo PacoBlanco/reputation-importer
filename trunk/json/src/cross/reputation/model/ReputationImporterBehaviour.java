@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReputationImporterBehaviour extends ReputationBehaviour {
-	List<MetricMapping> mapsMetrics;
-	List<ImportationUnit> importsFrom;
+	private List<MetricMapping> mapsMetrics;
+	private List<ImportationUnit> importsFrom;
 	
 	public List<MetricMapping> getMapsMetrics() {
 		return mapsMetrics;

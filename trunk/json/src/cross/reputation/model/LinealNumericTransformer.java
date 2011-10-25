@@ -70,4 +70,13 @@ public class LinealNumericTransformer extends NumericTransformer {
 	static public List<Class<? extends MetricTransformer>> listSubclasses() {
 		return null;
 	}
+	
+	public String toReducedString(String offset) {
+		StringBuilder result = new StringBuilder(offset+"sourceMetric:" + getSourceMetric());
+		result.append("\n"+offset+"destinationMetric:" +getDestinationMetric());
+		result.append("\n"+offset+"correlationBetMetrics:" +getCorrelationBetweenMetrics());
+		result.append("\n"+offset+"difference:"+getDifference());
+		result.append("\n"+offset+"scale:" + getScale());
+		return result.toString();
+	}
 }

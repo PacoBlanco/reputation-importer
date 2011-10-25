@@ -8,7 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.hp.hpl.jena.rdf.model.Resource;
+
 public class Community {
+	private Resource resource;
 	private String name;
 	private String domainName;
 	private List<Category> categories;
@@ -47,7 +50,14 @@ public class Community {
 		this.domainName = domainName;		
 		this.categories = Arrays.asList(categories);
 		this.metrics = metrics;
+	}
+	
+	public Resource getResource() {
+		return resource;
 	}	
+	public void setResource(Resource resource) {
+		this.resource = resource;
+	}
 	public String getDomainName() {
 		return domainName;
 	}
