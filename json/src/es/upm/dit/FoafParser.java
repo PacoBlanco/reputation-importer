@@ -39,9 +39,6 @@ public class FoafParser {
 	String riNamespace = "http://purl.org/reputationImport/0.1/";
 	
 	private List<Property> communitiesProperty = new ArrayList<Property>();
-	private List<Property> communitiesReputationModel = new ArrayList<Property>();
-	private List<Property> communitiesReputationModelProperties = new ArrayList<Property>();
-	private List<Property> communitiesImportsFrom = new ArrayList<Property>();
 	private List<Property> collectingSystemProperty = new ArrayList<Property>();
 	private List<Property> metricDefinitionProperty = new ArrayList<Property>();
 	private List<Property> metricTransformerProperty = new ArrayList<Property>();
@@ -52,14 +49,27 @@ public class FoafParser {
 	private List<Property> dimensionsProperty = new ArrayList<Property>();
 	private String userName = "";
 	
+	public FoafParser() {		
+	}
+	
+	public FoafParser(String foafNamespace) {
+		propertyAccountName.add(ResourceFactory.createProperty(foafNamespace, "accountName"));
+		propertyAccountProfile.add(ResourceFactory.createProperty(foafNamespace, "accountProfilePage"));
+		
+		propertyAccount.add(ResourceFactory.createProperty(foafNamespace, "account"));
+		propertyAccount.add(ResourceFactory.createProperty(foafNamespace, "holdsAccount"));
+				
+		agentResource.add(ResourceFactory.createResource(foafNamespace + "Agent"));
+		agentResource.add(ResourceFactory.createResource(foafNamespace + "Person"));
+	}
+	
 	static public void main(String[] args) {
 		FoafParser foaf = new FoafParser();
 		//foaf.foafAgent("http://localhost/foafSample2.rdf");
-		//foaf.foafAgent("dir/foafAndrea.rdf");
-		foaf.getCrossReputationGlobalModelFromRDF("dir/model2.rdf");
+		foaf.getCrossReputationGlobalModelFromRDF("dir/model0.rdf");
 	}
 	
-	public void foafAgent(String inputFileName) {
+	public void foafAgent(String inputFileName) throws Exception {
 		String foafNamespace = "http://xmlns.com/foaf/0.1/";
 		// create an empty model
 		Model model = ModelFactory.createOntologyModel(); // createDefaultModel();
@@ -219,7 +229,8 @@ public class FoafParser {
 			System.out.println("No simple String foafNamespace+Person were found in the database");
 		}
 		
-		Property propertyOnlineAccount = ResourceFactory.createProperty(foafNamespace, "OnlineAccount");
+		Property propertyOnlineAccount = ResourceFactory.createProperty(
+				foafNamespace, "OnlineAccount");		
 		iters = model.listSubjectsWithProperty(propertyOnlineAccount);
 		if (iters.hasNext()) {
 		    System.out.println("The database contains OnlineAccount for:");
@@ -318,13 +329,13 @@ public class FoafParser {
         model.read(in, "", null);
         
         // create the reasoner factory and the reasoner
-		/*Resource conf = model.createResource();
+		Resource conf = model.createResource();
 		//conf.addProperty( ReasonerVocabulary.PROPtraceOn, "true" );
 		RDFSRuleReasoner reasoner = (RDFSRuleReasoner) RDFSRuleReasonerFactory.theInstance().create(conf);
 		// Create inference model
 		InfModel infModel = ModelFactory.createInfModel(reasoner, model);
 		
-		model = infModel;*/
+		model = infModel;
         
         System.out.println("Base Namespace:"+model.getNsPrefixURI(""));
         
@@ -332,109 +343,571 @@ public class FoafParser {
         	riNamespace = model.getNsPrefixURI("ri");
             System.out.println("ri namespace:"+riNamespace);
         }
+        Resource dimension = ResourceFactory.createResource(riNamespace + "Dimension");
+        Resource categoryMatching = ResourceFactory.createResource(riNamespace + "CategoryMatching");
+        Resource fixedCommunitiesTrust = ResourceFactory.createResource(
+        		riNamespace + "FixedCommunitiesTrust");
+        Resource trustBetweenCommunities = ResourceFactory.
+        		createResource(riNamespace + "TrustBetweenCommunities");
+        Resource correlationBetweenDimension = ResourceFactory.
+        		createResource(riNamespace + "CorrelationBetweenDimension");
+        Resource logaritmicNumericTransformer = ResourceFactory.
+        		createResource(riNamespace + "LogaritmicNumericTransformer");
+        Resource linealNumericTransformer = ResourceFactory.
+				createResource(riNamespace + "LinealNumericTransformer");
+        Resource sqrtNumericTransformer = ResourceFactory.
+				createResource(riNamespace + "SqrtNumericTransformer");
+        Resource metric = ResourceFactory.createResource(
+        		riNamespace + "Metric");
+        Resource collectingSystem = ResourceFactory.createResource(
+        		riNamespace + "CollectingSystem");
+        Resource community = ResourceFactory.createResource(
+        		riNamespace + "Community");
+        
+        Property identifier = ResourceFactory.createProperty(
+        		riNamespace + "identifier");
+        Property hasDimension = ResourceFactory.createProperty(
+        		riNamespace + "hasDimension");
+        Property hasScale = ResourceFactory.createProperty(
+        		riNamespace + "hasScale");
+        Property name = ResourceFactory.createProperty(
+        		riNamespace + "name");
+        Property uriFormat = ResourceFactory.createProperty(
+        		riNamespace + "uriFormat");
+        Property homePage = ResourceFactory.createProperty(
+        		riNamespace + "homePage");
+        Property hasCategory = ResourceFactory.createProperty(
+        		riNamespace + "hasCategory");
+        Property hasReputationModel = ResourceFactory.createProperty(
+        		riNamespace + "hasReputationModel");
+        Property reputationModule = ResourceFactory.createProperty(
+        		riNamespace + "reputationModule");
+        Property mapsMetric = ResourceFactory.createProperty(
+        		riNamespace + "mapsMetric");
+        Property importedCommunity = ResourceFactory.createProperty(
+        		riNamespace + "importedCommunity");
+        Property importedMetric = ResourceFactory.createProperty(
+        		riNamespace + "importedMetric");
+        Property collectsReputationBy = ResourceFactory.createProperty(
+        		riNamespace + "collectsReputationBy");
+        Property metricTransformation = ResourceFactory.createProperty(
+        		riNamespace + "metricTransformation");
+        Property trust = ResourceFactory.createProperty(
+        		riNamespace + "trust");
+        Property importsFrom = ResourceFactory.createProperty(
+        		riNamespace + "importsFrom");
         
         addPropertiesAndResources();
-     
-        for(Resource res : resources){
-        	
-            ResIterator iters = model.listSubjectsWithProperty(RDF.type,res);
+        
+        for(Resource agent : resources) {                           
+            ResIterator iters = model.listResourcesWithProperty(RDF.type,agent);
             if (iters.hasNext()) {
-                System.out.println("The database contains subjects of type " + res.getLocalName());
+                System.out.println("The database contains resource for:");
                 while (iters.hasNext()) {
                     Resource resource = iters.nextResource();
-                    System.out.println("  " + resource.getLocalName());  
-                    
-        	    	StmtIterator stmtI = model.listStatements(resource, null, (RDFNode)null);
-        	    	while(stmtI.hasNext()) {
-        	    		Statement statement = stmtI.nextStatement();
-        	    		System.out.println("   triple "+statement.getPredicate()+" - "+statement.getObject());
-        	    	}
-        	    	if(res.getLocalName().toString().equals("Community")){
-				    	for(Property property : communitiesProperty) {
-					    	StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
-					    	while(stmtI1.hasNext()) {
-					    		Statement statement = stmtI1.nextStatement();			    		
-					    		System.out.println("   Nodes "+statement.getObject());
-					    		if(statement.getObject().isResource()) {
-					    			Resource onlineAccount = statement.getObject().asResource();				    			
-					    			NodeIterator nodess = model.listObjectsOfProperty(onlneAccount, RDF.type);
-							    	while(nodess.hasNext()) {
-							    		RDFNode node = nodess.nextNode();
-							    		if(node.isResource()) {
-							    			System.out.println("      type " + node.asResource().getURI());
-							    		}
-							    	}
-					    			for(Property property2 : communitiesReputationModelProperties) {
-					    				StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
-					    				if(stmtI2.hasNext()){
-						    				Statement statement2 = stmtI2.nextStatement();
-						    				System.out.println("      Properties "+ property2.getLocalName() + ": " + statement2.getObject());
-						    				if(statement2.getObject().isResource()){
-						    					Resource reputationModule = statement2.getObject().asResource();
-						    					NodeIterator nodess2 = model.listObjectsOfProperty(reputationModule, RDF.type);
-						    					while(nodess2.hasNext()){
-						    						RDFNode node2 = nodess2.nextNode();
-						    						if(node2.isResource()){
-						    							System.out.println("         type " + node2.asResource().getURI());
-						    							for(Property property3 : communitiesReputationModel){
-						    								StmtIterator stmtI3 = model.listStatements(reputationModule, property3, (RDFNode)null);
-						    								if(stmtI3.hasNext()){
-						    									Statement statement3 = stmtI3.nextStatement();
-						    									System.out.println("            Properties "+ 
-						    											property3.getLocalName() + ": " + statement3.getObject());
-						    									if(statement3.getObject().isResource()){
-						    										Resource importsFrom = statement3.getObject().asResource();
-						    										NodeIterator nodess3 = model.listObjectsOfProperty(importsFrom, RDF.type);
-						    										while(nodess3.hasNext()){
-						    											RDFNode node3 = nodess3.nextNode();
-						    											if(node3.isResource()){
-						    												System.out.println("            type " + node3.asResource().getURI());
-						    												for(Property property4 : communitiesImportsFrom){
-						    													StmtIterator stmtI4 = model.listStatements(importsFrom, property4, (RDFNode)null);
-						    													if(stmtI4.hasNext()){
-						    														Statement statement4 = stmtI4.nextStatement();
-											    									System.out.println("               Properties "+ 
-											    											property4.getLocalName() + ": " + statement4.getObject());
-						    													}
-						    												}
-						    											}
-						    										}
-						    									}
-						    								}	
-						    							}
-						    						}
-						    					}
-						    				}
-					    				}
-					    			}
-					    		}
-					    	}
-				    	}
-        	    	}else if(res.getLocalName().toString().equals("CollectingSystem")){
-        	    		for(Property property : collectingSystemProperty) {
-        	    			StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
-        	    			while(stmtI1.hasNext()) {
-					    		Statement statement = stmtI1.nextStatement();			    		
-					    		System.out.println("   Nodes "+statement.getObject());
-					    		if(statement.getObject().isResource()) {
-					    			Resource onlineAccount = statement.getObject().asResource();				    			
-					    			NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
-							    	while(nodess.hasNext()) {
-							    		RDFNode node = nodess.nextNode();
-							    		if(node.isResource()) {
-							    			System.out.println("      type " + node.asResource().getURI());
-							    		}
-							    	}
-					    		}
-        	    			}
-        	    		}
-        	    	}
+                    String resourceName = null;
+                    if(resource.getLocalName() != null) {
+                            resourceName = resource.getLocalName();
+                    } else if(resource.getId() != null) {
+                    	if(resource.getId().getLabelString() != null) {
+                    		resourceName = resource.getId().getLabelString();
+                        } else {
+                        	resourceName = resource.getId().toString();
+                        }
+                    } else if(resource.getURI() != null) {
+                            resourceName = resource.getURI();
+                    }
+                    System.out.println("  " + resourceName+" class:"+resource.getClass());
+                    NodeIterator nodes = model.listObjectsOfProperty(resource, RDF.type);
+                    while(nodes.hasNext()) {
+                        RDFNode node = nodes.nextNode();
+                        if(node.isResource()) {
+                                System.out.println("   type " + node.asResource().getURI());
+                        }
+                    }
+                    StmtIterator stmtI = model.listStatements(resource, null, (RDFNode)null);
+                    while(stmtI.hasNext()) {
+                            Statement statement = stmtI.nextStatement();
+                            System.out.println("   triple "+statement.getPredicate()+" - "+statement.getObject());
+                    }
+                    for(Property property : propertyAccount) {
+                        StmtIterator stmtI1 = model.listStatements(resource, property, (RDFNode)null);
+                        while(stmtI1.hasNext()) {
+                            Statement statement = stmtI1.nextStatement();                                   
+                            System.out.println("   OnlineAccount "+statement.getObject());
+                            if(statement.getObject().isResource()) {
+                                Resource onlineAccount = statement.getObject().asResource();                                                    
+                                NodeIterator nodess = model.listObjectsOfProperty(onlineAccount, RDF.type);
+                                while(nodess.hasNext()) {
+                                    RDFNode node = nodess.nextNode();
+                                    if(node.isResource()) {
+                                        System.out.println("      type " + node.asResource().getURI());
+                                    }
+                                }
+                                for(Property property2 : propertyAccountName) {
+                                    StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
+                                    Statement statement2 = stmtI2.nextStatement();
+                                    System.out.println("      AccountName "+statement2.getObject());
+                                }
+                                for(Property property2 : propertyAccountProfile) {
+                                    StmtIterator stmtI2 = model.listStatements(onlineAccount, property2, (RDFNode)null);
+                                    Statement statement2 = stmtI2.nextStatement();
+                                    System.out.println("      AccountProfile "+statement2.getObject());
+                                }
+                            }
+                        }
+                    }
                 }
-            } else {
-                System.out.println("No simple String " + riNamespace + res.getLocalName() +  " were found in the database");
-            }  
-            
+            }
+         }  
+        
+        ResIterator iters = model.listSubjectsWithProperty(RDF.type,dimension);
+        if (iters.hasNext()) {
+            System.out.println("The database contains subjects of type dimension:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+Dimension were found in the database");
         }
+        
+        iters = model.listResourcesWithProperty(RDF.type,categoryMatching);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type CategoryMatching:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String "+riNamespace+
+            		"CategoryMatching were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,fixedCommunitiesTrust);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type fixedCommunitiesTrust:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"FixedCommunitiesTrust were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,trustBetweenCommunities);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type trustBetweenCommunities:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"trustBetweenCommunities were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,correlationBetweenDimension);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type CorrelationBetweenDimension:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"CorrelationBetweenDimension were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,logaritmicNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type LogaritmicNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"LogaritmicNumericTransformer were found in the database");
+        }
+        iters = model.listSubjectsWithProperty(RDF.type,linealNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type linealNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"linealNumericTransformer were found in the database");
+        }        
+        iters = model.listSubjectsWithProperty(RDF.type,sqrtNumericTransformer);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type SqrtNumericTransformer:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"SqrtNumericTransformer were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,metric);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type metric:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+                /* identifier */
+                StmtIterator stmtI1 = model.listStatements(resource, identifier, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    identifier:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    identifier resource " +
+			    				"impossible:"+statement.getObject());			    		
+			    	} else {
+			    		System.out.println("    identifier no literal no resource");
+			    	}
+			    }
+				/* hasDimension */
+				stmtI1 = model.listStatements(resource, hasDimension, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    hasDimension impossible:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    hasDimension resource:"+statement.getObject());
+			    		Resource dimResource = statement.getObject().asResource();				    			
+			    		StmtIterator stmtI2 = model.listStatements(dimResource, 
+					   			(Property)null, (RDFNode)null);
+					   	while(stmtI2.hasNext()) {
+					    	Statement statement2 = stmtI2.nextStatement();
+					    	System.out.println("      "+statement2.getPredicate().getLocalName()
+					    			+" "+statement2.getObject());
+					   	}
+			    	} else {
+			    		System.out.println("    hasDimension no literal no resource");
+			    	}
+			    }
+				/* hasScale */
+				stmtI1 = model.listStatements(resource, hasScale, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    hasScale impossible:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    hasScale resource:"+statement.getObject());
+			    		Resource scaResource = statement.getObject().asResource();				    			
+			    		StmtIterator stmtI2 = model.listStatements(scaResource, 
+					   			(Property)null, (RDFNode)null);
+					   	while(stmtI2.hasNext()) {
+					    	Statement statement2 = stmtI2.nextStatement();
+					    	System.out.println("      "+statement2.getPredicate().getLocalName()
+					    			+" "+statement2.getObject());
+					   	}
+			    	} else {
+			    		System.out.println("    hasScale no literal no resource");
+			    	}
+			    }
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"metric were found in the database");
+        }
+        
+        iters = model.listSubjectsWithProperty(RDF.type,collectingSystem);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type collectingSystem:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+                /* name */
+                StmtIterator stmtI1 = model.listStatements(resource, name, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    name:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    name resource " +
+			    				"impossible:"+statement.getObject());			    		
+			    	} else {
+			    		System.out.println("    name no literal no resource");
+			    	}
+			    }				
+				/* uriFormat */
+				stmtI1 = model.listStatements(resource, uriFormat, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    uriFormat:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    uriFormat resource impossible:"
+			    				+statement.getObject());			    		
+			    	} else {
+			    		System.out.println("    uriFormat no literal no resource");
+			    	}
+			    }
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"collectingSystem were found in the database");
+        }        
+        
+        iters = model.listSubjectsWithProperty(RDF.type,community);
+        if (iters.hasNext()) {
+            System.out.println("The database contains resources of type community:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+                /* identifier */
+                StmtIterator stmtI1 = model.listStatements(resource, identifier, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    identifier:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    identifier resource " +
+			    				"impossible:"+statement.getObject());			    		
+			    	} else {
+			    		System.out.println("    identifier no literal no resource");
+			    	}
+			    }
+				/* homePage */
+                stmtI1 = model.listStatements(resource, homePage, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    homePage:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    homePage resource " +
+			    				"impossible:"+statement.getObject());			    		
+			    	} else {
+			    		System.out.println("    homePage no literal no resource");
+			    	}
+			    }
+				/* hasCategory */
+				stmtI1 = model.listStatements(resource, hasCategory, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    hasCategory impossible:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    hasCategory resource:"
+			    				+statement.getObject());
+			    		Resource catResource = statement.getObject().asResource();				    			
+			    		StmtIterator stmtI2 = model.listStatements(catResource, 
+					   			(Property)null, (RDFNode)null);
+					   	while(stmtI2.hasNext()) {
+					    	Statement statement2 = stmtI2.nextStatement();
+					    	System.out.println("      "+statement2.getPredicate().getLocalName()
+					    			+" "+statement2.getObject());
+					   	}
+			    	} else {
+			    		System.out.println("    hasCategory no literal no resource");
+			    	}
+			    }
+				/* hasReputationModel */
+				stmtI1 = model.listStatements(resource, hasReputationModel, (RDFNode)null);
+				while(stmtI1.hasNext()) {
+			    	Statement statement = stmtI1.nextStatement();
+			    	if(statement.getObject().isLiteral()) {
+			    		System.out.println("    hasReputationModel impossible:"+statement.getObject());				    	
+			    	} else if(statement.getObject().isResource()) {
+			    		System.out.println("    hasReputationModel resource:"
+			    				+statement.getObject());
+			    		Resource repResource = statement.getObject().asResource();				    			
+			    		StmtIterator stmtI2 = model.listStatements(repResource, 
+					   			(Property)null, (RDFNode)null);
+					   	while(stmtI2.hasNext()) {
+					    	Statement statement2 = stmtI2.nextStatement();
+					    	if(reputationModule.getURI().equalsIgnoreCase(
+					    			statement2.getPredicate().getURI())) {
+					    		System.out.println("      "+reputationModule.getURI()+" property "
+					    				+statement2.getObject());
+					    		Resource modResource = statement2.getObject().asResource();				    			
+					    		StmtIterator stmtI3 = model.listStatements(modResource, 
+							   			(Property)null, (RDFNode)null);
+					    		while(stmtI3.hasNext()) {
+							    	Statement statement3 = stmtI3.nextStatement();
+							    	if(statement3.getObject().isLiteral()) {
+							    		System.out.println("         "+statement3.getPredicate().getLocalName()
+							    				+":"+statement3.getObject());				    	
+							    	} else if(statement3.getObject().isResource()) {
+							    		System.out.println("         "+statement3.getPredicate().getLocalName()
+							    				+" resource:"+statement3.getObject());
+							    		Resource anyResource = statement3.getObject().asResource();				    			
+							    		StmtIterator stmtI4 = model.listStatements(anyResource, 
+									   			(Property)null, (RDFNode)null);
+							    		if(mapsMetric.getURI().equalsIgnoreCase(
+							    				statement3.getPredicate().getURI())) {
+							    			
+							    		} else if(importsFrom.getURI().equalsIgnoreCase(
+							    				statement3.getPredicate().getURI())) {
+							    			while(stmtI4.hasNext()) {
+										    	Statement statement4 = stmtI4.nextStatement();
+										    	if(importedCommunity.getURI().equals(statement4.getPredicate().getURI())) {
+										    		if(statement4.getObject().isLiteral()) {
+											    		System.out.println("                importedCommunity impossible:"
+											    				+statement4.getObject());				    	
+											    	} else if(statement4.getObject().isResource()) {
+											    		System.out.println("                importedCommunity resource:"
+											    				+statement4.getObject());
+											    		Resource impResource = statement4.getObject().asResource();				    			
+											    		StmtIterator stmtI5 = model.listStatements(impResource, 
+													   			(Property)null, (RDFNode)null);
+													   	while(stmtI5.hasNext()) {
+													    	Statement statement5 = stmtI5.nextStatement();
+													    	System.out.println("                      "
+													    			+statement5.getPredicate().getLocalName()
+													    			+" "+statement5.getObject());
+													   	}
+											    	} else {
+											    		System.out.println("                "+
+											    				"importedCommunity no literal no resource");
+											    	}
+										    	} else if(importedMetric.getURI().equals(statement4.getPredicate().getURI())) {
+										    		if(statement4.getObject().isLiteral()) {
+											    		System.out.println("                importedMetric impossible:"
+											    				+statement4.getObject());				    	
+											    	} else if(statement4.getObject().isResource()) {
+											    		System.out.println("                importedMetric resource:"
+											    				+statement4.getObject());
+											    		Resource impResource = statement4.getObject().asResource();				    			
+											    		StmtIterator stmtI5 = model.listStatements(impResource, 
+													   			(Property)null, (RDFNode)null);
+													   	while(stmtI5.hasNext()) {
+													    	Statement statement5 = stmtI5.nextStatement();
+													    	System.out.println("                      "
+													    			+statement5.getPredicate().getLocalName()
+													    			+" "+statement5.getObject());
+													   	}
+											    	} else {
+											    		System.out.println("                "+
+											    				"importedMetric no literal no resource");
+											    	}
+										    	} else if(collectsReputationBy.getURI().equals(statement4.getPredicate().getURI())) {
+										    		if(statement4.getObject().isLiteral()) {
+											    		System.out.println("                collectsReputationBy impossible:"
+											    				+statement4.getObject());				    	
+											    	} else if(statement4.getObject().isResource()) {
+											    		System.out.println("                collectsReputationBy resource:"
+											    				+statement4.getObject());
+											    		Resource colResource = statement4.getObject().asResource();				    			
+											    		StmtIterator stmtI5 = model.listStatements(colResource, 
+													   			(Property)null, (RDFNode)null);
+													   	while(stmtI5.hasNext()) {
+													    	Statement statement5 = stmtI5.nextStatement();
+													    	System.out.println("                      "
+													    			+statement5.getPredicate().getLocalName()
+													    			+" "+statement5.getObject());
+													   	}
+											    	} else {
+											    		System.out.println("                "+
+											    				"collectsReputationBy no literal no resource");
+											    	}
+										    	} else if(metricTransformation.getURI().equals(statement4.getPredicate().getURI())) {
+										    		if(statement4.getObject().isLiteral()) {
+											    		System.out.println("                metricTransformation impossible:"
+											    				+statement4.getObject());				    	
+											    	} else if(statement4.getObject().isResource()) {
+											    		System.out.println("                metricTransformation resource:"
+											    				+statement4.getObject());
+											    		Resource metResource = statement4.getObject().asResource();				    			
+											    		StmtIterator stmtI5 = model.listStatements(metResource, 
+													   			(Property)null, (RDFNode)null);
+													   	while(stmtI5.hasNext()) {
+													    	Statement statement5 = stmtI5.nextStatement();
+													    	System.out.println("                      "
+													    			+statement5.getPredicate().getLocalName()
+													    			+" "+statement5.getObject());
+													   	}
+											    	} else {
+											    		System.out.println("                "+
+											    				"metricTransformation no literal no resource");
+											    	}
+										    	} else if(trust.getURI().equals(statement4.getPredicate().getURI())) {
+										    		if(statement4.getObject().isLiteral()) {
+											    		System.out.println("                trust impossible:"
+											    				+statement4.getObject());				    	
+											    	} else if(statement4.getObject().isResource()) {
+											    		System.out.println("                trust resource:"
+											    				+statement4.getObject());
+											    		Resource truResource = statement4.getObject().asResource();				    			
+											    		StmtIterator stmtI5 = model.listStatements(truResource, 
+													   			(Property)null, (RDFNode)null);
+													   	while(stmtI5.hasNext()) {
+													    	Statement statement5 = stmtI5.nextStatement();
+													    	System.out.println("                      "
+													    			+statement5.getPredicate().getLocalName()
+													    			+" "+statement5.getObject());
+													   	}
+											    	} else {
+											    		System.out.println("                "+
+											    				"trust no literal no resource");
+											    	}
+										    	} else {
+										    		System.out.println("            "+statement4.getPredicate().getLocalName()
+										    			+" "+statement4.getObject());
+										    	}
+										   	}							    			
+							    		} else {
+							    			while(stmtI4.hasNext()) {
+										    	Statement statement4 = stmtI4.nextStatement();
+										    	System.out.println("            "+statement4.getPredicate().getLocalName()
+										    			+" "+statement4.getObject());
+										   	}
+							    		}
+							    	} else {
+							    		System.out.println("         "+statement3.getPredicate().getLocalName()
+							    				+" no literal no resource");
+							    	}
+							   	}
+					    	} else {
+					    		System.out.println("      "+statement2.getPredicate().getLocalName()
+					    			+" "+statement2.getObject());
+					    	}
+					   	}
+			    	} else {
+			    		System.out.println("    hasReputationModel no literal no resource");
+			    	}
+			    }				
+            }
+        } else {
+            System.out.println("No simple String riNamespace+" +
+            		"community were found in the database");
+        }
+        
+        
+        
+        
+        
+        
+        /*
+        iters = model.listSubjects();
+        if (iters.hasNext()) {
+            System.out.println("Subjects:");
+            while (iters.hasNext()) {
+                Resource resource = iters.nextResource();
+                System.out.println("  " + resource.getLocalName());
+               // node.
+                
+            }
+        } 
+        
+        StmtIterator stms = model.listStatements();
+        if (stms.hasNext()) {
+            System.out.println("Statements:");
+            while (stms.hasNext()) {
+                Statement stm = stms.nextStatement();
+                System.out.println("  " + stm.getSubject()+"-"+stm.getPredicate()
+                		+"-"+stm.getObject());
+               // node.
+                
+            }
+        }
+        */        
                      
         
 	}
@@ -442,7 +915,7 @@ public class FoafParser {
 	private void addPropertiesAndResources(){
 		
 		resources.add(ResourceFactory.createResource(riNamespace + "Community"));
-        resources.add(ResourceFactory.createResource(riNamespace + "CollectingSystem"));
+        /*resources.add(ResourceFactory.createResource(riNamespace + "CollectingSystem"));
         resources.add(ResourceFactory.createResource(riNamespace + "Metric"));
         resources.add(ResourceFactory.createResource(riNamespace + "SqrtNumericTransformer"));
         resources.add(ResourceFactory.createResource(riNamespace + "ExponentialNumericTransformer"));
@@ -452,26 +925,14 @@ public class FoafParser {
         resources.add(ResourceFactory.createResource(riNamespace + "TrustBetweenCommunities"));
         resources.add(ResourceFactory.createResource(riNamespace + "FixedCommunitiesTrust"));
         resources.add(ResourceFactory.createResource(riNamespace + "CategoryMatching"));
-        resources.add(ResourceFactory.createResource(riNamespace + "Dimension"));
+        resources.add(ResourceFactory.createResource(riNamespace + "hasDimension"));*/
         
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasCategory"));
         communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasReputationModel"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "name"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "reputationModule"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
-        communitiesReputationModelProperties.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "resultCollectionType"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "Accesibility"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "usesMetric"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "importsFrom"));
-        communitiesReputationModel.add(ResourceFactory.createProperty(riNamespace, "mapsMetric"));
-        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "importedCommunity"));
-        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "importedMetric"));
-        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "collectsReputationBy"));
-        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "metricTransformation"));
-        communitiesImportsFrom.add(ResourceFactory.createProperty(riNamespace, "trust"));
-        
-        collectingSystemProperty.add(ResourceFactory.createProperty(riNamespace, "name"));
-        collectingSystemProperty.add(ResourceFactory.createProperty(riNamespace, "uriFormat"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "reputationModule"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "mapsMetric"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "importsFrom"));
+        communitiesProperty.add(ResourceFactory.createProperty(riNamespace, "hasCategory"));
 	}
 	
 }
