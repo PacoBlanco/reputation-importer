@@ -1,0 +1,707 @@
+<!DOCTYPE rdf:RDF [
+    <!ENTITY ri "http://purl.org/reputationImport/0.1/" >
+]>
+
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:foaf="http://xmlns.com/foaf/0.1/"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema/"
+  xmlns:rss="http://purl.org/rss/1.0/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:ri="http://purl.org/reputationImport/0.1/"
+  xml:base="http://ojo.org/">
+
+  <!-- Community definitions -->   
+  <ri:Community rdf:about="http://example.org/semanticWiki">
+       <ri:identifier>semanticWiki</ri:identifier>
+       <ri:homePage>http://lab.gsi.dit.upm.es/semanticwiki</ri:homePage>
+       <ri:hasCategory rdf:resource="#SecurityWebApp"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#semanticWikiReputationModel">
+                 <ri:name>semanticWikiModel</ri:name>
+                 <dc:description>Reputation Model of the Community semanticWiki based in an only module of reputation importation</dc:description>
+				 <ri:usesMetric rdf:resource="#semanticWikiMetric"/>
+                 <ri:reputationModule>
+                      <ri:ReputationImporter rdf:about="#semanticWikiReputationImporterModule">
+					       <ri:name>semanticWikiReputationImporterModule</ri:name>
+                           <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+                           <ri:accesibility rdf:resource="&ri;Visible"/>
+                           <ri:accesibility rdf:resource="&ri;Downloadable"/>
+                           <ri:usesMetric rdf:resource="#semanticWikiMetric"/>     
+                           
+                           <ri:mapsMetric>
+								<ri:MetricMapping rdf:about="#stackOverflowWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#stackOverflowImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>	
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#stackoverflowToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#stackoverflow.com"/>
+                                     <ri:importedMetric rdf:resource="#stackOverflowImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#stackOverflowImportation"/>
+                                     <ri:metricTransformation rdf:resource="#stackOverflowToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#stackOverflowToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+                           
+                           <ri:mapsMetric>
+								<ri:MetricMapping  rdf:about="#KudoOhlohWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#ohlohKudoImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#ohlohKudoToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#ohloh.net"/>
+                                     <ri:importedMetric rdf:resource="#ohlohKudoImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#ohlohKudoImportation"/>
+                                     <ri:metricTransformation rdf:resource="#ohlohKudoToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#ohlohToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+                           
+                           <ri:mapsMetric>
+								<ri:MetricMapping  rdf:about="#RankOhlohWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#ohlohRankImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>                         
+                                <ri:ImportationUnit rdf:about="#ohlohRankToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#ohloh.net"/>
+                                     <ri:importedMetric rdf:resource="#ohlohRankImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#ohlohRankImportation"/>
+                                     <ri:metricTransformation rdf:resource="#ohlohRankToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#ohlohToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+
+                           <ri:mapsMetric>
+								<ri:MetricMapping  rdf:about="#serverFaultWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#serverFaultImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#serverFaultToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#serverfault.com"/>
+                                     <ri:importedMetric rdf:resource="#serverFaultImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#serverFaultImportation"/>
+                                     <ri:metricTransformation rdf:resource="#serverFaultToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#serverFaultToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+
+                           <ri:mapsMetric>
+								<ri:MetricMapping rdf:about="#webAppsStackExchangeWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#webAppsStackExchangeImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#webapps.stackexchangeToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#webapps.stackexchange.com"/>
+                                     <ri:importedMetric rdf:resource="#webAppsStackExchangeImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#webAppsStackExchangeImportation"/>
+                                     <ri:metricTransformation rdf:resource="#webAppsStackExchangeToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#webAppsStackExchangeToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+
+                           <ri:mapsMetric>
+								<ri:MetricMapping rdf:about="#questionsSecuritytubeWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#questionsSecuritytubeImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#questions.securitytubeToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#questions.securitytube.net"/>
+                                     <ri:importedMetric rdf:resource="#questionsSecuritytubeImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#questionsSecuritytubeImportation"/>
+                                     <ri:metricTransformation rdf:resource="#questionsSecuritytubeToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#questionsSecuritytubeToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+
+                           <ri:mapsMetric>
+								<ri:MetricMapping rdf:about="#security.StackexchangeWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#security.StackexchangeImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#security.stackexchangeToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#security.stackexchange.com"/>
+                                     <ri:importedMetric rdf:resource="#security.StackexchangeImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#security.StackexchangeImportation"/>
+                                     <ri:metricTransformation rdf:resource="#security.StackexchangeToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#security.StackexchangeToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+
+                           <ri:mapsMetric>
+								<ri:MetricMapping rdf:about="#slackersWikiMetricMapping">
+									<ri:resultMetric rdf:resource="#semanticWikiMetric"/>
+									<ri:importedMetric rdf:resource="#slackersImportedMetric"/>
+									<ri:value>1</ri:value>
+								</ri:MetricMapping>
+                           </ri:mapsMetric>
+                           <ri:importsFrom>
+                                <ri:ImportationUnit rdf:about="#slackersToWikiImportation">
+                                     <ri:importedCommunity rdf:resource="#sla.ckers.org"/>
+                                     <ri:importedMetric rdf:resource="#slackersImportedMetric"/>
+                                     <ri:collectsReputationBy rdf:resource="#slackersImportation"/>
+                                     <ri:metricTransformation rdf:resource="#slackersToWikiTransformation"/>
+                                     <ri:trust rdf:resource="#slackersToWikiTrust"/>
+                                </ri:ImportationUnit>
+                           </ri:importsFrom>
+                           
+                      </ri:ReputationImporter>
+                 </ri:reputationModule>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#stackoverflow.com">
+       <ri:identifier>stackoverflow.com</ri:identifier>
+       <ri:homePage>http://stackoverflow.com</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#stackoverflowReputationModel">
+                 <ri:name>stackoverflowReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community StackOverflow.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#serverfault.com">
+       <ri:identifier>serverfault.com</ri:identifier>
+       <ri:homePage>http://serverfault.com</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#serverfaultReputationModel">
+                 <ri:name>serverfaultReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community serverfault.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#webapps.stackexchange.com">
+       <ri:identifier>webapps.stackexchange.com</ri:identifier>
+       <ri:homePage>http://webapps.stackexchange.com</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#webAppsStackExchangeReputationModel">
+                 <ri:name>webAppsStackExchangeReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community webapps.stackexchange.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#questions.securitytube.net">
+       <ri:identifier>questions.securitytube.net</ri:identifier>
+       <ri:homePage>http://questions.securitytube.net</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#questionsSecuritytubeReputationModel">
+                 <ri:name>questionsSecuritytubeReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community questions.securitytube.net based in an only module of question and answer that are accepted, voted up and voted down</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#security.stackexchange.com">
+       <ri:identifier>security.stackexchange.com</ri:identifier>
+       <ri:homePage>http://security.stackexchange.com</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#security.stackexchangeReputationModel">
+                 <ri:name>security.stackexchangeReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community security.stackexchange.com based in an only module of question and answer that are accepted, voted up and voted down</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#sla.ckers.org">
+       <ri:identifier>sla.ckers.org</ri:identifier>
+       <ri:homePage>http://sla.ckers.org</ri:homePage>
+       <ri:hasCategory rdf:resource="#QandA"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#slackersReputationModel">
+                 <ri:name>slackersReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community sla.ckers.org based in an only module of question and answer</dc:description>               
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <ri:Community rdf:about="#ohloh.net">
+       <ri:identifier>ohloh.net</ri:identifier>
+       <ri:homePage>http://ohloh.net</ri:homePage>
+       <ri:hasCategory rdf:resource="#ProjectConnection"/>
+       <ri:hasReputationModel>
+            <ri:ReputationModel rdf:about="#ohlohReputationModel">
+                 <ri:name>ohlohReputationModel</ri:name>
+                 <dc:description>Reputation Model of the Community ohloh.net based in one module of KudoRank</dc:description>
+                 <ri:accesibility rdf:resource="&ri;Visible"/>
+                 <ri:resultCollectionType rdf:resource="&ri;Unique"/>               
+            </ri:ReputationModel>
+       </ri:hasReputationModel>
+  </ri:Community>
+
+  <!-- Collecting Systems Definition -->
+  <ri:CollectingSystem rdf:about="#ohlohKudoImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>ohloh.net/$User_Profile_Ending/$Kudo_Reputation</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#ohlohKudoImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#ohlohRankImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>ohloh.net/$User_Profile_Ending/$Rank_Reputation</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#ohlohRankImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#stackOverflowImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>stackoverflow.com/$User_Profile_Ending</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#stackOverflowImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#serverFaultImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>serverfault.com/$User_Profile_Ending</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#serverFaultImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#webAppsStackExchangeImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>webapps.stackexchange.com/$User_Profile_Ending</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#webAppsStackExchangeImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#questionsSecuritytubeImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>questions.securitytube.net/$User_Profile_Ending</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#questionsSecuritytubeImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingSystem rdf:about="#security.StackexchangeImportation">
+       <ri:name>Scrappy</ri:name>
+       <ri:uriFormat>security.stackexchange.com/$User_Profile_Ending</ri:uriFormat>
+	   <ri:usesMetric rdf:resource="#security.StackexchangeImportedMetric"/>
+  </ri:CollectingSystem>
+  <ri:CollectingAlgorithm rdf:about="#slackersImportation">
+      <ri:name>slackersCollectingAlgorithm</ri:name>
+      <ri:usesMetric rdf:resource="#slackersImportedMetric"/>
+      <ri:obtainsReputationBy>
+          <ri:CollectingSystem rdf:about="#slackersScrappyImportation">
+             <ri:stepIdentifier>1</ri:stepIdentifier>
+			 <ri:objectClass>es.upm.dit.algorithm.SlackersImportation</ri:objectClass>
+			 <ri:algorithmPath>es.upm.dit.algorithm.SlackersImportation.scrappyImportation</ri:algorithmPath>
+             <ri:name>Scrappy</ri:name>
+             <ri:uriFormat>sla.ckers.org/$User_Profile_History_Posts</ri:uriFormat>
+			 <ri:obtainsReputationBy>
+				<ri:ReputationalAction rdf:about="#slackersSelectThreadImportation">
+					<ri:name>slackersSelectThreadImportation</ri:name>
+					<ri:stepIdentifier>1</ri:stepIdentifier>
+					<dc:description>Select each thread of the user history</dc:description>
+				</ri:ReputationalAction>				
+			</ri:obtainsReputationBy>
+			<ri:obtainsReputationBy>
+				<ri:ReputationAlgorithm rdf:about="#slackersScrappyPostsAfterUserImportation">
+					<ri:name>slackersScrappyPostsAfterUserImportation</ri:name>
+					<ri:stepIdentifier>2</ri:stepIdentifier>
+					<ri:algorithmPath>es.upm.dit.algorithm.SlackersImportation.scrappyPostsAfterUserImportation</ri:algorithmPath>
+					<ri:uriFormat>sla.ckers.org/$User_Thread</ri:uriFormat>
+				</ri:ReputationAlgorithm>
+			</ri:obtainsReputationBy>
+          </ri:CollectingSystem>
+      </ri:obtainsReputationBy>
+      <ri:obtainsReputationBy>
+          <ri:CollectingSystem rdf:about="#slackersOpalImportation">
+              <ri:stepIdentifier>2</ri:stepIdentifier>
+              <ri:name>Opal</ri:name>
+			  <dc:description>Score each post after user post in the thread by Opal. Average of the posts score per thread. Average of each thread.</dc:description>
+			  <ri:algorithmPath>es.upm.dit.algorithm.SlackersImportation.opalImportation</ri:algorithmPath>
+              <ri:uriFormat>sla.ckers.org/$User_Thread/$Posts_After_User_Post</ri:uriFormat>
+          </ri:CollectingSystem>
+      </ri:obtainsReputationBy>
+  </ri:CollectingAlgorithm>
+
+  <!-- Metrics Definition -->
+  <ri:Metric rdf:about="#stackOverflowImportedMetric">
+       <ri:identifier>stackOverflowImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#stackOverflowImportedScale">
+                 <ri:name>stackOverflowImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>200000.0</ri:maximum>
+                 <ri:step>1.0</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#serverFaultImportedMetric">
+       <ri:identifier>serverFaultImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#serverFaultImportedScale">
+                 <ri:name>serverFaultImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>20000.0</ri:maximum>
+                 <ri:step>1.0</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#webAppsStackExchangeImportedMetric">
+       <ri:identifier>webAppsStackExchangeImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#webAppsStackExchangeImportedScale">
+                 <ri:name>webAppsStackExchangeImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>20000.0</ri:maximum>
+                 <ri:step>0.1</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#questionsSecuritytubeImportedMetric">
+       <ri:identifier>questionsSecuritytubeImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#questionsSecuritytubeImportedScale">
+                 <ri:name>questionsSecuritytubeImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>20000.0</ri:maximum>
+                 <ri:step>0.1</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#security.StackexchangeImportedMetric">
+       <ri:identifier>security.StackexchangeImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#serverFaultImportedScale">
+                 <ri:name>security.StackexchangeImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>2000.0</ri:maximum>
+                 <ri:step>0.1</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#slackersImportedMetric">
+       <ri:identifier>slackersImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#slackersImportedScale">
+                 <ri:name>slackersImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>10.0</ri:maximum>
+                 <ri:step>0.1</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#ohlohRankImportedMetric">
+       <ri:identifier>ohlohRankImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#rankReputation"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#ohlohRankImportedScale">
+                 <ri:name>ohlohRankImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>450000.0</ri:maximum>
+                 <ri:step>1.0</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#ohlohKudoImportedMetric">
+       <ri:identifier>ohlohKudoImportedMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#ReputationInProject"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#ohlohKudoImportedScale">
+                 <ri:name>ohlohKudoImportedScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">1.0</ri:minimum>
+                 <ri:maximum>10.0</ri:maximum>
+                 <ri:step>1.0</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+  <ri:Metric rdf:about="#semanticWikiMetric">
+       <ri:identifier>semanticWikiMetric</ri:identifier>
+       <ri:hasDimension rdf:resource="#reputationInQandA"/>
+       <ri:hasScale>
+            <ri:NumericScale rdf:about="#semanticWikiScale">
+                 <ri:name>semanticWikiScale</ri:name>
+                 <ri:minimum rdf:datatype="http://www.w3.org/2001/XMLSchema#double">0.0</ri:minimum>
+                 <ri:maximum>10.0</ri:maximum>
+                 <ri:step>1.0</ri:step>
+            </ri:NumericScale>
+       </ri:hasScale>
+  </ri:Metric>
+
+  <!-- Metric Transformers-->
+  <ri:SqrtNumericTransformer rdf:about="#stackOverflowToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same"</dc:description>
+       <ri:sourceMetric rdf:resource="#stackOverflowImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/> 
+  </ri:SqrtNumericTransformer>
+  <ri:SqrtNumericTransformer rdf:about="#serverFaultToWikiTransformation">
+		<dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). 0.333 for dimensions correlation</dc:description>
+		<ri:sourceMetric rdf:resource="#serverFaultImportedMetric"/>
+		<ri:destinationMetric rdf:resource="#semanticWikiMetric"/>		
+  </ri:SqrtNumericTransformer>
+  <ri:LogaritmicNumericTransformer rdf:about="#webAppsStackExchangeToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same</dc:description>
+       <ri:sourceMetric rdf:resource="#webAppsStackExchangeImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+  </ri:LogaritmicNumericTransformer>
+  <ri:LogaritmicNumericTransformer rdf:about="#questionsSecuritytubeToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same</dc:description>
+       <ri:sourceMetric rdf:resource="#questionsSecuritytubeImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+  </ri:LogaritmicNumericTransformer>
+  <ri:LogaritmicNumericTransformer rdf:about="#security.StackexchangeToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same</dc:description>
+       <ri:sourceMetric rdf:resource="#security.StackexchangeImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+  </ri:LogaritmicNumericTransformer>
+  <ri:LogaritmicNumericTransformer rdf:about="#slackersToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional). The same for dimensions correlation because both are the same</dc:description>
+       <ri:sourceMetric rdf:resource="#slackersImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+  </ri:LogaritmicNumericTransformer>
+  <ri:LinealNumericTransformer rdf:about="#ohlohKudoToWikiTransformation">
+       <dc:description>"correlation between scales is 0.92 (1 to 10 is less than 0 to 10)</dc:description>
+       <ri:sourceMetric rdf:resource="#ohlohKudoImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+	   <ri:correlationBetweenScales rdf:resource="#rankScaleToWikiScale"/>
+       <ri:correlationBetweenDimensions rdf:resource="#QandAToProject"/>     
+  </ri:LinealNumericTransformer>
+  <ri:LogaritmicNumericTransformer rdf:about="#ohlohRankToWikiTransformation">
+       <dc:description>"correlation between scales is 1.0 (To put it in the ontology is optional)</dc:description>
+       <ri:sourceMetric rdf:resource="#ohlohRankImportedMetric"/>
+       <ri:destinationMetric rdf:resource="#semanticWikiMetric"/>
+       <ri:correlationBetweenDimensions rdf:resource="#QandAToRank"/>
+  </ri:LogaritmicNumericTransformer>
+
+  <!-- Correlation Between Dimensions -->
+  <ri:DimensionCorrelation rdf:about="#QandAToProject">
+       <ri:sourceDimension rdf:resource="#reputationInQandA"/>
+       <ri:targetDimension rdf:resource="#ReputationInProject"/>
+       <ri:correlationValue>1</ri:correlationValue>
+  </ri:DimensionCorrelation>
+  <ri:DimensionCorrelation rdf:about="#QandAToRank">
+       <ri:sourceDimension rdf:resource="#reputationInQandA"/>
+       <ri:targetDimension rdf:resource="#rankReputation"/>
+       <ri:correlationValue>1</ri:correlationValue>
+  </ri:DimensionCorrelation>
+  
+  <!-- Correlation Between Scales -->
+  <ri:ScaleCorrelation rdf:about="#rankScaleToWikiScale">
+       <ri:sourceScale rdf:resource="#ohlohKudoImportedScale"/>
+       <ri:targetScale rdf:resource="#semanticWikiScale"/>
+       <ri:correlationValue>1</ri:correlationValue>
+  </ri:ScaleCorrelation>
+  
+  <!-- Trust Between Communities -->
+  <ri:TrustBetweenCommunities rdf:about="#stackOverflowToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedStackOverflowToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#ohlohToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedOhlohToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#ProjectToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#serverFaultToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedServerFaultToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#webAppsStackExchangeToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedWebappsStackExchangeToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#questionsSecuritytubeToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedQuestions.SecurityTubeToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#security.StackexchangeToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedSecurity.StackExchangeToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+  <ri:TrustBetweenCommunities rdf:about="#slackersToWikiTrust">
+       <ri:trustProvidedBy rdf:resource="#fixedSlackersToWiki"/>
+       <ri:trustProvidedBy rdf:resource="#QandAToSecurity"/>
+  </ri:TrustBetweenCommunities>
+
+  <!-- Fixed Communities Trust Definitions -->
+  <ri:FixedCommunitiesTrust rdf:about="#fixedStackOverflowToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#stackoverflow.com"/>
+       <ri:value>0.7</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedServerFaultToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#serverfault.com"/>
+       <ri:value>0.4</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedWebappsStackExchangeToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#webapps.stackexchange.com"/>
+       <ri:value>0.5</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedQuestions.SecurityTubeToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#questions.securitytube.net"/>
+       <ri:value>0.7</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedSecurity.StackExchangeToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#security.stackexchange.com"/>
+       <ri:value>1.0</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedSlackersToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#sla.ckers.org"/>
+       <ri:value>1.0</ri:value>
+  </ri:FixedCommunitiesTrust>
+  <ri:FixedCommunitiesTrust rdf:about="#fixedOhlohToWiki">
+       <ri:communityScorer rdf:resource="http://example.org/semanticWiki"/>
+       <ri:communityScored rdf:resource="#ohloh.net"/>
+       <ri:value>1.0</ri:value>
+  </ri:FixedCommunitiesTrust>
+
+  <!-- Category Matching Definitions -->
+  <ri:CategoryMatching rdf:about="#QandAToSecurity">
+       <ri:originatingCategory rdf:resource="#QandA"/>
+       <ri:receivingCategory rdf:resource="#SecurityWebApp"/>
+       <ri:value>0.9</ri:value>
+  </ri:CategoryMatching>
+  <ri:CategoryMatching rdf:about="#ProjectToSecurity">
+       <ri:originatingCategory rdf:resource="#ProjectConnection"/>
+       <ri:receivingCategory rdf:resource="#SecurityWebApp"/>
+       <ri:value>0.9</ri:value>
+  </ri:CategoryMatching>
+  
+  <!-- Category Definitions -->
+  <ri:Category rdf:about="#QandA">
+		<ri:name>QandA</ri:name>
+  </ri:Category>
+  <ri:Category rdf:about="#SecurityWebApp">
+		<ri:name>SecurityWebApp</ri:name>
+  </ri:Category>
+  <ri:Category rdf:about="#ProjectConnection">
+		<ri:name>ProjectConnection</ri:name>
+  </ri:Category>
+
+  <!-- Dimensions Definition -->
+  <ri:Dimension rdf:about="#reputationInQandA">
+       <ri:name>reputationInQandA</ri:name>
+  </ri:Dimension>
+  <ri:Dimension rdf:about="#ReputationInProject">
+       <ri:name>ReputationInProject</ri:name>
+  </ri:Dimension>
+  <ri:Dimension rdf:about="#rankReputation">
+       <ri:name>rankReputation</ri:name>
+  </ri:Dimension>
+  
+  <!-- Entities Definition -->
+  <!-- TEST: 
+    1) two entities with the same rdf:about and uniqueIdentifier: join the accounts
+	2) two entities with the same rdf:about and distint uniqueIdentifier: join the accounts and put the last parsed identifier
+	3) two entities with the same uniqueIdentifier and distint rdf:about: controlled exception
+	4) accountName very simple: the first that discover Google
+	5) accountName to not existant user: controlled exception
+	6) accountProfilePage to not existant url: scrappy executes the url and gives a JSON exception generating controlled exception
+  -->
+  <!--<ri:Entity rdf:about="#DPozog">
+		<ri:identifier>David del Pozo</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#SdanelsonStackoverflow">
+				<foaf:accountName>222605/sdanelson</foaf:accountName><!-222605/sdanelson->
+				<foaf:accountProfilePage>stackoverflow.com/users/222605/sdanelson</foaf:accountProfilePage>
+				<ri:belongsTo rdf:resource="#stackoverflow.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>
+   </ri:Entity>-->
+   <!--<ri:Entity rdf:about="#Other">
+		<ri:identifier>David del Pozo</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#AndreGSecurityTube">
+				<foaf:accountName>Andre G</foaf:accountName>
+				<ri:belongsTo rdf:resource="#questions.securitytube.net"/>
+			</foaf:OnlineAccount>
+		</foaf:account>
+  </ri:Entity>-->
+  <!--<ri:Entity rdf:about="#Administrator">
+		<ri:identifier>Ben Torell</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#BenTorellServerFault">
+				<foaf:accountName>Ben Torell</foaf:accountName>
+				<ri:belongsTo rdf:resource="#serverfault.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>		
+  </ri:Entity>
+  <ri:Entity rdf:about="#ErikA">
+		<ri:identifier>ErikA</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#ErikAServerFault">
+				<foaf:accountName>erika</foaf:accountName>
+				<ri:belongsTo rdf:resource="#serverfault.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>		
+  </ri:Entity>
+  <ri:Entity rdf:about="#JoseIgnacio">
+		<ri:identifier>Jose Ignacio</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#JIstackoverflow">
+				<foaf:accountName>347915/Jose</foaf:accountName>
+				<ri:belongsTo rdf:resource="#stackoverflow.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>		
+  </ri:Entity>-->
+  <ri:Entity rdf:about="#TinKode">
+		<ri:identifier>TinKode</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#TinKodeSlackers">
+				<foaf:accountName>TinKode</foaf:accountName>
+				<ri:belongsTo rdf:resource="#sla.ckers.org"/>
+			</foaf:OnlineAccount>
+		</foaf:account>		
+  </ri:Entity>
+  <!--<ri:Entity rdf:about="#PacoBlanco">
+		<ri:identifier>Paco Blanco</ri:identifier>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#KoortsServerfault">
+				<foaf:accountName>Koorts</foaf:accountName>
+				<ri:belongsTo rdf:resource="#serverfault.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#KarraxStackexchange">
+				<foaf:accountName>Karrax</foaf:accountName>
+				<ri:belongsTo rdf:resource="#security.stackexchange.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>
+		<foaf:account>
+			<foaf:OnlineAccount rdf:about="#KarraxStackoverflow">
+				<foaf:accountName>Karrax</foaf:accountName>
+				<ri:belongsTo rdf:resource="#stackoverflow.com"/>
+			</foaf:OnlineAccount>
+		</foaf:account>
+  </ri:Entity>-->
+  
+</rdf:RDF>
