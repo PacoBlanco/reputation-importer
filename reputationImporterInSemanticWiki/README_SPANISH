@@ -1,6 +1,7 @@
-Ejecutar el script de Linux reputationImporter.sh para realizar la importacion
-de reputacion
-Este script ejecuta los siguientes tres procesos en el siguiente orden:
+Ejecutar el script de Linux reputationImporter.sh o el script de Windows 
+reputationImporter.bat para realizar la importacion de reputacion
+Los scripts realizan lo mismo.
+Así, ejecutan los siguientes tres procesos en este orden mostrado:
  1. userAccounts.py script en python que saca los usuarios de la wiki semantica 
      con sus configuraciones de cuentas donde importar su reputacion
  2. reputationWiki.jar ejecutable java que de las cuentas de otras comunidades de
