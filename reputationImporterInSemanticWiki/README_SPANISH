@@ -1,0 +1,21 @@
+Ejecutar el script de Linux reputationImporter.sh para realizar la importacion
+de reputacion
+Este script ejecuta los siguientes tres procesos en el siguiente orden:
+ 1. userAccounts.py script en python que saca los usuarios de la wiki semantica 
+     con sus configuraciones de cuentas donde importar su reputacion
+ 2. reputationWiki.jar ejecutable java que de las cuentas de otras comunidades de
+     cada uno de los usuarios realiza el proceso de importación y genera otro
+     fichero donde expone la reputación total (agregación de la reputación que
+     se ha importadado de cada una de las cuentas) asociada a cada usuario
+ 3. putUserReputation.py script en python que pone en una página configurada en
+     el script la puntuación total importada asociada a cada usuario en una tabla 
+Los script en python deben tener accesible el bot python pywikipedia y configurado
+para la wiki semantica de donde se quiera realizar el proceso de importacion sobre
+los usuarios y las cuentas configuradas en dicha wiki
+El reputationWiki.jar es un paquete java que simplemente comprime el proyecto que
+puede ser bajado a través de la siguiente ruta de subversion:
+ svn checkout http://reputation-importer.googlecode.com/svn/trunk/ reputation-importer-read-only
+Para ver mas informacion de este proyecto, se puede acceder a su pagina oficial:
+ http://code.google.com/p/reputation-importer/
+El proyecto de subversion es un proyecto configurado en Eclipse que se puede 
+empaquetar para sustutiir al .jar de este proyecto con una version más actualizada.
