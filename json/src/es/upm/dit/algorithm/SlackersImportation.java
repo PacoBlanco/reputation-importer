@@ -1,5 +1,6 @@
 package es.upm.dit.algorithm;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,14 @@ public class SlackersImportation {
 			return null;
 		}
 		ScrappyExecutor scrappy = new ScrappyExecutor();
-		String scrappy_dump = scrappy.execute(url); //"1"
+		String scrappy_dump = null;
+		try {
+			scrappy_dump = scrappy.execute(url); //"1"
+		} catch (ConnectException ce) {
+			ce.printStackTrace();
+			ModelException.throwException(ModelException.SCRAPPY_CONNECTION_ERROR,
+					"Connection exception to execute Scrappy");
+		}
 		try {
 			JSONArray array = (JSONArray) JSONSerializer.toJSON(scrappy_dump);
 			for(int j=0; j < array.size(); j++){
@@ -85,12 +93,14 @@ public class SlackersImportation {
 		if(userName == null) {
 			ModelException.throwException(ModelException.SCRAPPY_ERROR,
 					"Slackers scrappy template is out of date or incorrect. " +
-					"There is not http://purl.org/dc/elements/1.1/Nombre found");
+					"There is not http://purl.org/dc/elements/1.1/Nombre found." +
+					"Check manually the url:"+url+" in Scrappy");
 		}
 		if(urlPosts == null) {
 			ModelException.throwException(ModelException.SCRAPPY_ERROR,
 					"Slackers scrappy template is out of date or incorrect. " +
-					"There is not http://purl.org/dc/elements/1.1/URLPosts found");
+					"There is not http://purl.org/dc/elements/1.1/URLPosts found"+
+					"Check manually the url:"+url+" in Scrappy");
 		}
 		return null;
 	}

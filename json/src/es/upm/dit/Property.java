@@ -116,7 +116,7 @@ public class Property { // Static
             	setImportation_model_file_path(props.getProperty("importation_model_file_path"));
             	File modelFile = new File(getImportation_model_file_path());
             	ModelException.sendMessage(ModelException.INFO, 
-            			"Model file path is:"+modelFile.getAbsolutePath());
+            			"Reputation Importation Result file path is:"+modelFile.getAbsolutePath());
             } else {
             	File modelFile = new File(getImportation_model_file_path());
             	ModelException.sendMessage(ModelException.WARNING, 

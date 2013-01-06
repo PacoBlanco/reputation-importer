@@ -31,6 +31,7 @@ public final class Web {
         final java.net.HttpURLConnection conn =
             (java.net.HttpURLConnection)uconn; 
         // Set up a request.
+        //TODO:Probar con timeout para ver que error da y tratarlo de forma diferente al refused
         conn.setConnectTimeout( 600000 );    // 10 sec
         conn.setReadTimeout( 600000 );       // 10 sec
         conn.setInstanceFollowRedirects( true );

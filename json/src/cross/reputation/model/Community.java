@@ -150,26 +150,27 @@ public class Community {
 		return true;
 	}
 	public String toString(String offset) {
-		String result = offset+"name:"+name+"\n";
-		result += offset+"domainName:"+domainName+"\n";
-		result += offset+"categories:";
+		StringBuffer result = new StringBuffer(offset+"resource:"+resource+"\n");
+		result.append(offset+"name:"+name+"\n");
+		result.append(offset+"domainName:"+domainName+"\n");
+		result.append(offset+"categories:");
 		if(categories != null) {
 			for(Category category : categories) {
-				result += category.getName()+", ";
+				result.append(category.getName()+", ");
 			}
 		}
-		result += "\n"+offset+"metrics:";
+		result.append("\n"+offset+"metrics:");
 		if(metrics != null) {
 			for(Metric metric : metrics) {
-				result += "\n"+offset+"     "+metric+"\n";
-				result += "\n"+metric.toString(offset+"          ");
+				result.append("\n"+offset+"     "+metric+"\n");
+				result.append("\n"+metric.toString(offset+"          "));
 			}
 		}
-		result += "\n"+offset+"hasReputationModel:"+reputationModel;
+		result.append("\n"+offset+"hasReputationModel:"+reputationModel);
 		if(reputationModel != null) {
-			result += "\n"+reputationModel.toString(offset+"     ")+"\n";
+			result.append("\n"+reputationModel.toString(offset+"     ")+"\n");
 		}				
-		result += offset+"entities:"+entities;
-		return result;
+		result.append(offset+"entities:"+entities);
+		return result.toString();
 	}
 }

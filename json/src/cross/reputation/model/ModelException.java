@@ -18,6 +18,7 @@ public class ModelException {
 	public final static int ONLINEACCOUNT = 1000;
 	public final static int REPUTATIONOBJECT = 1100;
 	public final static int REPUTATIONOBJECT_ENTITY = 1101;
+	public final static int REPUTATIONOBJECT_REPUATIONVALUE = 1102;
 	public final static int REPUTATIONVALUE = 1200;
 	public final static int REPUTATIONVALUE_ENTITY = 1201;
 	public final static int REPUTATIONVALUE_REPUTATIONALGORITHM = 1202;
@@ -45,6 +46,7 @@ public class ModelException {
 	public final static int REPUTATIONALGORITHM_METRIC_ERROR = 2002;
 	public final static int IMPORTATIONUNIT_COMMUNITY = 2003;
 	public final static int IMPORTATIONUNIT_COLLECTSREPUTATION = 2004;
+	public final static int IMPORTATIONUNIT_METRICTRANSFORMER = 2005;
 	public final static int COLLECTINGALGORITHM = 2100;
 	public final static int REPUTATIONALACTION = 2200;
 	public final static int COLLECTINGSYSTEM = 2300;
@@ -58,6 +60,7 @@ public class ModelException {
 	public final static int GET_MORE_ACCOUNTS = 10000;
 	public final static int EXTRACT_REPUTATION_URL = 10100;
 	public final static int ALGORITHM_IMPLEMENTATION_NOT_FOUND = 10200;
+	public final static int ALGORITHM_IMPLEMENTATION_ERROR = 10201;
 	public final static int NOT_URI_KNOWN = 10300;
 	public final static int NOT_URI_FOUND = 10301;
 	public final static int URI_NOT_SUPPORTED = 10302;
@@ -70,6 +73,8 @@ public class ModelException {
 	public final static int SYSTEM_NAME_NOT_EXPECTED = 10501;
 	public final static int OBJECT_WITH_IDENTIFIER_NOT_KNOWN = 10600;
 	public final static int BASE_URI = 10700;
+	
+	public final static int SCRAPPY_CONNECTION_ERROR = 20000;
 	
 	
 	public final static int DEBUG = 0;

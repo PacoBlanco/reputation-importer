@@ -48,6 +48,8 @@ public class ModelProperties {
 			setProperty(properties,"REPUTATIONOBJECT",ModelException.REPUTATIONOBJECT);
 			setProperty(properties,"REPUTATIONOBJECT_ENTITY",
 					ModelException.REPUTATIONOBJECT_ENTITY);
+			setProperty(properties,"REPUTATIONOBJECT_REPUATIONVALUE",
+					ModelException.REPUTATIONOBJECT_REPUATIONVALUE);
 			setProperty(properties,"REPUTATIONVALUE",ModelException.REPUTATIONVALUE);
 			setProperty(properties,"REPUTATIONVALUE_ENTITY",
 					ModelException.REPUTATIONVALUE_ENTITY);
@@ -91,6 +93,8 @@ public class ModelProperties {
 					ModelException.IMPORTATIONUNIT_COMMUNITY);
 			setProperty(properties,"IMPORTATIONUNIT_COLLECTSREPUTATION",
 					ModelException.IMPORTATIONUNIT_COLLECTSREPUTATION);
+			setProperty(properties,"IMPORTATIONUNIT_METRICTRANSFORMER",
+					ModelException.IMPORTATIONUNIT_METRICTRANSFORMER);
 			setProperty(properties,"COLLECTINGALGORITHM",ModelException.COLLECTINGALGORITHM);
 			setProperty(properties,"COLLECTINGSYSTEM",ModelException.COLLECTINGSYSTEM);
 			setProperty(properties,"METRICMAPPING",ModelException.METRICMAPPING);
@@ -101,6 +105,8 @@ public class ModelProperties {
 			setProperty(properties,"EXTRACT_REPUTATION_URL",ModelException.EXTRACT_REPUTATION_URL);
 			setProperty(properties,"ALGORITHM_IMPLEMENTATION_NOT_FOUND",
 					ModelException.ALGORITHM_IMPLEMENTATION_NOT_FOUND);
+			setProperty(properties,"ALGORITHM_IMPLEMENTATION_ERROR",
+					ModelException.ALGORITHM_IMPLEMENTATION_ERROR);
 			setProperty(properties,"NOT_URI_KNOWN",ModelException.NOT_URI_KNOWN);
 			setProperty(properties,"NOT_URI_FOUND",ModelException.NOT_URI_FOUND);
 			setProperty(properties,"URI_NOT_SUPPORTED",ModelException.URI_NOT_SUPPORTED);
@@ -119,6 +125,8 @@ public class ModelProperties {
 					ModelException.OBJECT_WITH_IDENTIFIER_NOT_KNOWN);
 			setProperty(properties,"BASE_URI",
 					ModelException.BASE_URI);
+			setProperty(properties,"SCRAPPY_CONNECTION_ERROR",
+					ModelException.SCRAPPY_CONNECTION_ERROR);
 		} catch (IOException ioe) {
 			throw ioe;
 		}
@@ -188,6 +196,7 @@ public class ModelProperties {
 			result.put(ModelException.ONLINEACCOUNT, DEFAULT);
 			result.put(ModelException.REPUTATIONOBJECT, DEFAULT);
 			result.put(ModelException.REPUTATIONOBJECT_ENTITY, DEFAULT);
+			result.put(ModelException.REPUTATIONOBJECT_REPUATIONVALUE, DEFAULT);
 			result.put(ModelException.REPUTATIONVALUE, DEFAULT);
 			result.put(ModelException.REPUTATIONVALUE_ENTITY, DEFAULT);
 			result.put(ModelException.REPUTATIONVALUE_REPUTATIONALGORITHM, DEFAULT);
@@ -214,6 +223,7 @@ public class ModelProperties {
 			result.put(ModelException.IMPORTATIONUNIT_METRIC, NOTHING);
 			result.put(ModelException.IMPORTATIONUNIT_COMMUNITY,DEFAULT);
 			result.put(ModelException.IMPORTATIONUNIT_COLLECTSREPUTATION,DEFAULT);
+			result.put(ModelException.IMPORTATIONUNIT_METRICTRANSFORMER,DEFAULT);
 			result.put(ModelException.COLLECTINGALGORITHM, DEFAULT);
 			result.put(ModelException.COLLECTINGSYSTEM, DEFAULT);
 			result.put(ModelException.METRICMAPPING, DEFAULT);
@@ -224,6 +234,7 @@ public class ModelProperties {
 			result.put(ModelException.GET_MORE_ACCOUNTS, DISCARD);
 			result.put(ModelException.EXTRACT_REPUTATION_URL, DEFAULT);
 			result.put(ModelException.ALGORITHM_IMPLEMENTATION_NOT_FOUND, DEFAULT);
+			result.put(ModelException.ALGORITHM_IMPLEMENTATION_ERROR, NOTHING);
 			result.put(ModelException.NOT_URI_KNOWN, DEFAULT);
 			result.put(ModelException.NOT_URI_FOUND, DEFAULT);
 			result.put(ModelException.URI_NOT_SUPPORTED, DEFAULT);
@@ -236,6 +247,7 @@ public class ModelProperties {
 			result.put(ModelException.SYSTEM_NAME_NOT_EXPECTED, DEFAULT);
 			result.put(ModelException.OBJECT_WITH_IDENTIFIER_NOT_KNOWN, DEFAULT);
 			result.put(ModelException.BASE_URI, DEFAULT);
+			result.put(ModelException.SCRAPPY_CONNECTION_ERROR, DEFAULT);
 		} else {
 			result = MODEL_PROPERTIES;
 		}
