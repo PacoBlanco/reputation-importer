@@ -42,7 +42,8 @@ public class EntityIdentifier {
 	}
 
 	public String toString(String offset) {
-		StringBuilder result = new StringBuilder(offset+"accountName:"+name);
+		StringBuilder result = new StringBuilder(offset+"resource:"+resource);
+		result.append("\n"+offset+"accountName:"+name);
 		result.append("\n"+offset+"accountProfilePage:"+url);
 		result.append("\n"+offset+"belongsTo:"+belongsTo);
 		if(belongsTo != null) {

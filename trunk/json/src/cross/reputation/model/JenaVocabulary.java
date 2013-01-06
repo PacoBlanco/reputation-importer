@@ -6,7 +6,8 @@ import com.hp.hpl.jena.rdf.model.ResourceFactory;
 
 public class JenaVocabulary {
 	static String riNamespace = "http://purl.org/reputationImport/0.1/";
-	static String foafNamespace = "http://purl.org/dc/elements/1.1/";
+	static String dcNamespace = "http://purl.org/dc/elements/1.1/";
+	static String foafNamespace = "http://xmlns.com/foaf/0.1/";
 	
 	static final String nEntity = "Entity";
 	public static Resource entity = null;

@@ -109,40 +109,41 @@ public class Entity {
 	}
 	
 	public String toString(String offset) {
-		String result = offset+"identifier:"+uniqueIdentificator+"\n";
-		result += offset+"onlineAccount size:"+((identificatorInCommunities==null)?
-				"null":identificatorInCommunities.size());
+		StringBuffer result = new StringBuffer(offset+"resource:"+resource.toString()+"\n");
+		result.append(offset+"identifier:"+uniqueIdentificator+"\n");
+		result.append(offset+"onlineAccount List size:"+((identificatorInCommunities==null)?
+				"null":identificatorInCommunities.size()));
 		if(identificatorInCommunities != null) {
 			for(EntityIdentifier identifier : identificatorInCommunities.values()) {
-				result += "\n"+offset+" onlineAccount:"+identifier;
-				result += "\n"+identifier.toString(offset+"     ");
+				result.append("\n"+offset+" onlineAccount:"+identifier);
+				result.append("\n"+identifier.toString(offset+"     ")+"\n");
 			}			
 		}
-		result += offset+"hasReputation size:"+
-				((hasReputation == null)?"null":hasReputation.size());
+		result.append(offset+"hasReputation List size:"+
+				((hasReputation == null)?"null":hasReputation.size()));
 		if(hasReputation != null) {
 			for(ReputationObject value : hasReputation) {
-				result += "\n"+offset+"reputationObject:"+value;
-				result += "\n"+value.toLimitedString(offset+"     ");
+				result.append("\n"+offset+" reputationObject:"+value);
+				result.append("\n"+value.toLimitedString(offset+"     "));
 			}
 		}
-		result += "\n"+offset+"hasValue size:"+
-				((hasValue == null)?"null":hasValue.size());
+		result.append("\n"+offset+"hasValue List size:"+
+				((hasValue == null)?"null":hasValue.size()));
 		if(hasValue != null) {
 			for(ReputationValue value : hasValue) {
-				result += "\n"+offset+"reputationValue:"+value;
-				result += "\n"+value.toLimitedString(offset+"     ");
+				result.append("\n"+offset+" reputationValue:"+value);
+				result.append("\n"+value.toLimitedString(offset+"     "));
 			}
 		}
-		result += "\n"+offset+"hasEvaluation size:"+
-				((hasEvaluation == null)?"null":hasEvaluation.size());
+		result.append("\n"+offset+"hasEvaluation size:"+
+				((hasEvaluation == null)?"null":hasEvaluation.size()));
 		if(hasEvaluation != null) {
 			for(ReputationEvaluation value : hasEvaluation) {
-				result += "\n"+offset+"reputationEvaluation:"+value;
-				result += "\n"+value.toLimitedString(offset+"     ");
+				result.append("\n"+offset+" reputationEvaluation:"+value);
+				result.append("\n"+value.toLimitedString(offset+"     "));
 			}
 		}
-		return result;
+		return result.toString();
 	}
 	
 	public class UserEntity extends Entity {

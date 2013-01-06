@@ -613,20 +613,21 @@ public class ValidateModel {
 	static public boolean validateOnlineAccount(EntityIdentifier account) throws Exception {
 		if(account.getBelongsTo() == null) {
 			if(!ModelException.throwException(ModelException.ONLINEACCOUNT, "belongsTo " +
-					"property must be set in online account")) {
+					"property must be set in online account "+account.getResource())) {
 				return false;
 			}				
 		} else {
 			if(account.getBelongsTo().getName() == null) {
-				if(!ModelException.throwException(ModelException.ONLINEACCOUNT, "belongsTo " +
-						"property must be link to a community with identifier")) {
+				if(!ModelException.throwException(ModelException.ONLINEACCOUNT, "belongsTo property ("
+						+account.getBelongsTo().getResource()+") must be link to a community with identifier "+
+						"inside online account "+account.getResource())) {
 					return false;
 				}
 			}
 		}
 		if(account.getName() == null && account.getUrl() == null) {
 			if(!ModelException.throwException(ModelException.ONLINEACCOUNT, "name or " +
-					"url properties must be set in online account")) {
+					"url properties must be set in online account "+account.getResource())) {
 				return false;
 			}
 		}
@@ -636,49 +637,50 @@ public class ValidateModel {
 	static public boolean validateMetricTransformer(MetricTransformer transformer) throws Exception {
 		if(transformer.getIdentifier() == null) {
 			if(!ModelException.throwException(ModelException.METRICTRANSFORMER_IDENTIFIER,
-					"identifier must be set")) {
+					"identifier must be set in metricTransformer "+transformer.getResource())) {
 				return false;
 			}
 		} 
 		if(transformer.getCorrelationBetweenMetric() != null) {
 			for(Double correlationBetweenMetric : transformer.getCorrelationBetweenMetric()) {
 				if(correlationBetweenMetric == null) {
-					throw new Exception("NULL: "+transformer.getResource()+".Size:"+
-							transformer.getCorrelationBetweenMetric().size());
+					throw new Exception("NULL in correlationBetweenMetric in the list of Size:"+
+							transformer.getCorrelationBetweenMetric().size()+
+							" in metricTransformer "+transformer.getResource());
 				}
 				if(correlationBetweenMetric <= 0) {
 					if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-							"All Correlations must be greater than 0")) {
+							"All Correlations must be greater than 0 in metricTransformer "+transformer.getResource())) {
 						return false;
 					}
 				} else if(correlationBetweenMetric > 1) {
 					if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-							"All Correlations must be between 0 and 1 values")) {
+							"All Correlations must be between 0 and 1 values in metricTransformer "+transformer.getResource())) {
 						return false;
 					}
 				}
 			}
 			if(transformer.getCorrelationBetweenMetrics() <= 0) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"Correlation must be greater than 0")) {
+						"Correlation must be greater than 0 in metricTransformer "+transformer.getResource())) {
 					return false;
 				}
 			} else if(transformer.getCorrelationBetweenMetrics() > 1) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"Correlation must be between 0 and 1 values")) {
+						"Correlation must be between 0 and 1 values in metricTransformer "+transformer.getResource())) {
 					return false;
 				}
 			}
 		}
 		if(transformer.getSourceMetric() == null) {
 			if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-					"SourceMetric must be set")) {
+					"SourceMetric must be set in metricTransformer "+transformer.getResource())) {
 				return false;
 			}
 		} else {
 			if(transformer.getSourceMetric().getIdentifier() == null) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"SourceMetric Identifier must be set")) {
+						"SourceMetric Identifier must be set in metricTransformer "+transformer.getResource())) {
 					return false;
 				}
 			}
@@ -688,13 +690,13 @@ public class ValidateModel {
 		}
 		if(transformer.getDestinationMetric() == null) {
 			if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-					"DestinationMetric must be set")) {
+					"DestinationMetric must be set in metricTransformer "+transformer.getResource())) {
 				return false;
 			}
 		} else {
 			if(transformer.getDestinationMetric().getIdentifier() == null) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"DestinationMetric Identifier must be set")) {
+						"DestinationMetric Identifier must be set in metricTransformer "+transformer.getResource())) {
 					return false;
 				}
 			}
@@ -707,15 +709,18 @@ public class ValidateModel {
 				transformer.getDestinationMetric().getIdentifier() != null) {
 			if(transformer.getSourceMetric().getIdentifier().equals(
 					transformer.getDestinationMetric().getIdentifier())) {
-				ModelException.sendMessage(ModelException.WARNING,"source and destination" +
-						"Metric of the MetricTransformer("+transformer.getResource()+
-						") has the same identifier");
+				ModelException.sendMessage(ModelException.WARNING,"source("+
+						transformer.getSourceMetric().getResource()+") and destination(" +
+						transformer.getDestinationMetric().getResource()+
+						") Metric of the MetricTransformer("+transformer.getResource()+
+						") has the same identifier:"+transformer.getSourceMetric().getIdentifier());
 			}
 		}
 		if(transformer instanceof ExponentialNumericTransformer) {
 			if(((ExponentialNumericTransformer)transformer).getBase() == null) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"ExponentialNumericTransformer Base must be set")) {
+						"ExponentialNumericTransformer Base must be set in metricTransformer "
+						+transformer.getResource())) {
 					return false;
 				}
 			}
@@ -724,7 +729,8 @@ public class ValidateModel {
 			if(((LogaritmicNumericTransformer)transformer).getBase() == null &&
 					((LogaritmicNumericTransformer)transformer).getBase() != 10 ) {
 				if(!ModelException.throwException(ModelException.METRICTRANSFORMER,
-						"LogaritmicNumericTransformer Base only admits a value of 10.0")) {
+						"LogaritmicNumericTransformer Base only admits a value of 10.0" +
+						"  in metricTransformer "+transformer.getResource())) {
 					return false;
 				}
 			}
@@ -779,7 +785,8 @@ public class ValidateModel {
 			}
 			if(repImp.getDefinedByReputationModel().getBehaviours() == null) {
 				if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM_DEFINEDBY,
-						"ReputationModel resource from definedByReputationModel of the " +
+						"ReputationModel (resource"+repImp.getDefinedByReputationModel().getResource()
+						+") from definedByReputationModel of the " +
 						"ReputationAlgorithm(resource:"+repImp.getResource()+") " +
 						"must be ReputationModel class (or subclass)")) {
 					return false;
@@ -795,7 +802,8 @@ public class ValidateModel {
 				}
 				if(!isReputationModel) {
 					if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM_DEFINEDBY,
-							"ReputationModel resource from definedByReputationModel of the " +
+							"ReputationModel (resource:"+repImp.getDefinedByReputationModel().getResource()
+							+") from definedByReputationModel of the " +
 							"ReputationAlgorithm(resource:"+repImp.getResource()+
 							") must be ReputationModel class (or subclass)")) {
 						return false;
@@ -827,7 +835,7 @@ public class ValidateModel {
 				}
 			}
 		}
-		if(repImp.getUsesMetrics() == null) {
+		if(repImp.getUsesMetrics() == null || repImp.getUsesMetrics().size() == 0) {
 			if(!ModelException.throwException(ModelException.REPUTATIONALGORITHM_METRIC,
 					"usesMetric from ReputationAlgorithm(resource:"+repImp.getResource()+
 					")must be set")) {
@@ -852,8 +860,8 @@ public class ValidateModel {
 				}
 			}
 		} else {
-			ModelException.sendMessage(ModelException.INFO, "resource " +
-					" is only a individual of reputationAlgorithm class " +
+			ModelException.sendMessage(ModelException.INFO, "resource (" +repImp.getResource()+
+					") is only a individual of reputationAlgorithm class " +
 					"(not subclass instanced)");
 		}
 		return true;
@@ -911,12 +919,14 @@ public class ValidateModel {
 			CollectingSystemBehaviour behaviour) throws Exception {
 		if(behaviour.getUriFormat() == null) {
 			if(!ModelException.throwException(ModelException.COLLECTINGSYSTEM,
-					"uriFormat must be set")) {
+					"uriFormat must be set in CollectingSystem - ReputationAlgorithm" +
+					" (resource:"+behaviour.getRoot().getResource()+")")) {
 				return false;
 			}
 		} else if(!behaviour.getUriFormat().toString().contains("$")) {
 			ModelException.sendMessage(ModelException.INFO, "collectingSystem " +
-					"resource does not have any special character($)");
+					"- ReputationAlgorithm (resource:"+behaviour.getRoot().getResource()+
+					") does not have any special character($)");
 		}
 		return true;
 	}
@@ -981,14 +991,17 @@ public class ValidateModel {
 			ReputationImporterBehaviour behaviour) throws Exception{
 		if(behaviour.getImportsFrom() == null) {
 			if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
-					"ReputationImporter must have importsFrom property")) {
+					"ReputationImporter (resource:"+behaviour.getRoot().getResource()+
+					") must have importsFrom property")) {
 				return false;
 			}
 		} else {
 			for(int i = 0; i < behaviour.getImportsFrom().size(); i++) {
 				if(!validateImportationUnit(behaviour.getImportsFrom().get(i))) {
 					if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER_IMPORTATION,
-							"ImportationUnit from importsFrom has error/s")) {
+							"ImportationUnit(resource:"+behaviour.getImportsFrom().get(i).getResource()+
+							") from importsFrom of reputationImporter (resource:"+ 
+							behaviour.getRoot().getResource()+")has error/s")) {
 						behaviour.getImportsFrom().remove(i);
 						i--;
 					}
@@ -996,14 +1009,16 @@ public class ValidateModel {
 			}
 			if(behaviour.getImportsFrom().isEmpty()) {
 				if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
-						"ReputationImporter must have importsFrom property")) {
+						"ReputationImporter (resource:"+behaviour.getRoot().getResource()+
+						") must have importsFrom property")) {
 					return false;
 				}
 			}
 		}
 		if(behaviour.getMapsMetrics() == null) {
-			ModelException.sendMessage(ModelException.INFO, "no mapsMetric " +
-				"from importsFrom must be set");
+			ModelException.sendMessage(ModelException.INFO, "mapsMetric from importsFrom" +
+				" of ReputationImporter (resource:"+behaviour.getRoot().getResource()+
+				") must be set");
 		} else {
 			for(int i = 0; i < behaviour.getMapsMetrics().size(); i++) {
 				if(!validateMetricMapping(behaviour.getMapsMetrics().get(i))) {
@@ -1012,8 +1027,9 @@ public class ValidateModel {
 				}
 			}
 			if(behaviour.getMapsMetrics().isEmpty())  {
-				ModelException.sendMessage(ModelException.INFO, "no mapsMetric " +
-					"from importsFrom must be set (or they were discarded)");
+				ModelException.sendMessage(ModelException.INFO, "mapsMetric from importsFrom" +
+					" of ReputationImporter (resource:"+behaviour.getRoot().getResource()+
+					") must be set (or they were discarded)");
 			}
 		}
 		if(behaviour.getRoot().getUsesMetrics() != null && behaviour.getImportsFrom() != null) {
@@ -1025,13 +1041,18 @@ public class ValidateModel {
 				//Not done by name but by resource
 				if(!behaviour.getRoot().getUsesMetrics().contains(
 						impUni.getMetricTransformation().getDestinationMetric())) {
-					ModelException.sendMessage(ModelException.INFO, "destinationMetric" +
-						" from metricTransformation from importsFrom is not declared" +
-						" in usesMetric of the ReputationImporter");
+					ModelException.sendMessage(ModelException.INFO, "destinationMetric (resource:" +
+						impUni.getMetricTransformation().getDestinationMetric().getResource()+") from " +
+						"metricTransformation(resource:"+impUni.getMetricTransformation().getResource() +
+						") from importsFrom (size: "+behaviour.getImportsFrom().size()+")is not declared" +
+						" in usesMetric (size:" +behaviour.getRoot().getUsesMetrics().size() +") of the" +
+						" ReputationImporter(resource:"+behaviour.getRoot().getResource()+")");
 				}
 			}
 		}
-		//To check if sourceMetric and destinationMetrics have their mappings in mapsMetric
+		//To check if sourceMetric and destinationMetrics of the metricTransformation resource of the 
+		//importationUnits element from importsFrom property (of the reputationImporter) have their mappings
+		//in mapsMetric property (of the reputationImporter)
 		if(behaviour.getImportsFrom() == null) {
 			for(int i = 0; i < behaviour.getImportsFrom().size(); i++) {
 				MetricTransformer metTra = behaviour.getImportsFrom().get(i).getMetricTransformation();
@@ -1044,15 +1065,19 @@ public class ValidateModel {
 									metMap.getResultMetric()!= null &&
 									metMap.getResultMetric() == metTra.getDestinationMetric()) {
 								isIn = true;
+								break;
 							}
 						}
-					}
-					
+					}					
 				}
 				if(!isIn) {
-					ModelException.sendMessage(ModelException.INFO, "not MetricMapping " +
-						"found that maps sourceMetric and destinationMetric of the " +
-						"metricTransformation from importsFrom");
+					ModelException.sendMessage(ModelException.INFO, "not MetricMapping in mapsMetric properties"
+					+"(size:"+(behaviour.getMapsMetrics()==null?"0":behaviour.getMapsMetrics().size())+") "
+					+"found that maps sourceMetric(resource:"+(metTra.getSourceMetric()==null?null:
+					metTra.getSourceMetric().getResource())+") and destinationMetric(resource:"+
+					(metTra.getDestinationMetric()==null?null:metTra.getDestinationMetric().getResource())
+					+") of the metricTransformation(resource:"+(metTra==null?null:metTra.getResource())+
+					") from importsFrom of the ReputationImporter(resource:"+behaviour.getRoot().getResource()+")");
 				}
 			}
 		}
@@ -1069,8 +1094,9 @@ public class ValidateModel {
 		}
 		if(!hasOneOrMoreCollectingSystem) {
 			if(!ModelException.throwException(ModelException.REPUTATIONIMPORTER,
-					"collectingAlgorithm from importsFrom properties must have at least" +
-					" one collecingSystem between all")) {
+					"collectingAlgorithm from importsFrom properties (size:"+behaviour.getImportsFrom().size()
+					+"must have at least one collecingSystem between all of them in ReputationImporter" +
+					"(resource:"+behaviour.getRoot().getResource()+")")) {
 				return false;
 			}
 		}
@@ -1122,14 +1148,15 @@ public class ValidateModel {
 	
 	static public boolean validateMetricMapping(MetricMapping metMap) throws Exception {		
 		if(metMap.getImportedMetric() == null) {
-			if(!ModelException.throwException(ModelException.METRICMAPPING,
-					"importedMetric property must be set")) {
+			if(!ModelException.throwException(ModelException.METRICMAPPING,"importedMetric property " +
+					"must be set in MetricMapping(resource:"+metMap.getResource()+")")) {
 				return false;
 			}
 		} else {
 			if(metMap.getImportedMetric().getDimension() == null) {
-				if(!ModelException.throwException(ModelException.METRICMAPPING,
-						"dimension from importedMetric property must be set")) {
+				if(!ModelException.throwException(ModelException.METRICMAPPING,"dimension of Metric(" +
+						"resource:"+metMap.getImportedMetric().getResource()+") from importedMetric " +
+						"property must be set in MetricMapping(resource:"+metMap.getResource()+")")) {
 					return false;
 				}
 			} else {
@@ -1139,14 +1166,15 @@ public class ValidateModel {
 			}
 		}
 		if(metMap.getResultMetric() == null) {
-			if(!ModelException.throwException(ModelException.METRICMAPPING,
-					"importedMetric property must be set")) {
+			if(!ModelException.throwException(ModelException.METRICMAPPING,"resultMetric property" +
+					" must be set in MetricMapping(resource:"+metMap.getResource()+")")) {
 				return false;
 			}
 		} else {
 			if(metMap.getResultMetric().getDimension() == null) {
-				if(!ModelException.throwException(ModelException.METRICMAPPING,
-						"dimension from importedMetric property must be set")) {
+				if(!ModelException.throwException(ModelException.METRICMAPPING,"dimension of Metric(" +
+						"resource:"+metMap.getImportedMetric().getResource()+") from resultMetric " +
+						"property must be set in MetricMapping(resource:"+metMap.getResource()+")")) {
 					return false;
 				}
 			} else {
@@ -1163,8 +1191,8 @@ public class ValidateModel {
 			if(!ModelException.throwException(ModelException.METRICMAPPING,
 					"name Metric(resource:"+metMap.getImportedMetric().getResource()+") in importedMetric" +
 					" and name Metric(resource:"+metMap.getResultMetric().getResource()+") in " +
-					"resultMetric cannot be the same in MetricMapping(resource:"+
-					metMap.getResource()+")")) {
+					"resultMetric cannot be the same (name:"+metMap.getImportedMetric().getIdentifier()
+					+") in MetricMapping(resource:"+metMap.getResource()+")")) {
 				return false;
 			}
 		}
@@ -1175,11 +1203,11 @@ public class ValidateModel {
 				metMap.getResultMetric().getDimension().getName() != null) {
 			if(metMap.getImportedMetric().getDimension().getName() ==
 					metMap.getResultMetric().getDimension().getName()) {
-				ModelException.sendMessage(ModelException.WARNING,
-						"name of dimension in importedMetric("+metMap.getImportedMetric(
-						).getDimension().getName()+") and name of dimension in resultMetric("+
-						metMap.getResultMetric().getDimension().getName()+") should not be the same" +
-						" in MetricMapping(resource:"+metMap.getResource()+")");
+				ModelException.sendMessage(ModelException.WARNING,"name("+metMap.getImportedMetric().
+						getDimension().getName()+" of dimension in importedMetric(resource:"+
+						metMap.getImportedMetric().getResource()+") and of dimension in " +
+						"resultMetric("+metMap.getResultMetric().getResource()+") should not be the same"
+						+" in MetricMapping(resource:"+metMap.getResource()+")");
 			}
 		}
 		return true;
@@ -1188,40 +1216,44 @@ public class ValidateModel {
 	static public boolean validateImportationUnit(ImportationUnit impUni) throws Exception {
 		if(impUni.getCollectsReputationBy() == null) {
 			if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-					"ImportationUnit must have collectsReputationBy property")) {
+					"ImportationUnit(resource:"+impUni.getResource()+") must have collectsReputationBy" +
+					" property")) {
 				return false;
 			}
 		} else {
 			if(!validateReputationAlgorithmImplementation(impUni.getCollectsReputationBy())) {
 				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT_COLLECTSREPUTATION,
-						"ReputationImporter from collectsReputationBy has errors")) {
+						"ReputationImporter(resource:"+impUni.getCollectsReputationBy().getResource()+
+						") from collectsReputationBy has errors in ImportationUnit(resource:"+impUni.getResource()+")")) {
 					return false;
 				}
 			}
 		}
 		if(impUni.getImportedCommunity() == null) {
 			if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-					"ImportationUnit must have importedCommunity property")) {
+					"ImportationUnit(resource:"+impUni.getResource()+") must have importedCommunity property")) {
 				return false;
 			}
 		} else {
 			if(!validateCommunity(impUni.getImportedCommunity())) {
 				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT_COMMUNITY,
-						"Community from importedCommunity has errors")) {
+						"Community(resource:"+impUni.getImportedCommunity().getResource()+") from" +
+						" importedCommunity has errors in ImportationUnit(resource:"+impUni.getResource()+")")) {
 					return false;
 				}
 			}
 		}
 		if(impUni.getMetricTransformation() == null) {
 			if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-					"ImportationUnit must have metricTransformation property")) {
+					"ImportationUnit(resource:"+impUni.getResource()+") must have metricTransformation property")) {
 				return false;
 			}
 			
 		} else {
 			if(!validateMetricTransformer(impUni.getMetricTransformation())) {
-				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-						"MetricTransformer from metricTransformation has errors")) {
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT_METRICTRANSFORMER,
+						"MetricTransformer(resource:"+impUni.getMetricTransformation().getResource()+
+						" from metricTransformation has errors in ImportationUnit(resource:"+impUni.getResource()+")")) {
 					return false;
 				}
 			}
@@ -1242,7 +1274,8 @@ public class ValidateModel {
 		if(impUni.getTrust() != null) {
 			if(!validateTrustBetweenCommunities(impUni.getTrust())) {
 				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-						"TrustBetweenCommunities from trust has errors")) {
+						"TrustBetweenCommunities(resource:"+impUni.getTrust().getResource()+") from trust" +
+						" has errors in ImportationUnit(resource:"+impUni.getResource()+")")) {
 					return false;
 				}
 			}
@@ -1250,11 +1283,12 @@ public class ValidateModel {
 		if(impUni.getMetricTransformation() != null && 
 				impUni.getMetricTransformation().getSourceMetric() != null &&
 				impUni.getImportedMetric() != null) {
-			if(impUni.getMetricTransformation().getSourceMetric() != 
-					impUni.getImportedMetric()) {
-				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT,
-						"ImportationMetric and SourceMetric from metricTransformation" +
-						" must be the same")) {
+			if(impUni.getMetricTransformation().getSourceMetric() != impUni.getImportedMetric()) {
+				if(!ModelException.throwException(ModelException.IMPORTATIONUNIT_METRICTRANSFORMER,
+						"ImportationMetric(resource:"+impUni.getImportedMetric().getResource()+") and" +
+						" SourceMetric(resource:"+impUni.getMetricTransformation().getSourceMetric()+
+						") from metricTransformation(resource:"+impUni.getMetricTransformation().getResource()
+						+" must be the same in ImportationUnit(resource:"+impUni.getResource()+")")) {
 					return false;
 				}
 			}
@@ -1269,7 +1303,7 @@ public class ValidateModel {
 						).getResource()+") from metricTransformation(resource:"+impUni.
 						getMetricTransformation().getResource()+") must be also set in" +
 						" the community(resource:"+impUni.getImportedCommunity().getResource()+
-						") from importedCommunity in the importationUnit(resource:"+
+						") from importedCommunity in ImportationUnit(resource:"+
 						impUni.getResource()+")")) {
 					return false;
 				}
@@ -1279,10 +1313,12 @@ public class ValidateModel {
 				&& impUni.getMetricTransformation().getSourceMetric() != null) {
 			if(!getMetricsFromReputationAlgorithm(impUni.getCollectsReputationBy()).contains(
 					impUni.getMetricTransformation().getSourceMetric())) {
-				ModelException.sendMessage(ModelException.WARNING, "sourceMetric from importationUnit" +
-						"(resource:"+impUni.getResource()+") does not set in any metric used by " +
-						"reputationAlgorithm (resource:"+impUni.getCollectsReputationBy().getResource()
-						+") linked by collectsReputationBy. Be sure that an algorithm is implemented" +
+				ModelException.sendMessage(ModelException.WARNING, "sourceMetric(resource:"+
+						impUni.getMetricTransformation().getSourceMetric().getResource()+") from " +
+						"importationUnit(resource:"+impUni.getResource()+") does not set in any metric" +
+						" used by reputationAlgorithm (resource:"+impUni.getCollectsReputationBy().getResource()
+						+") linked by collectsReputationBy in ImportationUnit(resource:"+
+						impUni.getResource()+"). Be sure that an algorithm is implemented" +
 						" to have this metric in results");
 			}
 		}
@@ -1292,21 +1328,22 @@ public class ValidateModel {
 	static public boolean validateReputationObject(ReputationObject repObj) throws Exception {
 		if(repObj.getOwner() == null) {
 			if(!ModelException.throwException(ModelException.REPUTATIONOBJECT, "owner property" +
-					" of the reputationObject must be set")) {
+					" of the reputationObject(resource:"+repObj.getResource()+") must be set")) {
 				return false;
 			}
 		} else {
 			if(!validateEntity(repObj.getOwner())) {
 				if(!ModelException.throwException(ModelException.REPUTATIONOBJECT_ENTITY, 
-						"owner property of the reputationObject has errors")) {
+						"Entity(resource:"+repObj.getOwner().getResource()+"of owner property of the " +
+						"reputationObject(resource:"+repObj.getResource()+") has errors")) {
 					return false;
 				}
 			}
 		}
 		if(repObj.getHasValue() == null) {
-			if(!ModelException.throwException(ModelException.REPUTATIONVALUE, 
-					"hasEvaluations property of the reputationValue of the entity must be" +
-					" set or not-empty")) {
+			if(!ModelException.throwException(ModelException.REPUTATIONOBJECT, 
+					"hasValue property of the reputationObject(resource:"+repObj.getResource()+
+					"must be set or not-empty")) {
 				return false;
 			}
 		} else {
@@ -1317,8 +1354,9 @@ public class ValidateModel {
 				}
 			}
 			if(repObj.getHasValue().isEmpty()) {
-				if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "hasEvaluations property" +
-						" of the reputationValue of the entity must be set or not-empty")) {
+				if(!ModelException.throwException(ModelException.REPUTATIONOBJECT_REPUATIONVALUE, "hasValue property" +
+						" of the reputationValue(resource:"+repObj.getResource()+") of the entity must"+
+						" be set or not-empty")) {
 					return false;
 				}
 			}
@@ -1331,19 +1369,20 @@ public class ValidateModel {
 		if(repVal.getExpirationTime() != null && repVal.getTimeStamp() != null &&
 				repVal.getExpirationTime().getTime() <= repVal.getTimeStamp().getTime()) {
 			if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "expirationTime" +
-					" of the reputationValue must be greater than timeStamp")) {
+					" of the reputationValue(resource:"+repVal.getResource()+" must be greater than timeStamp")) {
 				return false;
 			}
 		}
 		if(repVal.getOwner() == null) {
 			if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "owner property" +
-					" of the reputationValue must be set")) {
+					" of the reputationValue(resource:"+repVal.getResource()+")must be set")) {
 				return false;
 			}
 		} else {
 			if(!validateEntity(repVal.getOwner())) {
 				if(!ModelException.throwException(ModelException.REPUTATIONVALUE_ENTITY, 
-						"owner property of the reputationValue has errors")) {
+						"Entity(resource:"+repVal.getOwner().getResource()+") of owner property of the" +
+						" reputationValue(resource:"+repVal.getResource()+") has errors")) {
 					return false;
 				}
 			}
@@ -1351,17 +1390,18 @@ public class ValidateModel {
 		if(repVal.getObtainedBy() == null) {
 			if(repAlg == null) {
 				if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "obtainedBy property" +
-						" of the reputationValue must be set")) {
+						" of the reputationValue(resource:"+repVal.getResource()+")  must be set")) {
 					return false;
 				}
 			} else {
 				ModelException.sendMessage(ModelException.INFO,"obtainedBy not defined but " +
-						"reputationAlgorithm is get from the reputationSource or reputationResult" +
-						"that links this reputationValue");
+						"reputationAlgorithm(resource:"+repAlg.getResource()+") is get from the" +
+						" reputationSource or reputationResult that links this reputationValue(resource:"+
+						repVal.getResource()+")");
 			}
-			if(repVal.getHasEvaluations() == null || repVal.getHasEvaluations().isEmpty()) {
+			if(repVal.getHasEvaluations() == null) {
 				if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "hasEvaluations property" +
-						" of the reputationValue must be set or not-empty")) {
+						" of the reputationValue(resource:"+repVal.getResource()+") must be set")) {
 					return false;
 				}
 			} else {
@@ -1372,15 +1412,21 @@ public class ValidateModel {
 						i--;
 					}
 				}
+				if(repVal.getHasEvaluations().isEmpty()) {
+					if(!ModelException.throwException(ModelException.REPUTATIONVALUE, "hasEvaluations property" +
+							" of the reputationValue(resource:"+repVal.getResource()+") must be not-empty")) {
+						return false;
+					}
+				}
 			}
 		} else {
 			if(repAlg != null) {
 				if(!repVal.getObtainedBy().getName().equals(repAlg.getName())) {
 					if(!ModelException.throwException(ModelException.REPUTATIONVALUE_REPUTATIONALGORITHM, 
 							"ReputationAlgorithm (resource:"+repVal.getObtainedBy().getResource()
-							+") from obtainedBy does not have the same identifier that " +
-							"ReputationAlgorithm (resource:"+repAlg.getResource()+
-							") from reputationSource or reputationResult properties")) {
+							+") from obtainedBy of ReputationValue(resource:"+repVal.getResource()+
+							"does not have the same identifier that ReputationAlgorithm (resource:"+
+							repAlg.getResource()+") from reputationSource or reputationResult properties")) {
 						return false;
 					}
 				}
@@ -1392,8 +1438,12 @@ public class ValidateModel {
 					return false;
 				}
 			} else {
-				for(ReputationEvaluation repEval : repVal.getHasEvaluations()) {
-					validateHasEvaluation(repEval, repVal.getOwner(), repVal.getObtainedBy());
+				for(int i = 0; i < repVal.getHasEvaluations().size(); i++) {
+					if(!validateHasEvaluation(repVal.getHasEvaluations().get(i),
+							repVal.getOwner(), repVal.getObtainedBy())) {
+						repVal.getHasEvaluations().remove(i);
+						i--;
+					}
 				}
 				if(repVal.getHasEvaluations().isEmpty()) {
 					if(!ModelException.throwException(ModelException.REPUTATIONVALUE, 
@@ -1418,8 +1468,8 @@ public class ValidateModel {
 		} else {
 			if(!validateEntity(repEval.getTarget())) {
 				if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION_ENTITY, 
-						"Target of the reputation evaluation (resource:"+
-						repEval.getResource()+"has error/s")) {
+						"Entity(resource:"+repEval.getTarget().getResource()+") from Target of the " +
+						"reputation evaluation (resource:"+repEval.getResource()+") has error/s")) {
 					return false;
 				}
 			}
@@ -1451,8 +1501,8 @@ public class ValidateModel {
 						if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION_REPUTATIONALGORITHM, 
 								"Metric(resource:"+repEval.getHasMetric().getResource()+") of the" +
 								" reputation evaluation (resource:"+repEval.getResource()+" not match" +
-								" with any metric from usesMetric from reputationResult or " +
-								"sourceResult")) {
+								" with any metric from usesMetric from reputationResult or reputationSource of the" +
+								" ReputationAlgorithm(resource:"+repAlg.getResource()+")")) {
 							return false;
 						}
 					}
@@ -1460,8 +1510,8 @@ public class ValidateModel {
 					if(!ModelException.throwException(ModelException.REPUTATIONEVALUATION_REPUTATIONALGORITHM, 
 							"Metric(resource:"+repEval.getHasMetric().getResource()+") of the" +
 							" reputation evaluation (resource:"+repEval.getResource()+" not match" +
-							" with metrics from usesMetric from reputationResult or sourceResult:" +
-							" (maybe usesMetric is not set in ReputationAlgorithm)")) {
+							" with metrics from usesMetric from reputationResult or sourceResult: (maybe" +
+							" usesMetric is not set in ReputationAlgorithm(resource:"+repAlg.getResource()+"))")) {
 						return false;
 					}
 				}				
@@ -1518,7 +1568,7 @@ public class ValidateModel {
 				if(!ModelException.throwException(ModelException.DIMENSIONCORRELATION,
 						"Dimensions from sourceDimension and targetDimension of the " +
 						"Dimension Correlation(resource:"+ dimCor.getResource()+") must" +
-						" have different names")) {
+						" have different names:"+dimCor.getTargetDimension().getName())) {
 					return false;
 				}
 			}
@@ -1533,7 +1583,7 @@ public class ValidateModel {
 			if(dimCor.getCorrelationValue() <= 0) {
 				if(!ModelException.throwException(ModelException.DIMENSIONCORRELATION,
 						"correlationValue from DimensionCorrelation((resource:"+ 
-					dimCor.getResource()+") must be greater than 0")) {
+						dimCor.getResource()+") must be greater than 0")) {
 					return false;
 				}
 			} else if(dimCor.getCorrelationValue() > 1) {
@@ -1558,7 +1608,7 @@ public class ValidateModel {
 			if(!validateScale(scaCor.getSourceScale())) {
 				if(!ModelException.throwException(ModelException.SCALECORRELATION,
 						"Scale(resource:"+scaCor.getSourceScale().getResource()+
-						") from sourceScale from ScaleCorrelation(resource:"+
+						") from sourceScale of the ScaleCorrelation(resource:"+
 						scaCor.getResource()+") has error/s")) {
 					return false;
 				}
@@ -1566,7 +1616,7 @@ public class ValidateModel {
 		}
 		if(scaCor.getTargetScale() == null) {
 			if(!ModelException.throwException(ModelException.SCALECORRELATION,
-					"sourceScale from sourceScale of the ScaleCorrelation(resource:"+
+					"targetScale of the ScaleCorrelation(resource:"+
 						scaCor.getResource()+") must be set")) {
 				return false;
 			}
@@ -1574,7 +1624,7 @@ public class ValidateModel {
 			if(!validateScale(scaCor.getTargetScale())) {
 				if(!ModelException.throwException(ModelException.SCALECORRELATION,
 						"Scale(resource:"+scaCor.getTargetScale().getResource()+
-						"from sourceScale of the ScaleCorrelation(resource:"+
+						"from targetScale of the ScaleCorrelation(resource:"+
 						scaCor.getResource()+") has error/s")) {
 					return false;
 				}
@@ -1587,7 +1637,7 @@ public class ValidateModel {
 					scaCor.getTargetScale().getName())) {
 				if(!ModelException.throwException(ModelException.SCALECORRELATION,
 						"Scales from sourceScale and targetScale of the ScaleCorrelation(resource:"+
-						scaCor.getResource()+") must have different names")) {
+						scaCor.getResource()+") must have different names:"+scaCor.getTargetScale().getName())) {
 					return false;
 				}
 			}

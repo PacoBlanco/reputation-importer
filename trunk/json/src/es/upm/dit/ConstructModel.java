@@ -57,8 +57,10 @@ public class ConstructModel {
 		String modelPath = Property.getModel_file_path();
 		ConstructModel constructor = new ConstructModel(modelPath,CONSTRUCT_NECCESARY);
 		constructor.getMoreAccounts();
+		System.out.println("\n--------------------- START REPUTATION IMPORTS TO SEMANTIC WIKI -----------------");
 		Map<String, Entity> entities = constructor
 				.importOverAllEntitiesToCommunity("semanticWiki");
+		System.out.println("\n---------------------- END REPUTATION IMPORTS TO SEMANTIC WIKI ------------------");
 		EntitiesToRDFFile rdfFile = new EntitiesToRDFFile();
 		String importationModelPath = Property.getImportation_model_file_path();
 		rdfFile.writeToRDFFile(entities, importationModelPath, constructor.reputationParser);
@@ -288,7 +290,10 @@ public class ConstructModel {
 			entity.addHasReputation(getReputationObjectWithValues(
 					entity,community,reputationValues));		
 			entities.put(entity.getUniqueIdentificator(), entity);
-			System.out.println(entity.toString(""));			
+			
+			//TODO: LOG como variable
+			System.out.println("Entity Procesed: unique identificator:"+entity.getUniqueIdentificator());
+			System.out.println(entity.toString("     "));			
 		}
 		return entities;
 		//Process collectingSystem with process of subgroups??		
@@ -630,7 +635,7 @@ public class ConstructModel {
 	
 	@SuppressWarnings("unchecked")
 	static public Map<Metric, List<Object>> executeAlgorithm(List<Object> algorithmsImpl, 
-			ReputationImporterBehaviour repImp, ImportationUnit importatationUnit, 
+			ReputationImporterBehaviour repImp, ImportationUnit importationUnit, 
 			CollectingSystemBehaviour system, Entity entity, String methodName) throws Exception {
 		Class<?> classMethodImpl = Class.forName(methodName.substring(
 				0,methodName.lastIndexOf(".")));
@@ -644,17 +649,25 @@ public class ConstructModel {
 				continue;
 			}
 			String classMethodName = methodName.substring(methodName.lastIndexOf(".")+1);
+			Method method = null;
 			try {
-				Method method = algorithmImpl.getClass().getMethod(classMethodName,
+				method = algorithmImpl.getClass().getMethod(classMethodName,
 						ReputationImporterBehaviour.class,ImportationUnit.class, 
 						CollectingSystemBehaviour.class, Entity.class);
 				return (Map<Metric, List<Object>>) method.invoke(algorithmImpl, repImp,
-						importatationUnit, system, entity);
+						importationUnit, system, entity);
 			} catch(NoSuchMethodException e) {
 				ModelException.throwException(ModelException.ALGORITHM_IMPLEMENTATION_NOT_FOUND,
 						"Class "+classMethodImpl+" does not have the accesible method:"+
 						classMethodName+" with the arguments type (ImportationUnit.class," +
 						" CollectingSystemBehaviour.class, Entity.class");
+			} catch(Exception e) {
+				//e.printStackTrace();
+				ModelException.throwException(ModelException.ALGORITHM_IMPLEMENTATION_ERROR,
+						"Algorithm implementation "+method.getName()+" from Class "+classMethodImpl+
+						" gives an exception to calculate the reputation: reputationImporter:"+repImp+
+						",importationUnit:"+importationUnit+",entity:"+entity);
+				return null;
 			}
 		}
 		ModelException.throwException(ModelException.ALGORITHM_IMPLEMENTATION_NOT_FOUND,

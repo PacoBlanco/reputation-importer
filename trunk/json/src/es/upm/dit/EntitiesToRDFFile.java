@@ -556,7 +556,7 @@ public class EntitiesToRDFFile {
 		repObjectRes.addProperty(property, finalOwner.getResource());
 		property = model.createProperty(reputationParser
 				 .getRiNamespace(), "fromCommunity");
-		repObjectRes.addProperty(property, reputationObject.getFromCommunity().getName());
+		repObjectRes.addProperty(property, reputationObject.getFromCommunity().getResource());
 		if(reputationObject.getHasValue() != null) {
 			for(ReputationValue reputationValue : 
 				reputationObject.getHasValue()) {
@@ -734,6 +734,7 @@ public class EntitiesToRDFFile {
 					base+entityIdentifier.getName(),base));
 			}
 		} 
+		onlineAccount.addProperty(RDF.type, JenaVocabulary.onlineAccount);
 		if(entityIdentifier.getName() != null) {
 			Property property = model.createProperty(reputationParser
 					 .getFoafNamespace(), "accountName");
